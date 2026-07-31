@@ -22,7 +22,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${montserrat.variable}`}>
-      <body className="min-h-screen pb-32">
+      <body>
         {children}
       </body>
     </html>

@@ -1,6 +1,28 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function OrderSuccess({ order, onNewOrder }) {
+  const router = useRouter();
+  const [note, setNote] = useState('');
+  const [noteSent, setNoteSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleAddNote = async () => {
+    if (!note.trim() || !order?.id) return;
+    setSending(true);
+    try {
+      await fetch(`/api/orders/${order.id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: note.trim() }),
+      });
+      setNoteSent(true);
+    } catch {}
+    setSending(false);
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -31,7 +53,7 @@ export default function OrderSuccess({ order, onNewOrder }) {
           Your order #{order.id} is being prepared
         </p>
         <div
-          className="rounded-xl p-4 mb-6"
+          className="rounded-xl p-4 mb-4"
           style={{ backgroundColor: '#F1F3F5' }}
         >
           <div
@@ -47,12 +69,68 @@ export default function OrderSuccess({ order, onNewOrder }) {
             30-45 minutes
           </div>
         </div>
+
+        {/* Add Note */}
+        {!noteSent ? (
+          <div className="mb-4 text-left">
+            <label
+              className="block text-[10px] uppercase tracking-wider font-semibold mb-1"
+              style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
+            >
+              Add a note to your order (optional)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={200}
+                placeholder="e.g. Ring the doorbell"
+                className="flex-1 bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none text-sm"
+                style={{
+                  borderRadius: '12px',
+                  border: '2px solid #debfc3',
+                  padding: '8px 12px',
+                  boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
+                  animation: 'pulse-border 2s ease-in-out infinite',
+                  fontFamily: 'Montserrat, sans-serif',
+                  color: '#191c1d',
+                }}
+              />
+              <button
+                onClick={handleAddNote}
+                disabled={!note.trim() || sending}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white transition-all disabled:opacity-50"
+                style={{ backgroundColor: '#840037', fontFamily: 'Montserrat, sans-serif' }}
+              >
+                {sending ? '...' : 'Add'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-4 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(132,0,55,0.08)', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+            Note added to your order
+          </div>
+        )}
+
         <button
-          onClick={onNewOrder}
-          className="w-full rounded-xl py-4 text-lg font-bold transition-colors"
+          onClick={() => router.push('/orders')}
+          className="w-full rounded-xl py-3 text-sm font-bold transition-colors mb-2"
           style={{
             backgroundColor: '#840037',
             color: '#ffffff',
+            fontFamily: 'Montserrat, sans-serif',
+          }}
+        >
+          View My Orders
+        </button>
+        <button
+          onClick={onNewOrder}
+          className="w-full rounded-xl py-3 text-sm font-bold transition-colors"
+          style={{
+            backgroundColor: 'transparent',
+            color: '#840037',
+            border: '1px solid #840037',
             fontFamily: 'Montserrat, sans-serif',
           }}
         >

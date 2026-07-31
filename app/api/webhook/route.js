@@ -1,33 +1,49 @@
 import { NextResponse } from 'next/server';
 import { upsertProduct, readStore, writeStore, updateStore } from '@/lib/data-store';
+import { wcUrl, WC_WEBHOOK_SECRET } from '@/lib/wc-config';
+import crypto from 'crypto';
 
-const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
-const WC_KEY = process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY;
-const WC_SECRET = process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET;
-const WEBHOOK_SECRET = process.env.WOO_WEBHOOK_SECRET || '';
+function verifyWebhook(request, body) {
+  if (!WC_WEBHOOK_SECRET) {
+    console.error('WC webhook secret not configured — rejecting request');
+    return false;
+  }
 
-function verifyWebhook(request) {
-  if (!WEBHOOK_SECRET) return true;
   const signature = request.headers.get('x-wc-webhook-signature');
-  // In production, verify HMAC-SHA256 signature
-  return !!signature;
+  if (!signature) return false;
+
+  // WooCommerce sends base64-encoded HMAC-SHA256 of the raw body
+  const rawBody = JSON.stringify(body);
+  const hash = crypto.createHmac('sha256', WC_WEBHOOK_SECRET).update(rawBody).digest('base64');
+
+  try {
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(hash));
+  } catch {
+    return false;
+  }
 }
 
 async function fetchProduct(productId) {
-  const url = `${WC_URL}/wp-json/wc/v3/products/${productId}?consumer_key=${WC_KEY}&consumer_secret=${WC_SECRET}`;
+  const url = wcUrl(`products/${productId}`);
   const res = await fetch(url);
   if (!res.ok) return null;
   return res.json();
 }
 
 export async function POST(request) {
-  if (!verifyWebhook(request)) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
+  }
+
+  if (!verifyWebhook(request, body)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
   try {
     const topic = request.headers.get('x-wc-webhook-topic') || '';
-    const body = await request.json();
 
     if (topic.startsWith('product.')) {
       const productId = body.id;
@@ -90,7 +106,7 @@ export async function POST(request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
+    console.error('Webhook processing error');
     return NextResponse.json({ received: true });
   }
 }

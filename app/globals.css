@@ -75,3 +75,25 @@ input, textarea, select {
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
 }
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: #debfc3;
+    box-shadow: 0 0 8px rgba(132,0,55,0.1), 0 0 16px rgba(132,0,55,0.05);
+  }
+  50% {
+    border-color: #ff88a3;
+    box-shadow: 0 0 12px rgba(132,0,55,0.25), 0 0 24px rgba(132,0,55,0.12);
+  }
+}
+
+@keyframes pulse-border-error {
+  0%, 100% {
+    border-color: #ba1a1a;
+    box-shadow: 0 0 8px rgba(186,26,26,0.15), 0 0 16px rgba(186,26,26,0.08);
+  }
+  50% {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 12px rgba(186,26,26,0.3), 0 0 24px rgba(186,26,26,0.15);
+  }
+}

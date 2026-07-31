@@ -4,43 +4,55 @@ import {
   upsertProduct,
   upsertBrand,
   upsertCategory,
+  upsertZone,
   getSyncStatus,
+  extractBrandsFromProducts,
 } from '@/lib/data-store';
+import { wcFetch, wcUrl, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
+import { ZONE_MAP } from '@/lib/zone-map';
 
-const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
-const WC_KEY = process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY;
-const WC_SECRET = process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET;
+async function syncZones() {
+  try {
+    const zones = await wcFetch('shipping/zones').then((r) => r.data);
+    let count = 0;
 
-async function wcFetch(endpoint, params = {}) {
-  const url = new URL(`${WC_URL}/wp-json/wc/v3/${endpoint}`);
-  url.searchParams.set('consumer_key', WC_KEY);
-  url.searchParams.set('consumer_secret', WC_SECRET);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    for (const zone of zones) {
+      if (zone.name === 'Locations not covered by your other zones') continue;
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`WC API error (${endpoint}): ${res.status} ${err}`);
-  }
-  return res.json();
-}
+      try {
+        const methodsUrl = wcUrl(`shipping/zones/${zone.id}/methods`);
+        const methodsRes = await fetch(methodsUrl);
+        if (!methodsRes.ok) continue;
+        const methods = await methodsRes.json();
 
-async function fetchAllPages(endpoint, params = {}) {
-  let page = 1;
-  let all = [];
-  let totalPages = 1;
-
-  while (page <= totalPages) {
-    const data = await wcFetch(endpoint, { ...params, page, per_page: '50' });
-    if (page === 1 && Array.isArray(data)) {
-      totalPages = parseInt(res?.headers?.get('x-wp-totalpages') || '1');
+        for (const method of methods) {
+          if (method.method_id === 'nairobi_shipping' && method.settings) {
+            for (const [key, meta] of Object.entries(ZONE_MAP)) {
+              const setting = method.settings[key];
+              const zonePrice = parseInt(setting?.value || setting?.default || '300', 10) || 300;
+              upsertZone({
+                id: key.replace('_price', ''),
+                name: meta.name,
+                zonePrice,
+                locations: meta.locations.map((loc) => ({
+                  name: loc.name,
+                  keywords: loc.keywords,
+                  price: loc.price,
+                })),
+              });
+              count++;
+            }
+          }
+        }
+      } catch {
+        // skip zone on error
+      }
     }
-    all = all.concat(data);
-    if (!Array.isArray(data) || data.length === 0) break;
-    page++;
-    if (page > 20) break;
+
+    return count;
+  } catch {
+    return 0;
   }
-  return all;
 }
 
 export async function POST() {
@@ -49,12 +61,20 @@ export async function POST() {
     return NextResponse.json({ error: 'Sync already in progress' }, { status: 409 });
   }
 
+  if (!WC_URL || !WC_KEY || !WC_SECRET) {
+    return NextResponse.json({ error: 'WooCommerce credentials not configured' }, { status: 500 });
+  }
+
   updateStore({ syncStatus: 'syncing' });
 
   try {
     const [wcProducts, wcCategories] = await Promise.all([
-      wcFetch('products', { per_page: '100', status: 'publish' }).catch(() => []),
-      wcFetch('products/categories', { per_page: '100' }).catch(() => []),
+      wcFetch('products', { per_page: '100', status: 'publish' })
+        .then((r) => r.data)
+        .catch(() => []),
+      wcFetch('products/categories', { per_page: '100' })
+        .then((r) => r.data)
+        .catch(() => []),
     ]);
 
     const productCount = wcProducts.length;
@@ -73,35 +93,20 @@ export async function POST() {
       });
     }
 
-    const brandMap = new Map();
-    for (const p of wcProducts) {
-      const brandAttr = p.attributes?.find(
-        (a) => a.name.toLowerCase() === 'brand' || a.name.toLowerCase() === 'manufacturer'
-      );
-      if (brandAttr && brandAttr.options?.length) {
-        const brandName = brandAttr.options[0];
-        if (!brandMap.has(brandName)) {
-          brandMap.set(brandName, {
-            wcId: `brand_${brandName.toLowerCase().replace(/\s+/g, '_')}`,
-            name: brandName,
-            slug: brandName.toLowerCase().replace(/\s+/g, '-'),
-            image: null,
-          });
-        }
-      }
-    }
-
-    for (const [name, brandData] of brandMap) {
-      upsertBrand(brandData);
-      brandCount++;
-    }
-
     for (const p of wcProducts) {
       const primaryImage = p.images?.[0]?.src || '';
       const brandAttr = p.attributes?.find(
         (a) => a.name.toLowerCase() === 'brand' || a.name.toLowerCase() === 'manufacturer'
       );
-      const brandName = brandAttr?.options?.[0] || '';
+      let brandName = brandAttr?.options?.[0] || '';
+
+      if (!brandName) {
+        const nameParts = p.name.trim().split(/\s+/);
+        brandName = nameParts[0] || '';
+        if (nameParts.length > 1 && /^(the|a|an)$/i.test(nameParts[0])) {
+          brandName = nameParts.slice(0, 2).join(' ');
+        }
+      }
 
       upsertProduct({
         wcId: p.id,
@@ -122,8 +127,14 @@ export async function POST() {
         shortDescription: p.short_description || '',
         sku: p.sku || '',
         weight: p.weight || '',
+        upsellIds: p.upsell_ids || [],
       });
     }
+
+    const extractedBrands = extractBrandsFromProducts();
+    brandCount = extractedBrands.length;
+
+    const zoneCount = await syncZones();
 
     updateStore({
       lastSync: new Date().toISOString(),
@@ -135,6 +146,7 @@ export async function POST() {
       products: productCount,
       categories: categoryCount,
       brands: brandCount,
+      zones: zoneCount,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

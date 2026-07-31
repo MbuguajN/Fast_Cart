@@ -175,13 +175,36 @@ export default function BrandsPage() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => startEdit(b)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0"
-                    style={{ backgroundColor: '#E9ECEF', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Edit
-                  </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={async () => {
+                        const updated = b.visible === false ? true : false;
+                        setBrands((prev) => prev.map((br) => (br.id === id || br.wcId === id) ? { ...br, visible: updated } : br));
+                        try {
+                          await fetch('/api/admin/brands', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id, visible: updated }),
+                          });
+                        } catch {}
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+                      style={{
+                        backgroundColor: b.visible === false ? '#E9ECEF' : '#840037',
+                        color: b.visible === false ? '#5f5e5e' : '#ffffff',
+                        fontFamily: 'Montserrat, sans-serif',
+                      }}
+                    >
+                      {b.visible === false ? 'Hidden' : 'Visible'}
+                    </button>
+                    <button
+                      onClick={() => startEdit(b)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0"
+                      style={{ backgroundColor: '#E9ECEF', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 )}
               </div>
             );

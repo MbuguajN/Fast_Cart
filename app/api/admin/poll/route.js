@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getProducts, getSyncStatus, updateStore, upsertProduct } from '@/lib/data-store';
-
-const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
-const WC_KEY = process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY;
-const WC_SECRET = process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET;
+import { wcUrl, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
 
 export async function GET() {
   const status = getSyncStatus();

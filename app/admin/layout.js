@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import AdminLogin from '@/components/AdminLogin';
 
 const NAV = [
   { label: 'Dashboard', href: '/admin', icon: '📊' },
@@ -13,7 +14,47 @@ const NAV = [
 
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authenticated, setAuthenticated] = useState(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if on login page — don't block
+    if (pathname === '/admin/login') {
+      setAuthenticated(true);
+      return;
+    }
+
+    // Verify admin session via cookie (httpOnly, set by API)
+    fetch('/api/admin/auth/check')
+      .then((r) => r.json())
+      .then((data) => setAuthenticated(data.authenticated))
+      .catch(() => setAuthenticated(false));
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    await fetch('/api/admin/auth', { method: 'DELETE' });
+    window.location.href = '/admin/login';
+  };
+
+  // Login page — no chrome
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  // Loading state
+  if (authenticated === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f5dc' }}>
+        <div className="text-sm" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>Loading...</div>
+      </div>
+    );
+  }
+
+  // Not authenticated — redirect
+  if (!authenticated) {
+    return <AdminLogin onLogin={() => setAuthenticated(true)} />;
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5dc' }}>
@@ -47,13 +88,22 @@ export default function AdminLayout({ children }) {
             </span>
           </div>
         </div>
-        <Link
-          href="/"
-          className="text-xs font-semibold underline"
-          style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}
-        >
-          View Store
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="text-xs font-semibold underline"
+            style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}
+          >
+            View Store
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-xs font-semibold px-2 py-1 rounded-lg"
+            style={{ color: '#ba1a1a', backgroundColor: 'rgba(186,26,26,0.08)', fontFamily: 'Montserrat, sans-serif' }}
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
       {/* Sidebar overlay */}

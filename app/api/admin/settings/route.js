@@ -5,6 +5,7 @@ const DEFAULT_SETTINGS = {
   pollingInterval: 30,
   webhookSecret: '',
   autoSync: false,
+  showOutOfStock: true,
 };
 
 export async function GET() {

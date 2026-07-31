@@ -1,102 +1,132 @@
 import { NextResponse } from 'next/server';
+import { wcUrl } from '@/lib/wc-config';
+import { initializePayment, generateReference } from '@/lib/paystack';
+import { rateLimitRequest } from '@/lib/rate-limit';
 
-const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
-const WC_KEY = process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY;
-const WC_SECRET = process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET;
+function sanitize(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>]/g, '').trim().slice(0, 500);
+}
+
+function validateEmail(email) {
+  if (!email) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export async function POST(request) {
-  try {
-    const { cart, paymentMethod, locationData, customerId, customerNote } = await request.json();
+  const rl = rateLimitRequest(request, { maxRequests: 10, windowMs: 60000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests. Please wait.' }, { status: 429 });
+  }
 
-    if (!cart || cart.length === 0) {
+  try {
+    const { cart, paymentMethod, locationData, customerId, customerNote, email } = await request.json();
+
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
-    if (!locationData) {
-      return NextResponse.json({ error: 'Location data is required' }, { status: 400 });
+    if (cart.length > 50) {
+      return NextResponse.json({ error: 'Cart too large' }, { status: 400 });
     }
 
-    // Build payment method for WooCommerce
-    let wcPaymentMethod = paymentMethod;
-    if (paymentMethod === 'mpesa') {
-      wcPaymentMethod = 'mpesa_stk';
-    } else if (paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') {
-      wcPaymentMethod = 'digital_wallet';
+    // Validate each cart item
+    for (const item of cart) {
+      if (!item.id || typeof item.id !== 'number') {
+        return NextResponse.json({ error: 'Invalid cart item' }, { status: 400 });
+      }
+      if (!item.quantity || item.quantity < 1 || item.quantity > 100 || !Number.isInteger(item.quantity)) {
+        return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 });
+      }
+    }
+
+    const lineItems = cart.map((item) => ({
+      product_id: item.id,
+      quantity: item.quantity,
+    }));
+
+    const customerName = sanitize(locationData?.name || '');
+    const customerPhone = sanitize(locationData?.phone || '');
+    const deliveryAddress = sanitize(locationData?.text || '');
+
+    if (!customerName || !customerPhone) {
+      return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
     }
 
     const orderPayload = {
-      payment_method: wcPaymentMethod,
-      set_paid: paymentMethod !== 'mpesa',
+      payment_method: 'paystack',
+      payment_method_title: 'Paystack',
+      set_paid: false,
       customer_id: customerId || 0,
       billing: {
-        phone: locationData.phone || '',
+        first_name: customerName,
+        last_name: '',
+        phone: customerPhone,
+        email: validateEmail(email) ? email : '',
         city: 'Nairobi',
       },
       shipping: {
-        address_1: locationData.text || `GPS: ${locationData.lat}, ${locationData.lng}`,
+        first_name: customerName,
+        last_name: '',
+        address_1: deliveryAddress,
         city: 'Nairobi',
       },
-      customer_note: customerNote || `Landmark: ${locationData.text || 'GPS coordinates provided'}`,
-      line_items: cart.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity,
-      })),
+      line_items: lineItems,
+      customer_note: sanitize(customerNote || '').slice(0, 500),
       meta_data: [
-        {
-          key: 'payment_method_display',
-          value: paymentMethod,
-        },
-        {
-          key: 'landmark_hint',
-          value: locationData.text || '',
-        },
+        { key: 'delivery_location', value: deliveryAddress },
       ],
     };
 
-    const response = await fetch(
-      `${WC_URL}/wp-json/wc/v3/orders?consumer_key=${WC_KEY}&consumer_secret=${WC_SECRET}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload),
-      }
-    );
+    const url = wcUrl('orders');
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderPayload),
+    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return NextResponse.json(
-        { error: errorData.message || 'Failed to create order' },
-        { status: response.status }
-      );
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('WC order creation failed');
+      return NextResponse.json({ error: 'Failed to create order' }, { status: res.status });
     }
 
-    const order = await response.json();
+    const order = await res.json();
 
-    // For M-Pesa, simulate STK Push initiation
-    if (paymentMethod === 'mpesa') {
-      // In production, this would call Safaricom Daraja API
-      // For now, we simulate the STK Push response
-      return NextResponse.json({
-        id: order.id,
-        status: 'pending',
-        total: order.total,
-        stkPrompt: true,
-        stkMessage: `STK Push sent to ${locationData.phone || 'your phone'}. Enter PIN to complete.`,
-      });
-    }
+    const total = parseFloat(order.total) || cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    const customerEmail = validateEmail(email) ? email : `customer_${order.id}@liquordash.com`;
+    const reference = generateReference(order.id);
 
-    // For Apple/Google Pay, order is already paid
+    // Use configured URL, never trust client origin
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const callbackUrl = `${origin}/api/paystack/callback`;
+
+    const paystackData = await initializePayment({
+      email: customerEmail,
+      amount: total,
+      reference,
+      metadata: {
+        order_id: order.id,
+        order_number: order.number,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        delivery_location: deliveryAddress,
+      },
+      callback_url: callbackUrl,
+    });
+
     return NextResponse.json({
-      id: order.id,
+      success: true,
+      orderId: order.id,
+      orderNumber: order.number,
       status: order.status,
       total: order.total,
-      paid: true,
+      authorization_url: paystackData.authorization_url,
+      access_code: paystackData.access_code,
+      reference,
     });
   } catch (error) {
-    console.error('Checkout error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Checkout error');
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

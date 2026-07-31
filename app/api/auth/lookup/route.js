@@ -1,20 +1,28 @@
 import { NextResponse } from 'next/server';
-
-const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
-const WC_KEY = process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY;
-const WC_SECRET = process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET;
+import { wcFetch, wcUrl } from '@/lib/wc-config';
+import { rateLimitRequest } from '@/lib/rate-limit';
 
 export async function POST(request) {
+  const rl = rateLimitRequest(request, { maxRequests: 10, windowMs: 60000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const { phone } = await request.json();
 
-    if (!phone) {
+    if (!phone || typeof phone !== 'string') {
       return NextResponse.json({ found: false }, { status: 400 });
     }
 
     const formattedPhone = phone.replace(/\s/g, '');
 
-    const url = `${WC_URL}/wp-json/wc/v3/customers?search=${formattedPhone}&consumer_key=${WC_KEY}&consumer_secret=${WC_SECRET}`;
+    // Basic phone format validation (10 digits starting with 0)
+    if (!/^0\d{9}$/.test(formattedPhone)) {
+      return NextResponse.json({ found: false }, { status: 400 });
+    }
+
+    const url = wcUrl('customers', { search: formattedPhone });
     const res = await fetch(url);
 
     if (!res.ok) {
@@ -38,6 +46,7 @@ export async function POST(request) {
           last_name: match.last_name,
           email: match.email,
           billing: match.billing,
+          shipping: match.shipping,
           meta_data: match.meta_data,
         },
       });
@@ -45,7 +54,7 @@ export async function POST(request) {
 
     return NextResponse.json({ found: false });
   } catch (error) {
-    console.error('Lookup error:', error);
+    console.error('Lookup error');
     return NextResponse.json({ found: false });
   }
 }
