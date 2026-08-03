@@ -92,9 +92,9 @@ export async function POST(request) {
     });
 
     if (!res.ok) {
-      const err = await res.json();
-      console.error('WC order creation failed');
-      return NextResponse.json({ error: 'Failed to create order' }, { status: res.status });
+      const err = await res.json().catch(() => ({ message: res.statusText }));
+      console.error('WC order creation failed:', res.status, err.message || err);
+      return NextResponse.json({ error: err.message || 'Failed to create order' }, { status: res.status });
     }
 
     const order = await res.json();
@@ -132,7 +132,7 @@ export async function POST(request) {
       reference,
     });
   } catch (error) {
-    console.error('Checkout error');
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Checkout error:', error.message || error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

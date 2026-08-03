@@ -312,6 +312,10 @@ function AppShell() {
           onOrderSuccess={handleOrderSuccess}
           onRemoveItem={removeItem}
           onCompleteProfile={completeProfileAtCheckout}
+          onUpdateLocation={async (updates) => {
+            await updateProfile(updates);
+            setLocation({ text: updates.landmark, lat: null, lng: null });
+          }}
         />
       )}
       {orderSuccess && <OrderSuccess order={orderSuccess} onNewOrder={handleNewOrder} onUpdateEmail={updateEmail} />}
