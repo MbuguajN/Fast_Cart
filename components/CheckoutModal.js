@@ -10,6 +10,8 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const [error, setError] = useState('');
   const [step, setStep] = useState('confirm');
   const [buildingName, setBuildingName] = useState('');
+  const [userSnapshot, setUserSnapshot] = useState(null);
+  const activeUser = userSnapshot || user;
 
   const subtotal = cart.reduce((sum, item) => {
     const product = products.find((p) => p.id === item.id);
@@ -22,12 +24,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   }, 0);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const baseDeliveryFee = user?.zonePrice || 300;
+  const baseDeliveryFee = activeUser?.zonePrice || 300;
   const deliveryVat = Math.round(baseDeliveryFee * 0.16);
   const deliveryFee = baseDeliveryFee + deliveryVat;
   const grandTotal = subtotal + deliveryFee;
 
-  const needsProfile = !user?.name || !user?.landmark;
+  const needsProfile = !activeUser?.name || !activeUser?.landmark;
 
   const handlePay = () => {
     if (!buildingName.trim()) {
@@ -44,14 +46,17 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const handleProfileComplete = async (data) => {
     try {
       await onCompleteProfile(data);
+      // Merge profile data into user for payment — don't rely on stale prop
+      setUserSnapshot((prev) => ({ ...prev, ...data }));
       setStep('confirm');
-      proceedToPayment();
+      proceedToPayment({ ...user, ...data });
     } catch {
       setError('Failed to save details. Please try again.');
     }
   };
 
-  const proceedToPayment = async () => {
+  const proceedToPayment = async (userOverride) => {
+    const activeUser = userOverride || user;
     haptic('medium');
     setLoading(true);
     setError('');
@@ -64,12 +69,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
         locationData: {
           ...locationData,
           text: `${locationData.text || ''} - ${buildingName.trim()}`,
-          name: user?.name || '',
-          phone: user?.phone || '',
+          name: activeUser?.name || '',
+          phone: activeUser?.phone || '',
         },
-        customerId: user?.customerId,
+        customerId: activeUser?.customerId,
         customerNote: '',
-        email: user?.email || '',
+        email: activeUser?.email || '',
       });
 
       if (order.authorization_url) {
@@ -92,7 +97,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
         <div className="w-full max-w-md p-6 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
           style={{ backgroundColor: '#f5f5dc', borderRadius: '0.75rem 0.75rem 0 0', border: '1px solid #E9ECEF' }}>
           <ProfileSetup
-            initialName={user?.name || ''}
+            initialName={activeUser?.name || ''}
             onSubmit={handleProfileComplete}
             onCancel={() => setStep('confirm')}
           />
@@ -234,12 +239,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                 >
                   {locationData.text || 'GPS coordinates'}
                 </p>
-                {user?.name && (
+                {activeUser?.name && (
                   <p
                     className="text-[10px]"
                     style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    {user.name} · {user.phone}
+                    {activeUser.name} · {activeUser.phone}
                   </p>
                 )}
               </div>
