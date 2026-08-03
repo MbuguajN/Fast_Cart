@@ -5,7 +5,7 @@ export function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Only protect API routes — pages handled by layout
-  if (pathname.startsWith('/api/admin') && !pathname.endsWith('/api/admin/auth')) {
+  if (pathname.startsWith('/api/admin') && !pathname.startsWith('/api/admin/auth')) {
     const token = getTokenFromRequest(request);
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

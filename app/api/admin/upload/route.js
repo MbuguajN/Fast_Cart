@@ -8,7 +8,7 @@ const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(request) {
-  const user = requireAdmin(request);
+  const user = await requireAdmin(request);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
