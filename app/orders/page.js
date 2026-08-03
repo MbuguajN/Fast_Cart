@@ -107,7 +107,7 @@ function OrdersContent() {
             )}
           </div>
           <div className="flex flex-col gap-3">
-            <div>
+            <div className="max-w-[200px]">
               <label className="block text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
                 From
               </label>
@@ -119,15 +119,16 @@ function OrdersContent() {
                 style={{
                   borderRadius: '12px',
                   border: '2px solid #debfc3',
-                  padding: '10px 14px',
+                  padding: '10px 12px',
                   boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
                   animation: 'pulse-border 2s ease-in-out infinite',
                   fontFamily: 'Montserrat, sans-serif',
                   color: '#191c1d',
+                  maxWidth: '200px',
                 }}
               />
             </div>
-            <div>
+            <div className="max-w-[200px]">
               <label className="block text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
                 To
               </label>
@@ -139,11 +140,12 @@ function OrdersContent() {
                 style={{
                   borderRadius: '12px',
                   border: '2px solid #debfc3',
-                  padding: '10px 14px',
+                  padding: '10px 12px',
                   boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
                   animation: 'pulse-border 2s ease-in-out infinite',
                   fontFamily: 'Montserrat, sans-serif',
                   color: '#191c1d',
+                  maxWidth: '200px',
                 }}
               />
             </div>
