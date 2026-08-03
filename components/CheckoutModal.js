@@ -138,7 +138,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                 const variantLabel = variant?.attributes?.map((a) => a.value).join(' / ') || '';
                 return (
                   <div
-                    key={item.cartKey}
+                    key={item.id}
                     className="flex items-center gap-3 p-3 rounded-xl"
                     style={{ backgroundColor: '#ffffff', border: '1px solid #E9ECEF' }}
                   >
@@ -170,7 +170,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                       KSh {(itemPrice * item.quantity).toLocaleString()}
                     </p>
                     <button
-                      onClick={() => onRemoveItem(item.cartKey)}
+                      onClick={() => onRemoveItem(item.id)}
                       className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
                       style={{ backgroundColor: '#F1F3F5' }}
                     >

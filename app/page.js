@@ -145,45 +145,39 @@ function AppShell() {
 
   const addToCart = useCallback((productId, variantId = null) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    const cartKey = variantId ? `${productId}_${variantId}` : `${productId}`;
     setCart((prev) => {
-      const exists = prev.find((i) => i.cartKey === cartKey);
-      if (exists) return prev.map((i) => i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, { id: productId, variantId, cartKey, quantity: 1 }];
+      const exists = prev.find((i) => i.id === productId);
+      if (exists) return prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity + 1, variantId: variantId || i.variantId } : i);
+      return [...prev, { id: productId, variantId, quantity: 1 }];
     });
 
     const product = PRODUCTS.find((p) => p.id === productId);
     if (!product?.upsellIds?.length) return;
 
-    if (typeof window !== 'undefined') {
-      const shown = JSON.parse(localStorage.getItem('upsells_shown') || '[]');
-      if (shown.includes(productId)) return;
+    const upsellProducts = product.upsellIds
+      .map((id) => PRODUCTS.find((p) => p.id === id))
+      .filter((p) => p && p.inStock !== false);
 
-      const upsellProducts = product.upsellIds
-        .map((id) => PRODUCTS.find((p) => p.id === id))
-        .filter((p) => p && p.inStock !== false);
-
-      if (upsellProducts.length > 0) {
-        setTimeout(() => {
-          queueMicrotask(() => setUpsellPopup({ product, upsellProducts }));
-        }, 300);
-      }
+    if (upsellProducts.length > 0) {
+      setTimeout(() => {
+        queueMicrotask(() => setUpsellPopup({ product, upsellProducts }));
+      }, 300);
     }
   }, [PRODUCTS]);
 
-  const incrementItem = useCallback((cartKey) => {
+  const incrementItem = useCallback((productId) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.map((i) => i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i));
+    setCart((prev) => prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity + 1 } : i));
   }, []);
 
-  const decrementItem = useCallback((cartKey) => {
+  const decrementItem = useCallback((productId) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.map((i) => i.cartKey === cartKey ? { ...i, quantity: i.quantity - 1 } : i).filter((i) => i.quantity > 0));
+    setCart((prev) => prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity - 1 } : i).filter((i) => i.quantity > 0));
   }, []);
 
-  const removeItem = useCallback((cartKey) => {
+  const removeItem = useCallback((productId) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.filter((i) => i.cartKey !== cartKey));
+    setCart((prev) => prev.filter((i) => i.id !== productId));
 
     if (typeof window !== 'undefined') {
       const shown = JSON.parse(localStorage.getItem('upsells_shown') || '[]');
@@ -192,10 +186,7 @@ function AppShell() {
     }
   }, []);
 
-  const getQuantity = useCallback((productId, variantId = null) => {
-    const cartKey = variantId ? `${productId}_${variantId}` : `${productId}`;
-    return cart.find((i) => i.cartKey === cartKey)?.quantity || 0;
-  }, [cart]);
+  const getQuantity = useCallback((productId) => cart.find((i) => i.id === productId)?.quantity || 0, [cart]);
 
   const handleOrderSuccess = useCallback((order) => {
     setShowCheckout(false);
@@ -334,11 +325,6 @@ function AppShell() {
           upsellProducts={upsellPopup.upsellProducts}
           onAddToCart={addToCart}
           onDismiss={() => {
-            if (typeof window !== 'undefined') {
-              const shown = JSON.parse(localStorage.getItem('upsells_shown') || '[]');
-              shown.push(upsellPopup.product.id);
-              localStorage.setItem('upsells_shown', JSON.stringify(shown));
-            }
             queueMicrotask(() => setUpsellPopup(null));
           }}
         />
