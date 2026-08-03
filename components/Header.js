@@ -5,14 +5,18 @@ import { useState, useEffect } from 'react';
 export default function Header({ location, onLocationSet, onSearch }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [logo, setLogo] = useState(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
       .then((r) => r.json())
       .then((data) => {
-        queueMicrotask(() => setLogo(data.logo || null));
+        queueMicrotask(() => {
+          setLogo(data.logo || null);
+          setLoaded(true);
+        });
       })
-      .catch(() => {});
+      .catch(() => setLoaded(true));
   }, []);
 
   return (
@@ -20,15 +24,8 @@ export default function Header({ location, onLocationSet, onSearch }) {
       <div className="flex justify-between items-center px-4 md:px-16 h-14 w-full max-w-7xl mx-auto pt-6 pb-2">
         <div className="flex items-center gap-4">
           <div className="w-28 h-12 flex items-center pl-2 pb-2">
-            {logo ? (
+            {loaded && logo && (
               <img src={logo} alt="Logo" className="max-h-10 w-auto object-contain" />
-            ) : (
-              <span
-                className="text-[18px] font-bold tracking-tight text-white"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-              >
-                LiquorDash
-              </span>
             )}
           </div>
         </div>

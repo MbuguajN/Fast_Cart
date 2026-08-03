@@ -7,6 +7,7 @@ export default function PhoneEntry({ onSubmit }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [settings, setSettings] = useState({ logo: null, background: null });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const inputRef = useRef(null);
 
   const isValid = digits.length >= 9;
@@ -15,9 +16,12 @@ export default function PhoneEntry({ onSubmit }) {
     fetch('/api/settings')
       .then((r) => r.json())
       .then((data) => {
-        queueMicrotask(() => setSettings(data));
+        queueMicrotask(() => {
+          setSettings(data);
+          setSettingsLoaded(true);
+        });
       })
-      .catch(() => {});
+      .catch(() => setSettingsLoaded(true));
   }, []);
 
   const handleChange = (e) => {
@@ -74,16 +78,12 @@ export default function PhoneEntry({ onSubmit }) {
               className="rounded-xl flex items-center justify-center overflow-hidden"
               style={{ width: 'clamp(100px, 28vw, 160px)', height: 'clamp(100px, 28vw, 160px)' }}
             >
-              {settings.logo ? (
+              {settingsLoaded && settings.logo && (
                 <img
                   src={settings.logo}
-                  alt="LiquorDash"
+                  alt="Logo"
                   className="w-full h-full object-contain"
                 />
-              ) : (
-                <svg style={{ width: 'clamp(60px, 16vw, 96px)', height: 'clamp(60px, 16vw, 96px)', color: '#ffffff' }} viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 2l.01 4.5c0 1.1.89 2 2 2h1v11c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2V8.5h1c1.1 0 2-.9 2-2V2H6zm2.5 2h7v2.5h-7V4zM8 17v-5h8v5H8zm8-7H8V8h8v2z"/>
-                </svg>
               )}
             </div>
           </div>

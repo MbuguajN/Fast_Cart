@@ -29,6 +29,7 @@ function AppShell() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [upsellPopup, setUpsellPopup] = useState(null);
+  const [appLoaded, setAppLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -84,7 +85,8 @@ function AppShell() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setAppLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -197,10 +199,14 @@ function AppShell() {
 
   const effectiveLocation = location || (user?.landmark ? { text: user.landmark, lat: null, lng: null } : null);
 
-  if (phase === 'loading') {
+  if (phase === 'loading' || !appLoaded) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center gap-4 bg-white">
-        <div className="text-5xl">🍹</div>
+        <div className="w-16 h-16 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(132,0,55,0.1)' }}>
+          <svg className="w-8 h-8" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 2l.01 4.5c0 1.1.89 2 2 2h1v11c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2V8.5h1c1.1 0 2-.9 2-2V2H6zm2.5 2h7v2.5h-7V4zM8 17v-5h8v5H8zm8-7H8V8h8v2z"/>
+          </svg>
+        </div>
         <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: '#E9ECEF', borderTopColor: '#840037' }} />
       </div>
     );
