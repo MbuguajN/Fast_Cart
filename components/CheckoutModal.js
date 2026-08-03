@@ -16,7 +16,9 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   }, 0);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const deliveryFee = user?.zonePrice || 300;
+  const baseDeliveryFee = user?.zonePrice || 300;
+  const deliveryVat = Math.round(baseDeliveryFee * 0.16);
+  const deliveryFee = baseDeliveryFee + deliveryVat;
   const grandTotal = subtotal + deliveryFee;
 
   const handleCheckout = async () => {
@@ -232,7 +234,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                   className="text-sm"
                   style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
                 >
-                  Subtotal ({totalItems} items)
+                  Subtotal ({totalItems} items) inc. VAT
                 </span>
                 <span
                   className="text-sm font-semibold"
@@ -246,7 +248,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                   className="text-sm"
                   style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
                 >
-                  Delivery
+                  Delivery inc. VAT
                 </span>
                 <span
                   className="text-sm font-semibold"
