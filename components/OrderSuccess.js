@@ -3,11 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function OrderSuccess({ order, onNewOrder }) {
+export default function OrderSuccess({ order, onNewOrder, onUpdateEmail }) {
   const router = useRouter();
   const [note, setNote] = useState('');
   const [noteSent, setNoteSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [emailPrompt, setEmailPrompt] = useState(true);
+  const [email, setEmail] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   const handleAddNote = async () => {
     if (!note.trim() || !order?.id) return;
@@ -21,6 +26,34 @@ export default function OrderSuccess({ order, onNewOrder }) {
       setNoteSent(true);
     } catch {}
     setSending(false);
+  };
+
+  const handleSubscribe = async () => {
+    if (!email.trim()) {
+      setEmailError('Please enter your email');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setEmailError('Please enter a valid email');
+      return;
+    }
+    setEmailLoading(true);
+    setEmailError('');
+    try {
+      if (onUpdateEmail) {
+        await onUpdateEmail(email.trim());
+      }
+      setEmailSent(true);
+      setEmailPrompt(false);
+    } catch {
+      setEmailError('Failed to save email. You can still track your order.');
+    }
+    setEmailLoading(false);
+  };
+
+  const handleSkip = () => {
+    setEmailPrompt(false);
   };
 
   return (
@@ -110,6 +143,62 @@ export default function OrderSuccess({ order, onNewOrder }) {
         ) : (
           <div className="mb-4 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(132,0,55,0.08)', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
             Note added to your order
+          </div>
+        )}
+
+        {/* Email Subscription Prompt */}
+        {emailPrompt && (
+          <div className="mb-4 rounded-xl p-4 text-left" style={{ backgroundColor: '#ffffff', border: '1px solid #E9ECEF' }}>
+            <p className="text-sm font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
+              Get order updates & exclusive deals
+            </p>
+            <p className="text-[11px] mb-3" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
+              Enter your email to receive promotions and delivery alerts
+            </p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setEmailError(''); }}
+              placeholder="your@email.com"
+              className="w-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none text-sm mb-2"
+              style={{
+                borderRadius: '12px',
+                border: '2px solid #debfc3',
+                padding: '10px 12px',
+                boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
+                animation: 'pulse-border 2s ease-in-out infinite',
+                fontFamily: 'Montserrat, sans-serif',
+                color: '#191c1d',
+              }}
+            />
+            {emailError && (
+              <p className="text-[11px] mb-2" style={{ color: '#ba1a1a', fontFamily: 'Montserrat, sans-serif' }}>
+                {emailError}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleSubscribe}
+                disabled={emailLoading}
+                className="flex-1 py-2 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-50"
+                style={{ backgroundColor: '#840037', fontFamily: 'Montserrat, sans-serif' }}
+              >
+                {emailLoading ? '...' : 'Subscribe'}
+              </button>
+              <button
+                onClick={handleSkip}
+                className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                style={{ backgroundColor: 'transparent', color: '#5f5e5e', border: '1px solid #E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
+              >
+                No thanks, skip
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!emailPrompt && emailSent && (
+          <div className="mb-4 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(132,0,55,0.08)', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+            ✓ Email saved — you&apos;ll receive order updates and exclusive deals
           </div>
         )}
 

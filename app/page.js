@@ -3,7 +3,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
 import PhoneEntry from '@/components/PhoneEntry';
-import ProfileSetup from '@/components/ProfileSetup';
 import Header from '@/components/Header';
 import CategoryDock from '@/components/CategoryDock';
 import ProductCard from '@/components/ProductCard';
@@ -16,7 +15,7 @@ import LocationPrompt from '@/components/LocationPrompt';
 import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
-  const { user, phase, phone, submitPhone, completeProfile, resetToEntry, updateProfile } = useAuth();
+  const { user, phase, phone, submitPhone, completeProfileAtCheckout, resetToEntry, updateProfile, updateEmail } = useAuth();
   const [location, setLocation] = useState(null);
   const [activeCategory, setActiveCategory] = useState('fast6');
   const [cart, setCart] = useState([]);
@@ -213,10 +212,6 @@ function AppShell() {
     return <PhoneEntry onSubmit={submitPhone} />;
   }
 
-  if (phase === 'profile_setup') {
-    return <ProfileSetup phone={phone} onSubmit={completeProfile} onBack={resetToEntry} />;
-  }
-
   return (
     <div className="min-h-screen bg-white pb-32">
       <Header location={effectiveLocation} onLocationSet={setLocation} onSearch={setSearchQuery} />
@@ -316,9 +311,10 @@ function AppShell() {
           onClose={() => setShowCheckout(false)}
           onOrderSuccess={handleOrderSuccess}
           onRemoveItem={removeItem}
+          onCompleteProfile={completeProfileAtCheckout}
         />
       )}
-      {orderSuccess && <OrderSuccess order={orderSuccess} onNewOrder={handleNewOrder} />}
+      {orderSuccess && <OrderSuccess order={orderSuccess} onNewOrder={handleNewOrder} onUpdateEmail={updateEmail} />}
       {upsellPopup && (
         <UpsellPopup
           product={upsellPopup.product}

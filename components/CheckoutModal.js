@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { createOrder } from '@/lib/woocommerce';
 import { haptic } from '@/lib/haptic';
+import ProfileSetup from './ProfileSetup';
 
-export default function CheckoutModal({ cart, products, user, locationData, onClose, onOrderSuccess, onRemoveItem }) {
+export default function CheckoutModal({ cart, products, user, locationData, onClose, onOrderSuccess, onRemoveItem, onCompleteProfile }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState('confirm');
@@ -26,11 +27,31 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const deliveryFee = baseDeliveryFee + deliveryVat;
   const grandTotal = subtotal + deliveryFee;
 
-  const handleCheckout = async () => {
+  const needsProfile = !user?.name || !user?.landmark;
+
+  const handlePay = () => {
     if (!buildingName.trim()) {
       setError('Please enter your building name or house number');
       return;
     }
+    if (needsProfile) {
+      setStep('collect_details');
+      return;
+    }
+    proceedToPayment();
+  };
+
+  const handleProfileComplete = async (data) => {
+    try {
+      await onCompleteProfile(data);
+      setStep('confirm');
+      proceedToPayment();
+    } catch {
+      setError('Failed to save details. Please try again.');
+    }
+  };
+
+  const proceedToPayment = async () => {
     haptic('medium');
     setLoading(true);
     setError('');
@@ -64,6 +85,21 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
       setStep('confirm');
     }
   };
+
+  if (step === 'collect_details') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="w-full max-w-md p-6 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+          style={{ backgroundColor: '#f5f5dc', borderRadius: '0.75rem 0.75rem 0 0', border: '1px solid #E9ECEF' }}>
+          <ProfileSetup
+            initialName={user?.name || ''}
+            onSubmit={handleProfileComplete}
+            onCancel={() => setStep('confirm')}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -298,7 +334,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
 
             {/* Pay Button */}
             <button
-              onClick={handleCheckout}
+              onClick={handlePay}
               disabled={loading || !buildingName.trim()}
               className="w-full py-4 rounded-xl text-base font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] flex items-center justify-center gap-2"
               style={{

@@ -48,7 +48,6 @@ function matchZone(neighbourhood, suburb, road, city, zones) {
         }
       }
     }
-
     return bestZone ? { zone: bestZone, location: bestLocation, score: bestScore } : null;
   };
 
@@ -70,9 +69,8 @@ function matchZone(neighbourhood, suburb, road, city, zones) {
   return null;
 }
 
-export default function ProfileSetup({ phone, onSubmit, onBack }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+export default function ProfileSetup({ initialName, onSubmit, onCancel }) {
+  const [name, setName] = useState(initialName || '');
   const [zones, setZones] = useState([]);
   const [zonesLoading, setZonesLoading] = useState(true);
   const [selectedZone, setSelectedZone] = useState(null);
@@ -198,7 +196,6 @@ export default function ProfileSetup({ phone, onSubmit, onBack }) {
       await onSubmit({
         name: name.trim(),
         landmark: locationText.trim(),
-        email: email.trim(),
         zone: selectedZone.name,
         zonePrice: deliveryPrice,
       });
@@ -209,327 +206,199 @@ export default function ProfileSetup({ phone, onSubmit, onBack }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col" style={{ backgroundColor: '#840037', height: '100dvh', maxHeight: '100dvh' }}>
-      {/* Header with back button */}
-      <header className="flex-shrink-0 w-full px-6 pt-8 pb-4">
-        <button onClick={onBack} className="flex items-center gap-2 text-white font-semibold hover:opacity-80 transition-opacity" style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 'clamp(13px, 3.5vw, 15px)' }}>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span>Back</span>
-        </button>
-      </header>
+    <div className="flex flex-col h-full overflow-y-auto" style={{ gap: 'clamp(16px, 4vh, 24px)' }}>
+      {/* Header */}
+      <div className="flex items-start gap-3 mb-2">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#edeeef' }}>
+          <span className="text-2xl">👋</span>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold tracking-tight mb-0.5" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
+            We just need a few details
+          </h2>
+          <p className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>
+            This helps us deliver to you faster next time
+          </p>
+        </div>
+      </div>
 
-      {/* Main Content */}
-      <main
-        className="flex-1 w-full bg-white flex flex-col overflow-y-auto"
-        style={{ borderRadius: 'clamp(20px, 5vw, 32px) clamp(20px, 5vw, 32px) 0 0' }}
-      >
-        <div className="w-full flex flex-col flex-1" style={{ padding: 'clamp(20px, 5vh, 32px) clamp(20px, 5vw, 24px) clamp(16px, 3vh, 24px)' }}>
-          {/* Welcome */}
-          <div className="flex items-start gap-3 mb-6">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: '#edeeef' }}
-            >
-              <span className="text-2xl">👋</span>
-            </div>
-            <div>
-              <h2
-                className="text-xl font-bold tracking-tight mb-0.5"
-                style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-              >
-                Welcome, new friend!
-              </h2>
-              <p
-                className="text-sm"
-                style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}
-              >
-                We&apos;ll remember you for next time
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col" style={{ gap: 'clamp(16px, 4vh, 24px)' }}>
-            {/* Name */}
-            <div>
-              <label
-                className="block text-sm font-semibold mb-1.5"
-                style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}
-              >
-                Your Name <span style={{ color: '#ba1a1a' }}>*</span>
-              </label>
-              <div className="relative" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); setError(''); }}
-                  placeholder="e.g. James Mwangi"
-                  className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
-                  style={{
-                    borderRadius: '12px',
-                    border: '2px solid #debfc3',
-                    padding: '0 clamp(10px, 2.5vw, 16px)',
-                    boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
-                    animation: 'pulse-border 2s ease-in-out infinite',
-                    color: '#191c1d',
-                    fontFamily: 'Montserrat, sans-serif',
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Delivery Location */}
-            <div>
-              <label
-                className="block text-sm font-semibold mb-1.5"
-                style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}
-              >
-                Delivery Location <span style={{ color: '#ba1a1a' }}>*</span>
-              </label>
-
-              {step === 'detecting' && (
-                    <div
-                      className="flex items-center gap-3 bg-white"
-                      style={{ height: 'clamp(48px, 12vw, 56px)', borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite' }}
-                    >
-                  <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: '#E9ECEF', borderTopColor: '#840037' }} />
-                  <span className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>Detecting your location...</span>
-                </div>
-              )}
-
-              {step === 'zone_matched' && selectedZone && (
-                <>
-                  <div
-                    className="flex items-center justify-between px-4 border"
-                    style={{
-                      height: 'clamp(56px, 14vw, 64px)',
-                      backgroundColor: 'rgba(174, 242, 194, 0.2)',
-                      borderColor: '#aef2c2',
-                      borderRadius: 0,
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#004b29' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <div>
-                        <div className="text-sm font-semibold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
-                          {selectedLocation?.name || selectedZone.name}
-                        </div>
-                        <div className="text-xs" style={{ color: 'rgba(0,75,41,0.8)', fontFamily: 'Montserrat, sans-serif' }}>
-                          {selectedZone.name} Zone
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif' }}>
-                      KSh {deliveryPrice}
-                    </span>
-                  </div>
-                  <div className="relative mt-2" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
-                    <input
-                      type="text"
-                      value={locationText}
-                      onChange={(e) => { setLocationText(e.target.value); setError(''); }}
-                      placeholder="Your address"
-                      className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
-                      style={{
-                        borderRadius: '12px',
-                        border: '2px solid #debfc3',
-                        padding: '0 clamp(10px, 2.5vw, 16px)',
-                        boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
-                        animation: 'pulse-border 2s ease-in-out infinite',
-                        color: '#191c1d',
-                        fontFamily: 'Montserrat, sans-serif',
-                      }}
-                    />
-                  </div>
-                  <button type="button" onClick={() => { setSelectedZone(null); setSelectedLocation(null); setStep('browse_zones'); }}
-                    className="text-sm font-semibold mt-2 hover:underline"
-                    style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-                    Not your location?
-                  </button>
-                </>
-              )}
-
-              {step === 'browse_zones' && (
-                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                  {zonesLoading ? (
-                    <div
-                      className="flex items-center gap-3 bg-white"
-                      style={{ height: 'clamp(48px, 12vw, 56px)', borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite' }}
-                    >
-                      <span className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>Loading zones...</span>
-                    </div>
-                  ) : zones.length === 0 ? (
-                    <div
-                      className="flex items-center gap-3 bg-white"
-                      style={{ height: 'clamp(48px, 12vw, 56px)', borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite' }}
-                    >
-                      <span className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>No delivery zones available</span>
-                    </div>
-                  ) : (
-                    zones.map((zone) => {
-                      const isExpanded = expandedZone === zone.id;
-                      return (
-                        <div key={zone.id} className="border overflow-hidden" style={{ borderColor: '#debfc3', borderRadius: '12px' }}>
-                          <button
-                            type="button"
-                            onClick={() => setExpandedZone(isExpanded ? null : zone.id)}
-                            className="w-full flex items-center justify-between px-4 hover:bg-gray-50 transition-all text-left"
-                            style={{ height: 'clamp(48px, 12vw, 56px)' }}
-                          >
-                            <div className="flex items-center gap-2">
-                              <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} style={{ color: '#574145' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                              <span className="text-sm font-semibold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>{zone.name}</span>
-                            </div>
-                          </button>
-                          {isExpanded && (
-                            <div className="px-4 pb-3 space-y-1.5">
-                              {zone.locations.map((loc) => (
-                                <button
-                                  key={loc.name}
-                                  type="button"
-                                  onClick={() => handleLocationPick(zone, loc)}
-                                  className="w-full flex items-center justify-between px-4 border hover:border-[#840037]/40 hover:bg-red-50/50 transition-all text-left"
-                                  style={{ height: 'clamp(44px, 11vw, 52px)', borderColor: '#E9ECEF', borderRadius: '8px' }}
-                                >
-                                  <span className="text-sm" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{loc.name}</span>
-                                  <span className="text-sm font-bold" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>KSh {loc.price}</span>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              )}
-
-              {step === 'ready' && selectedZone && (
-                <>
-                  <div
-                    className="flex items-center justify-between px-4 border"
-                    style={{
-                      height: 'clamp(56px, 14vw, 64px)',
-                      backgroundColor: 'rgba(174, 242, 194, 0.2)',
-                      borderColor: '#aef2c2',
-                      borderRadius: 0,
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#004b29' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <div>
-                        <div className="text-sm font-semibold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
-                          {selectedLocation?.name || selectedZone.name}
-                        </div>
-                        <div className="text-xs" style={{ color: 'rgba(0,75,41,0.8)', fontFamily: 'Montserrat, sans-serif' }}>
-                          {selectedZone.name} Zone
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif' }}>
-                      KSh {deliveryPrice}
-                    </span>
-                  </div>
-                  <div className="relative mt-2" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
-                    <input
-                      type="text"
-                      value={locationText}
-                      onChange={(e) => { setLocationText(e.target.value); setError(''); }}
-                      placeholder="Confirm your address"
-                      className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
-                      style={{
-                        borderRadius: '12px',
-                        border: '2px solid #debfc3',
-                        padding: '0 clamp(10px, 2.5vw, 16px)',
-                        boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
-                        animation: 'pulse-border 2s ease-in-out infinite',
-                        color: '#191c1d',
-                        fontFamily: 'Montserrat, sans-serif',
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-end mt-2">
-                    <button type="button" onClick={() => { setSelectedZone(null); setSelectedLocation(null); setStep('browse_zones'); }}
-                      className="text-sm font-semibold hover:underline"
-                      style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-                      Not your location?
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label
-                className="block text-sm font-semibold mb-1.5"
-                style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}
-              >
-                Email <span className="font-normal" style={{ color: '#574145' }}>(optional)</span>
-              </label>
-              <div className="relative" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="james@example.com"
-                  className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
-                  style={{
-                    borderRadius: '12px',
-                    border: '2px solid #debfc3',
-                    padding: '0 clamp(10px, 2.5vw, 16px)',
-                    boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
-                    animation: 'pulse-border 2s ease-in-out infinite',
-                    color: '#191c1d',
-                    fontFamily: 'Montserrat, sans-serif',
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex-1" />
-
-            {/* Error */}
-            {error && (
-              <p className="text-sm text-center" style={{ color: '#ba1a1a', fontFamily: 'Montserrat, sans-serif' }}>
-                {error}
-              </p>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading || !canSubmit}
-              className="w-full text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col" style={{ gap: 'clamp(16px, 4vh, 24px)' }}>
+        {/* Name */}
+        <div>
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
+            Your Name <span style={{ color: '#ba1a1a' }}>*</span>
+          </label>
+          <div className="relative" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => { setName(e.target.value); setError(''); }}
+              placeholder="e.g. James Mwangi"
+              className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
               style={{
-                height: 'clamp(48px, 12vw, 56px)',
-                backgroundColor: canSubmit ? '#840037' : 'rgba(132, 0, 55, 0.6)',
+                borderRadius: '12px',
+                border: '2px solid #debfc3',
+                padding: '0 clamp(10px, 2.5vw, 16px)',
+                boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
+                animation: 'pulse-border 2s ease-in-out infinite',
+                color: '#191c1d',
                 fontFamily: 'Montserrat, sans-serif',
-                fontSize: 'clamp(14px, 3.8vw, 16px)',
-                borderRadius: 0,
               }}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Setting up...
+            />
+          </div>
+        </div>
+
+        {/* Delivery Location */}
+        <div>
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
+            Delivery Location <span style={{ color: '#ba1a1a' }}>*</span>
+          </label>
+
+          {step === 'detecting' && (
+            <div className="flex items-center gap-3 bg-white" style={{ height: 'clamp(48px, 12vw, 56px)', borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite' }}>
+              <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: '#E9ECEF', borderTopColor: '#840037' }} />
+              <span className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>Detecting your location...</span>
+            </div>
+          )}
+
+          {step === 'zone_matched' && selectedZone && (
+            <>
+              <div className="flex items-center justify-between px-4 border" style={{ height: 'clamp(56px, 14vw, 64px)', backgroundColor: 'rgba(174, 242, 194, 0.2)', borderColor: '#aef2c2', borderRadius: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <div className="flex items-center gap-3">
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#004b29' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <div className="text-sm font-semibold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
+                      {selectedLocation?.name || selectedZone.name}
+                    </div>
+                    <div className="text-xs" style={{ color: 'rgba(0,75,41,0.8)', fontFamily: 'Montserrat, sans-serif' }}>
+                      {selectedZone.name} Zone
+                    </div>
+                  </div>
+                </div>
+                <span className="text-sm font-bold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif' }}>
+                  KSh {deliveryPrice}
+                </span>
+              </div>
+              <div className="relative mt-2" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
+                <input type="text" value={locationText} onChange={(e) => { setLocationText(e.target.value); setError(''); }} placeholder="Your address"
+                  className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
+                  style={{ borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }} />
+              </div>
+              <button type="button" onClick={() => { setSelectedZone(null); setSelectedLocation(null); setStep('browse_zones'); }}
+                className="text-sm font-semibold mt-2 hover:underline" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+                Not your location?
+              </button>
+            </>
+          )}
+
+          {step === 'browse_zones' && (
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {zonesLoading ? (
+                <div className="flex items-center gap-3 bg-white" style={{ height: 'clamp(48px, 12vw, 56px)', borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite' }}>
+                  <span className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>Loading zones...</span>
+                </div>
+              ) : zones.length === 0 ? (
+                <div className="flex items-center gap-3 bg-white" style={{ height: 'clamp(48px, 12vw, 56px)', borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite' }}>
+                  <span className="text-sm" style={{ color: '#574145', fontFamily: 'Montserrat, sans-serif' }}>No delivery zones available</span>
                 </div>
               ) : (
-                <span>Let&apos;s Go!</span>
+                zones.map((zone) => {
+                  const isExpanded = expandedZone === zone.id;
+                  return (
+                    <div key={zone.id} className="border overflow-hidden" style={{ borderColor: '#debfc3', borderRadius: '12px' }}>
+                      <button type="button" onClick={() => setExpandedZone(isExpanded ? null : zone.id)}
+                        className="w-full flex items-center justify-between px-4 hover:bg-gray-50 transition-all text-left" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
+                        <div className="flex items-center gap-2">
+                          <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} style={{ color: '#574145' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          <span className="text-sm font-semibold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>{zone.name}</span>
+                        </div>
+                      </button>
+                      {isExpanded && (
+                        <div className="px-4 pb-3 space-y-1.5">
+                          {zone.locations.map((loc) => (
+                            <button key={loc.name} type="button" onClick={() => handleLocationPick(zone, loc)}
+                              className="w-full flex items-center justify-between px-4 border hover:border-[#840037]/40 hover:bg-red-50/50 transition-all text-left"
+                              style={{ height: 'clamp(44px, 11vw, 52px)', borderColor: '#E9ECEF', borderRadius: '8px' }}>
+                              <span className="text-sm" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{loc.name}</span>
+                              <span className="text-sm font-bold" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>KSh {loc.price}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
-            </button>
-          </form>
+            </div>
+          )}
+
+          {step === 'ready' && selectedZone && (
+            <>
+              <div className="flex items-center justify-between px-4 border" style={{ height: 'clamp(56px, 14vw, 64px)', backgroundColor: 'rgba(174, 242, 194, 0.2)', borderColor: '#aef2c2', borderRadius: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <div className="flex items-center gap-3">
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#004b29' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <div className="text-sm font-semibold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
+                      {selectedLocation?.name || selectedZone.name}
+                    </div>
+                    <div className="text-xs" style={{ color: 'rgba(0,75,41,0.8)', fontFamily: 'Montserrat, sans-serif' }}>
+                      {selectedZone.name} Zone
+                    </div>
+                  </div>
+                </div>
+                <span className="text-sm font-bold" style={{ color: '#004b29', fontFamily: 'Montserrat, sans-serif' }}>
+                  KSh {deliveryPrice}
+                </span>
+              </div>
+              <div className="relative mt-2" style={{ height: 'clamp(48px, 12vw, 56px)' }}>
+                <input type="text" value={locationText} onChange={(e) => { setLocationText(e.target.value); setError(''); }} placeholder="Confirm your address"
+                  className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
+                  style={{ borderRadius: '12px', border: '2px solid #debfc3', padding: '0 clamp(10px, 2.5vw, 16px)', boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)', animation: 'pulse-border 2s ease-in-out infinite', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }} />
+              </div>
+              <div className="flex items-center justify-end mt-2">
+                <button type="button" onClick={() => { setSelectedZone(null); setSelectedLocation(null); setStep('browse_zones'); }}
+                  className="text-sm font-semibold hover:underline" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+                  Not your location?
+                </button>
+              </div>
+            </>
+          )}
         </div>
-      </main>
+
+        <div className="flex-1" />
+
+        {error && (
+          <p className="text-sm text-center" style={{ color: '#ba1a1a', fontFamily: 'Montserrat, sans-serif' }}>{error}</p>
+        )}
+
+        <div className="flex gap-3">
+          {onCancel && (
+            <button type="button" onClick={onCancel}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all"
+              style={{ border: '1px solid #E9ECEF', color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
+              Cancel
+            </button>
+          )}
+          <button type="submit" disabled={loading || !canSubmit}
+            className="flex-[2] py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: canSubmit ? '#840037' : 'rgba(132, 0, 55, 0.6)', fontFamily: 'Montserrat, sans-serif' }}>
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Setting up...
+              </div>
+            ) : (
+              <span>Continue to Payment</span>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
