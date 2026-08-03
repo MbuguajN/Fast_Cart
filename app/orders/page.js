@@ -106,8 +106,8 @@ function OrdersContent() {
               </button>
             )}
           </div>
-          <div className="flex gap-2">
-            <div className="flex-1 min-w-0">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="min-w-0">
               <label className="block text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
                 From
               </label>
@@ -115,11 +115,11 @@ function OrdersContent() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none text-sm"
+                className="w-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none text-xs"
                 style={{
                   borderRadius: '12px',
                   border: '2px solid #debfc3',
-                  padding: '8px clamp(8px, 2vw, 12px)',
+                  padding: '8px 4px',
                   boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
                   animation: 'pulse-border 2s ease-in-out infinite',
                   fontFamily: 'Montserrat, sans-serif',
@@ -127,7 +127,7 @@ function OrdersContent() {
                 }}
               />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0">
               <label className="block text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
                 To
               </label>
@@ -135,11 +135,11 @@ function OrdersContent() {
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none text-sm"
+                className="w-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none text-xs"
                 style={{
                   borderRadius: '12px',
                   border: '2px solid #debfc3',
-                  padding: '8px clamp(8px, 2vw, 12px)',
+                  padding: '8px 4px',
                   boxShadow: '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
                   animation: 'pulse-border 2s ease-in-out infinite',
                   fontFamily: 'Montserrat, sans-serif',
