@@ -1,15 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { haptic } from '@/lib/haptic';
 
-export default function ProductCard({ product, quantity, onAdd, onIncrement, onDecrement }) {
-  const outOfStock = product.inStock === false || product.stockQty === 0;
+export default function ProductCard({ product, quantity, onAdd, onIncrement, onDecrement, onVariantChange }) {
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const isVariable = product.type === 'variable' && product.variations?.length > 0;
+
+  const effectivePrice = selectedVariant ? parseFloat(selectedVariant.price) || product.price : product.price;
+  const outOfStock = isVariable
+    ? (selectedVariant ? selectedVariant.stockStatus !== 'instock' : product.inStock === false)
+    : (product.inStock === false || product.stockQty === 0);
+
+  const handleVariantSelect = (variant) => {
+    haptic('light');
+    setSelectedVariant(variant);
+    onVariantChange?.(product.id, variant);
+  };
 
   const handleAdd = () => {
     if (outOfStock) return;
     haptic('light');
-    onAdd();
+    if (isVariable && !selectedVariant) return;
+    onAdd(selectedVariant?.wcId || null);
   };
 
   const handleIncrement = () => {
@@ -22,6 +36,19 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
     onDecrement();
   };
 
+  // Group variations by attribute name
+  const variantGroups = {};
+  if (isVariable) {
+    for (const v of product.variations) {
+      for (const attr of v.attributes) {
+        if (!variantGroups[attr.name]) variantGroups[attr.name] = [];
+        if (!variantGroups[attr.name].find((o) => o.value === attr.value)) {
+          variantGroups[attr.name].push({ value: attr.value, variant: v });
+        }
+      }
+    }
+  }
+
   return (
     <div
       className="group bg-white rounded-xl border shadow-sm overflow-hidden transition-all duration-300 flex flex-col hover:shadow-md h-full"
@@ -33,7 +60,7 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
       <div className="aspect-square relative overflow-hidden bg-gray-50">
         {product.image ? (
           <Image
-            src={product.image}
+            src={selectedVariant?.image || product.image}
             alt={product.name}
             fill
             loading="eager"
@@ -68,8 +95,34 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
             className={`text-[18px] font-bold ${outOfStock ? 'text-gray-400' : 'text-[#840037]'}`}
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
-            KSh {product.price.toLocaleString()}
+            KSh {effectivePrice.toLocaleString()}
           </span>
+
+          {/* Variant selectors */}
+          {isVariable && Object.entries(variantGroups).map(([attrName, options]) => (
+            <div key={attrName} className="flex flex-wrap gap-1 mt-1">
+              {options.map((opt) => {
+                const isActive = selectedVariant?.attributes?.some(
+                  (a) => a.name === attrName && a.value === opt.value
+                );
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleVariantSelect(opt.variant)}
+                    className="px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all border"
+                    style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      backgroundColor: isActive ? '#840037' : '#ffffff',
+                      color: isActive ? '#ffffff' : '#5f5e5e',
+                      borderColor: isActive ? '#840037' : '#E9ECEF',
+                    }}
+                  >
+                    {opt.value}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
 
           {outOfStock ? (
             <div className="w-full py-1.5 rounded-full border border-gray-200 text-gray-400 text-[12px] text-center"
@@ -79,7 +132,8 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
           ) : quantity === 0 ? (
             <button
               onClick={handleAdd}
-              className="w-full py-1.5 rounded-full border text-[#840037] text-[12px] hover:bg-[#840037] hover:text-white transition-all active:scale-95"
+              disabled={isVariable && !selectedVariant}
+              className="w-full py-1.5 rounded-full border text-[#840037] text-[12px] hover:bg-[#840037] hover:text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 borderColor: '#840037',
                 fontFamily: 'Montserrat, sans-serif',
@@ -87,7 +141,7 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
                 letterSpacing: '0.05em',
               }}
             >
-              QUICK ADD
+              {isVariable && !selectedVariant ? 'SELECT OPTION' : 'QUICK ADD'}
             </button>
           ) : (
             <div

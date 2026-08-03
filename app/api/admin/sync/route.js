@@ -7,6 +7,7 @@ import {
   upsertZone,
   getSyncStatus,
   extractBrandsFromProducts,
+  updateProductVariations,
 } from '@/lib/data-store';
 import { wcFetch, wcUrl, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
 import { ZONE_MAP } from '@/lib/zone-map';
@@ -108,10 +109,13 @@ export async function POST() {
         }
       }
 
+      const productType = p.type || 'simple';
+
       upsertProduct({
         wcId: p.id,
         name: p.name,
         slug: p.slug,
+        type: productType,
         price: p.price || p.regular_price,
         regularPrice: p.regular_price,
         salePrice: p.sale_price,
@@ -128,7 +132,40 @@ export async function POST() {
         sku: p.sku || '',
         weight: p.weight || '',
         upsellIds: p.upsell_ids || [],
+        totalSales: p.total_sales || 0,
+        attributes: (p.attributes || []).map((a) => ({
+          name: a.name,
+          options: a.options || [],
+        })),
       });
+
+      // Fetch variations for variable products
+      if (productType === 'variable') {
+        try {
+          const varsUrl = wcUrl(`products/${p.id}/variations`, { per_page: '100' });
+          const varsRes = await fetch(varsUrl);
+          if (varsRes.ok) {
+            const wcVariations = await varsRes.json();
+            const variations = wcVariations.map((v) => ({
+              wcId: v.id,
+              price: v.price || v.regular_price,
+              regularPrice: v.regular_price,
+              salePrice: v.sale_price,
+              stockStatus: v.stock_status,
+              stockQuantity: v.stock_quantity,
+              sku: v.sku || '',
+              image: v.image?.src || primaryImage,
+              attributes: (v.attributes || []).map((a) => ({
+                name: a.option || a.name || '',
+                value: a.option || '',
+              })),
+            }));
+            updateProductVariations(p.id, variations);
+          }
+        } catch {
+          // skip variations on error
+        }
+      }
     }
 
     const extractedBrands = extractBrandsFromProducts();

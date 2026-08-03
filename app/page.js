@@ -61,9 +61,11 @@ function AppShell() {
               id: p.wcId,
               name: p.name,
               slug: p.slug,
+              type: p.type || 'simple',
               price: parseFloat(p.price) || 0,
               originalPrice: parseFloat(p.regularPrice) || parseFloat(p.price) || 0,
               image: p.image,
+              images: p.images || [],
               category: catSlug,
               fast6: false,
               inStock: p.stockStatus === 'instock',
@@ -72,6 +74,9 @@ function AppShell() {
               sku: p.sku || '',
               size: p.shortDescription?.replace(/<[^>]*>/g, '').trim() || '',
               upsellIds: p.upsellIds || [],
+              totalSales: p.totalSales || 0,
+              attributes: p.attributes || [],
+              variations: p.variations || [],
             };
           }));
           if (data.brands && data.brands.length > 0) {
@@ -124,7 +129,9 @@ function AppShell() {
     if (selectedBrand) {
       filtered = filtered.filter((p) => p.brand === selectedBrand);
     } else if (activeCategory === 'fast6') {
-      filtered = filtered.filter((p) => p.inStock !== false).slice(0, 6);
+      filtered = filtered.filter((p) => p.inStock !== false)
+        .sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0))
+        .slice(0, 6);
     } else {
       filtered = filtered.filter((p) => p.category === activeCategory);
     }
@@ -136,12 +143,13 @@ function AppShell() {
     return filtered;
   }, [activeCategory, selectedBrand, showOutOfStock, searchQuery, PRODUCTS]);
 
-  const addToCart = useCallback((productId) => {
+  const addToCart = useCallback((productId, variantId = null) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+    const cartKey = variantId ? `${productId}_${variantId}` : `${productId}`;
     setCart((prev) => {
-      const exists = prev.find((i) => i.id === productId);
-      if (exists) return prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, { id: productId, quantity: 1 }];
+      const exists = prev.find((i) => i.cartKey === cartKey);
+      if (exists) return prev.map((i) => i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i);
+      return [...prev, { id: productId, variantId, cartKey, quantity: 1 }];
     });
 
     const product = PRODUCTS.find((p) => p.id === productId);
@@ -163,19 +171,19 @@ function AppShell() {
     }
   }, [PRODUCTS]);
 
-  const incrementItem = useCallback((productId) => {
+  const incrementItem = useCallback((cartKey) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity + 1 } : i));
+    setCart((prev) => prev.map((i) => i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i));
   }, []);
 
-  const decrementItem = useCallback((productId) => {
+  const decrementItem = useCallback((cartKey) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity - 1 } : i).filter((i) => i.quantity > 0));
+    setCart((prev) => prev.map((i) => i.cartKey === cartKey ? { ...i, quantity: i.quantity - 1 } : i).filter((i) => i.quantity > 0));
   }, []);
 
-  const removeItem = useCallback((productId) => {
+  const removeItem = useCallback((cartKey) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.filter((i) => i.id !== productId));
+    setCart((prev) => prev.filter((i) => i.cartKey !== cartKey));
 
     if (typeof window !== 'undefined') {
       const shown = JSON.parse(localStorage.getItem('upsells_shown') || '[]');
@@ -184,7 +192,10 @@ function AppShell() {
     }
   }, []);
 
-  const getQuantity = useCallback((productId) => cart.find((i) => i.id === productId)?.quantity || 0, [cart]);
+  const getQuantity = useCallback((productId, variantId = null) => {
+    const cartKey = variantId ? `${productId}_${variantId}` : `${productId}`;
+    return cart.find((i) => i.cartKey === cartKey)?.quantity || 0;
+  }, [cart]);
 
   const handleOrderSuccess = useCallback((order) => {
     setShowCheckout(false);
@@ -285,7 +296,7 @@ function AppShell() {
               key={product.id}
               product={product}
               quantity={getQuantity(product.id)}
-              onAdd={() => addToCart(product.id)}
+              onAdd={(variantId) => addToCart(product.id, variantId)}
               onIncrement={() => incrementItem(product.id)}
               onDecrement={() => decrementItem(product.id)}
             />

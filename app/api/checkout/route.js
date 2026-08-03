@@ -40,10 +40,16 @@ export async function POST(request) {
       }
     }
 
-    const lineItems = cart.map((item) => ({
-      product_id: item.id,
-      quantity: item.quantity,
-    }));
+    const lineItems = cart.map((item) => {
+      const lineItem = {
+        product_id: item.id,
+        quantity: item.quantity,
+      };
+      if (item.variantId) {
+        lineItem.variation_id = item.variantId;
+      }
+      return lineItem;
+    });
 
     const customerName = sanitize(locationData?.name || '');
     const customerPhone = sanitize(locationData?.phone || '');

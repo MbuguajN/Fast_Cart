@@ -6,7 +6,12 @@ export default function FloatingCheckout({ cart, products, onCheckout, hidden })
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => {
     const product = products.find((p) => p.id === item.id);
-    return sum + (product ? product.price * item.quantity : 0);
+    if (!product) return sum;
+    if (item.variantId) {
+      const variant = product.variations?.find((v) => v.wcId === item.variantId);
+      return sum + (variant ? parseFloat(variant.price) * item.quantity : product.price * item.quantity);
+    }
+    return sum + (product.price * item.quantity);
   }, 0);
 
   return (

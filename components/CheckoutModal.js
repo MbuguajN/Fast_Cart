@@ -12,7 +12,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
 
   const subtotal = cart.reduce((sum, item) => {
     const product = products.find((p) => p.id === item.id);
-    return sum + (product ? product.price * item.quantity : 0);
+    if (!product) return sum;
+    if (item.variantId) {
+      const variant = product.variations?.find((v) => v.wcId === item.variantId);
+      return sum + (variant ? parseFloat(variant.price) * item.quantity : product.price * item.quantity);
+    }
+    return sum + (product.price * item.quantity);
   }, 0);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -128,15 +133,18 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
               {cart.map((item) => {
                 const product = products.find((p) => p.id === item.id);
                 if (!product) return null;
+                const variant = item.variantId ? product.variations?.find((v) => v.wcId === item.variantId) : null;
+                const itemPrice = variant ? parseFloat(variant.price) : product.price;
+                const variantLabel = variant?.attributes?.map((a) => a.value).join(' / ') || '';
                 return (
                   <div
-                    key={item.id}
+                    key={item.cartKey}
                     className="flex items-center gap-3 p-3 rounded-xl"
                     style={{ backgroundColor: '#ffffff', border: '1px solid #E9ECEF' }}
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50">
-                      {product.image ? (
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                      {(variant?.image || product.image) ? (
+                        <img src={variant?.image || product.image} alt={product.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg">🍹</div>
                       )}
@@ -152,17 +160,17 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                         className="text-[11px]"
                         style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
                       >
-                        Qty: {item.quantity}
+                        {variantLabel && <span>{variantLabel} · </span>}Qty: {item.quantity}
                       </p>
                     </div>
                     <p
                       className="text-sm font-bold flex-shrink-0"
                       style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
                     >
-                      KSh {(product.price * item.quantity).toLocaleString()}
+                      KSh {(itemPrice * item.quantity).toLocaleString()}
                     </p>
                     <button
-                      onClick={() => onRemoveItem(item.id)}
+                      onClick={() => onRemoveItem(item.cartKey)}
                       className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
                       style={{ backgroundColor: '#F1F3F5' }}
                     >
