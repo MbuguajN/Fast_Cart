@@ -3,23 +3,6 @@
 import { useState, useEffect } from 'react';
 import { haptic } from '@/lib/haptic';
 
-function matchZoneByKeywords(text, zones) {
-  const normalized = text.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-  let bestZone = null;
-  let bestLocation = null;
-  let bestScore = 0;
-  for (const zone of zones) {
-    for (const loc of zone.locations || []) {
-      let score = 0;
-      for (const kw of loc.keywords) {
-        if (normalized.includes(kw)) score += kw.length;
-      }
-      if (score > bestScore) { bestScore = score; bestZone = zone; bestLocation = loc; }
-    }
-  }
-  return bestScore >= 2 ? { zone: bestZone, location: bestLocation } : null;
-}
-
 export default function CheckoutModal({ cart, products, user, locationData, onClose, onOrderSuccess, onRemoveItem, onCompleteProfile, onLookupPhone, onUpdateLocation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,15 +12,27 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const [userPhone, setUserPhone] = useState(user?.phone || '');
   const [phoneLookupDone, setPhoneLookupDone] = useState(!!user?.phone);
   const [looking, setLooking] = useState(false);
-  const [detectingLocation, setDetectingLocation] = useState(false);
-  const [detectedAddress, setDetectedAddress] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState(user?.landmark || locationData?.text || '');
   const [selectedZone, setSelectedZone] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [zones, setZones] = useState([]);
+  const [expandedZone, setExpandedZone] = useState(null);
+  const [editingAddress, setEditingAddress] = useState(false);
 
   useEffect(() => {
-    fetch('/api/zones').then(r => r.json()).then(d => setZones(d.zones || [])).catch(() => {});
-  }, []);
+    fetch('/api/zones').then(r => r.json()).then(d => {
+      const z = d.zones || [];
+      setZones(z);
+      // Restore saved zone from user session
+      if (user?.zone && z.length > 0) {
+        const match = z.find(zz => zz.name === user.zone);
+        if (match) {
+          setSelectedZone(match);
+          if (user.landmark) setDeliveryAddress(user.landmark);
+        }
+      }
+    }).catch(() => {});
+  }, [user?.zone, user?.landmark]);
 
   const subtotal = cart.reduce((sum, item) => {
     const product = products.find((p) => p.id === item.id);
@@ -50,7 +45,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   }, 0);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const baseDeliveryFee = selectedLocation?.price ?? user?.zonePrice ?? 300;
+  const baseDeliveryFee = selectedLocation?.price ?? selectedZone?.zonePrice ?? user?.zonePrice ?? 300;
   const deliveryVat = Math.round(baseDeliveryFee * 0.16);
   const deliveryFee = baseDeliveryFee + deliveryVat;
   const grandTotal = subtotal + deliveryFee;
@@ -65,7 +60,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
         setUserName([result.customer.first_name, result.customer.last_name].filter(Boolean).join(' '));
         const savedZone = result.customer.meta_data?.find(m => m.key === 'delivery_zone')?.value || '';
         const savedLandmark = result.customer.meta_data?.find(m => m.key === 'landmark_hint')?.value || result.customer.shipping?.address_1 || '';
-        if (savedLandmark) setDetectedAddress(savedLandmark);
+        if (savedLandmark) setDeliveryAddress(savedLandmark);
         if (savedZone && zones.length > 0) {
           const match = zones.find(z => z.name === savedZone);
           if (match) {
@@ -82,65 +77,26 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
     setLooking(false);
   };
 
-  const handleAutoDetect = () => {
-    if (!('geolocation' in navigator)) {
-      setError('Location not available on this device');
-      return;
+  const handleLocationPick = (zone, loc) => {
+    setSelectedZone(zone);
+    setSelectedLocation(loc);
+    setDeliveryAddress(loc.name);
+    setExpandedZone(null);
+    setEditingAddress(false);
+    if (onUpdateLocation) {
+      onUpdateLocation({ landmark: loc.name, zone: zone.name, zonePrice: loc.price ?? zone.zonePrice });
     }
-    setDetectingLocation(true);
-    setError('');
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
-            headers: { 'User-Agent': 'LiquorDash/1.0' },
-          });
-          const data = await res.json();
-          const addr = data.address || {};
-          const parts = [];
-          if (addr.road) parts.push(addr.road);
-          if (addr.neighbourhood && !addr.suburb?.toLowerCase().includes(addr.neighbourhood.toLowerCase())) parts.push(addr.neighbourhood);
-          if (addr.suburb && addr.suburb !== addr.neighbourhood) parts.push(addr.suburb);
-          if (addr.city && !parts.some(p => p.toLowerCase() === addr.city.toLowerCase())) parts.push(addr.city);
-          const text = parts.length > 0 ? parts.join(', ') : (data.display_name || '').split(',').slice(0, 5).map(s => s.trim()).filter(Boolean).join(', ');
-
-          setDetectedAddress(text);
-
-          if (zones.length > 0) {
-            const matched = matchZoneByKeywords(
-              `${addr.neighbourhood || ''} ${addr.suburb || ''} ${addr.road || ''} ${addr.city || ''}`,
-              zones
-            );
-            if (matched) {
-              setSelectedZone(matched.zone);
-              setSelectedLocation(matched.location);
-              if (onUpdateLocation) {
-                onUpdateLocation({ landmark: text, zone: matched.zone.name, zonePrice: matched.location.price ?? matched.zone.zonePrice });
-              }
-            }
-          }
-        } catch {
-          setError('Could not detect address. Try again or type manually.');
-        }
-        setDetectingLocation(false);
-      },
-      () => {
-        setDetectingLocation(false);
-        setError('Location access denied. Please enable location or type your address.');
-      },
-      { timeout: 8000, enableHighAccuracy: false }
-    );
   };
 
-  const deliveryAddress = detectedAddress || locationData?.text || '';
   const hasPhone = !!user?.phone || phoneLookupDone;
-  const canPay = hasPhone && userName.trim() && buildingName.trim();
+  const hasLocation = !!deliveryAddress;
+  const canPay = hasPhone && userName.trim() && buildingName.trim() && hasLocation;
 
   const handlePay = async () => {
     if (!hasPhone) { setError('Please enter your phone number'); return; }
     if (!userName.trim()) { setError('Please enter your name'); return; }
     if (!buildingName.trim()) { setError('Please enter your building name or house number'); return; }
+    if (!hasLocation) { setError('Please select your delivery location'); return; }
     haptic('medium');
     setLoading(true);
     setError('');
@@ -318,7 +274,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                 </div>
               )}
 
-              {/* Location */}
+              {/* Delivery Location */}
               <div className="rounded-xl p-3" style={{ backgroundColor: '#F1F3F5' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
@@ -327,34 +283,61 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                   <span className="text-xs font-semibold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Delivery Location</span>
                 </div>
 
-                {detectedAddress ? (
+                {/* Has location — show it */}
+                {hasLocation && !editingAddress ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs truncate font-medium" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{detectedAddress}</p>
-                      {selectedLocation && (
+                      <p className="text-xs truncate font-medium" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{deliveryAddress}</p>
+                      {selectedZone && (
                         <p className="text-[10px]" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-                          {selectedZone?.name} — KSh {selectedLocation.price ?? selectedZone?.zonePrice ?? 300}
+                          {selectedZone.name} — KSh {baseDeliveryFee}
                         </p>
                       )}
                     </div>
-                    <button onClick={() => { setDetectedAddress(''); setSelectedZone(null); setSelectedLocation(null); }} className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>Change</button>
+                    <button onClick={() => setEditingAddress(true)} className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>Change</button>
                   </div>
                 ) : (
-                  <button onClick={handleAutoDetect} disabled={detectingLocation}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold transition-all"
-                    style={{ backgroundColor: '#fff', border: '1px solid #debfc3', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-                    {detectingLocation ? (
-                      <><div className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: '#debfc3', borderTopColor: '#840037' }} />Detecting...</>
+                  /* No location or editing — show zone browser */
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {zones.length === 0 ? (
+                      <p className="text-xs py-2" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>Loading zones...</p>
                     ) : (
-                      <><svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>Auto-detect my location</>
+                      zones.map((zone) => {
+                        const isExpanded = expandedZone === zone.id;
+                        return (
+                          <div key={zone.id} className="border overflow-hidden" style={{ borderColor: '#debfc3', borderRadius: '10px', backgroundColor: '#fff' }}>
+                            <button type="button" onClick={() => setExpandedZone(isExpanded ? null : zone.id)}
+                              className="w-full flex items-center justify-between px-3 hover:bg-gray-50 transition-all text-left"
+                              style={{ height: '40px' }}>
+                              <div className="flex items-center gap-2">
+                                <svg className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} style={{ color: '#574145' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                                <span className="text-xs font-semibold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{zone.name}</span>
+                              </div>
+                            </button>
+                            {isExpanded && (
+                              <div className="px-3 pb-2 space-y-1">
+                                {zone.locations.map((loc) => (
+                                  <button key={loc.name} type="button" onClick={() => handleLocationPick(zone, loc)}
+                                    className="w-full flex items-center justify-between px-3 border hover:border-[#840037]/40 hover:bg-red-50/50 transition-all text-left"
+                                    style={{ height: '36px', borderColor: '#E9ECEF', borderRadius: '8px' }}>
+                                    <span className="text-[11px]" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{loc.name}</span>
+                                    <span className="text-[11px] font-bold" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>KSh {loc.price}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
-                  </button>
-                )}
-
-                {detectedAddress && (
-                  <input type="text" value={detectedAddress} onChange={(e) => setDetectedAddress(e.target.value)}
-                    className="w-full mt-2 bg-white border-none focus:ring-0 focus:outline-none outline-none text-xs"
-                    style={{ borderRadius: '8px', border: '1px solid #debfc3', padding: '8px 10px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' }} />
+                    {editingAddress && (
+                      <button onClick={() => setEditingAddress(false)} className="text-[11px] font-semibold" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+                        ← Back to current location
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
