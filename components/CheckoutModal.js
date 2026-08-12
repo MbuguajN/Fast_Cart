@@ -1,7 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { haptic } from '@/lib/haptic';
+
+function matchZoneByKeywords(text, zones) {
+  const normalized = text.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  let bestZone = null;
+  let bestLocation = null;
+  let bestScore = 0;
+  for (const zone of zones) {
+    for (const loc of zone.locations || []) {
+      let score = 0;
+      for (const kw of loc.keywords) {
+        if (normalized.includes(kw)) score += kw.length;
+      }
+      if (score > bestScore) { bestScore = score; bestZone = zone; bestLocation = loc; }
+    }
+  }
+  return bestScore >= 2 ? { zone: bestZone, location: bestLocation, address: text } : null;
+}
+
+function reverseGeocode(lat, lon) {
+  return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+    headers: { 'User-Agent': 'LiquorDash/1.0' },
+  }).then(r => r.json()).then(data => {
+    const addr = data.address || {};
+    const parts = [];
+    if (addr.road) parts.push(addr.road);
+    if (addr.neighbourhood && !addr.suburb?.toLowerCase().includes(addr.neighbourhood.toLowerCase())) parts.push(addr.neighbourhood);
+    if (addr.suburb && addr.suburb !== addr.neighbourhood) parts.push(addr.suburb);
+    if (addr.city && !parts.some(p => p.toLowerCase() === addr.city.toLowerCase())) parts.push(addr.city);
+    const text = parts.length > 0 ? parts.join(', ') : (data.display_name || '').split(',').slice(0, 5).map(s => s.trim()).filter(Boolean).join(', ');
+    return { text, raw: addr };
+  });
+}
 
 export default function CheckoutModal({ cart, products, user, locationData, onClose, onOrderSuccess, onRemoveItem, onCompleteProfile, onLookupPhone, onUpdateLocation }) {
   const [loading, setLoading] = useState(false);
@@ -18,46 +50,86 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const [zones, setZones] = useState([]);
   const [expandedZone, setExpandedZone] = useState(null);
   const [editingAddress, setEditingAddress] = useState(false);
+  const [detectingGps, setDetectingGps] = useState(false);
+  const [gpsAddress, setGpsAddress] = useState('');
+  const [gpsMatch, setGpsMatch] = useState(null);
+  const [locationMismatch, setLocationMismatch] = useState(false);
+  const hasRestoredRef = useRef(false);
 
+  // Load zones
   useEffect(() => {
-    fetch('/api/zones').then(r => r.json()).then(d => {
-      const z = d.zones || [];
-      setZones(z);
-      // Restore saved zone from user session
-      if (user?.zone && z.length > 0) {
-        const match = z.find(zz => zz.name === user.zone);
-        if (match) {
-          setSelectedZone(match);
-          if (user.landmark) {
-            setDeliveryAddress(user.landmark);
-            // Match landmark to a specific location for correct pricing
-            const landmarkLower = user.landmark.toLowerCase();
-            const matchedLoc = match.locations?.find(loc =>
-              loc.keywords?.some(kw => landmarkLower.includes(kw))
-            );
-            setSelectedLocation(matchedLoc || null);
-          }
+    fetch('/api/zones').then(r => r.json()).then(d => setZones(d.zones || [])).catch(() => {});
+  }, []);
+
+  // Restore saved zone from session
+  useEffect(() => {
+    if (hasRestoredRef.current) return;
+    if (zones.length === 0) return;
+    if (!user?.zone && !user?.landmark) {
+      // Guest with no saved location — fire GPS
+      fireGps();
+      hasRestoredRef.current = true;
+      return;
+    }
+    if (user?.zone) {
+      const match = zones.find(z => z.name === user.zone);
+      if (match) {
+        setSelectedZone(match);
+        if (user.landmark) {
+          setDeliveryAddress(user.landmark);
+          const landmarkLower = user.landmark.toLowerCase();
+          const matchedLoc = match.locations?.find(loc =>
+            loc.keywords?.some(kw => landmarkLower.includes(kw))
+          );
+          setSelectedLocation(matchedLoc || null);
         }
       }
-    }).catch(() => {});
-  }, [user?.zone, user?.landmark]);
-
-  const subtotal = cart.reduce((sum, item) => {
-    const product = products.find((p) => p.id === item.id);
-    if (!product) return sum;
-    if (item.variantId) {
-      const variant = product.variations?.find((v) => v.wcId === item.variantId);
-      return sum + (variant ? parseFloat(variant.price) * item.quantity : product.price * item.quantity);
     }
-    return sum + (product.price * item.quantity);
-  }, 0);
+    hasRestoredRef.current = true;
+  }, [zones, user?.zone, user?.landmark]);
 
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const baseDeliveryFee = selectedLocation?.price ?? selectedZone?.zonePrice ?? user?.zonePrice ?? 300;
-  const deliveryVat = Math.round(baseDeliveryFee * 0.16);
-  const deliveryFee = baseDeliveryFee + deliveryVat;
-  const grandTotal = subtotal + deliveryFee;
+  const fireGps = () => {
+    if (!('geolocation' in navigator)) return;
+    setDetectingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { text, raw } = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+          setGpsAddress(text);
+          if (zones.length > 0) {
+            const matched = matchZoneByKeywords(
+              `${raw.neighbourhood || ''} ${raw.suburb || ''} ${raw.road || ''} ${raw.city || ''}`,
+              zones
+            );
+            if (matched) {
+              setGpsMatch(matched);
+              // If user has a saved location, check if it matches GPS
+              if (selectedZone && deliveryAddress) {
+                const savedLower = deliveryAddress.toLowerCase();
+                const gpsLower = text.toLowerCase();
+                const sameLocation = selectedZone.name === matched.zone?.name &&
+                  matched.location?.keywords?.some(kw => savedLower.includes(kw));
+                if (!sameLocation) setLocationMismatch(true);
+              } else {
+                // No saved location — use GPS result
+                setDeliveryAddress(text);
+                setSelectedZone(matched.zone);
+                setSelectedLocation(matched.location);
+                if (onUpdateLocation) {
+                  onUpdateLocation({ landmark: text, zone: matched.zone.name, zonePrice: matched.location.price ?? matched.zone.zonePrice });
+                }
+              }
+            }
+          }
+        } catch {}
+        setDetectingGps(false);
+      },
+      () => setDetectingGps(false),
+      { timeout: 8000, enableHighAccuracy: false }
+    );
+  };
 
+  // Phone lookup
   const handlePhoneLookup = async () => {
     if (!userPhone || userPhone.length < 10) return;
     setLooking(true);
@@ -68,12 +140,38 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
         setUserName([result.customer.first_name, result.customer.last_name].filter(Boolean).join(' '));
         const savedZone = result.customer.meta_data?.find(m => m.key === 'delivery_zone')?.value || '';
         const savedLandmark = result.customer.meta_data?.find(m => m.key === 'landmark_hint')?.value || result.customer.shipping?.address_1 || '';
-        if (savedLandmark) setDeliveryAddress(savedLandmark);
+        if (savedLandmark) {
+          setDeliveryAddress(savedLandmark);
+          // Fire GPS to compare with saved location
+          if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+              async (pos) => {
+                try {
+                  const { text } = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+                  setGpsAddress(text);
+                  // Compare saved vs GPS
+                  if (savedLandmark && text) {
+                    const savedLower = savedLandmark.toLowerCase();
+                    const gpsLower = text.toLowerCase();
+                    // Simple similarity check — if less than 30% overlap, it's different
+                    const savedWords = new Set(savedLower.split(/[\s,]+/).filter(Boolean));
+                    const gpsWords = new Set(gpsLower.split(/[\s,]+/).filter(Boolean));
+                    let overlap = 0;
+                    for (const w of savedWords) { if (gpsWords.has(w)) overlap++; }
+                    const similarity = overlap / Math.max(savedWords.size, 1);
+                    if (similarity < 0.3) setLocationMismatch(true);
+                  }
+                } catch {}
+              },
+              () => {},
+              { timeout: 8000, enableHighAccuracy: false }
+            );
+          }
+        }
         if (savedZone && zones.length > 0) {
           const match = zones.find(z => z.name === savedZone);
           if (match) {
             setSelectedZone(match);
-            // Try to match saved landmark to a specific location
             const landmarkLower = savedLandmark.toLowerCase();
             const matchedLoc = match.locations?.find(loc =>
               loc.keywords?.some(kw => landmarkLower.includes(kw))
@@ -95,10 +193,40 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
     setDeliveryAddress(loc.name);
     setExpandedZone(null);
     setEditingAddress(false);
+    setLocationMismatch(false);
     if (onUpdateLocation) {
       onUpdateLocation({ landmark: loc.name, zone: zone.name, zonePrice: loc.price ?? zone.zonePrice });
     }
   };
+
+  const handleUseGpsLocation = () => {
+    if (gpsMatch) {
+      setDeliveryAddress(gpsMatch.address || gpsAddress);
+      setSelectedZone(gpsMatch.zone);
+      setSelectedLocation(gpsMatch.location);
+      setLocationMismatch(false);
+      setEditingAddress(false);
+      if (onUpdateLocation) {
+        onUpdateLocation({ landmark: gpsMatch.address || gpsAddress, zone: gpsMatch.zone.name, zonePrice: gpsMatch.location.price ?? gpsMatch.zone.zonePrice });
+      }
+    }
+  };
+
+  const subtotal = cart.reduce((sum, item) => {
+    const product = products.find((p) => p.id === item.id);
+    if (!product) return sum;
+    if (item.variantId) {
+      const variant = product.variations?.find((v) => v.wcId === item.variantId);
+      return sum + (variant ? parseFloat(variant.price) * item.quantity : product.price * item.quantity);
+    }
+    return sum + (product.price * item.quantity);
+  }, 0);
+
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const baseDeliveryFee = selectedLocation?.price ?? selectedZone?.zonePrice ?? user?.zonePrice ?? 300;
+  const deliveryVat = Math.round(baseDeliveryFee * 0.16);
+  const deliveryFee = baseDeliveryFee + deliveryVat;
+  const grandTotal = subtotal + deliveryFee;
 
   const hasPhone = !!user?.phone || phoneLookupDone;
   const hasLocation = !!deliveryAddress;
@@ -125,7 +253,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
             phone: userPhone,
             name: userName.trim(),
             landmark: deliveryAddress || buildingName.trim(),
-            zone: selectedZone?.name || user?.zone || '',
+            zone: selectedZone?.name || '',
             zonePrice: baseDeliveryFee,
           }),
         });
@@ -136,7 +264,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
             await onCompleteProfile({
               name: userName.trim(),
               landmark: deliveryAddress || buildingName.trim(),
-              zone: selectedZone?.name || user?.zone || '',
+              zone: selectedZone?.name || '',
               zonePrice: baseDeliveryFee,
               customerId,
               phone: userPhone,
@@ -167,16 +295,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || `Order failed (${res.status})`);
-      }
+      if (!res.ok) throw new Error(data.error || `Order failed (${res.status})`);
 
       if (data.authorization_url) {
         window.location.href = data.authorization_url;
         return;
       }
-
       haptic('success');
       onOrderSuccess(data);
     } catch (err) {
@@ -255,7 +379,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                     <input
                       type="tel"
                       value={userPhone}
-                      onChange={(e) => { setUserPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setError(''); setPhoneLookupDone(false); }}
+                      onChange={(e) => { setUserPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setError(''); setPhoneLookupDone(false); setLocationMismatch(false); }}
                       onBlur={() => { if (userPhone.length === 10) handlePhoneLookup(); }}
                       placeholder="0712345678"
                       className="flex-1 bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm"
@@ -295,20 +419,42 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                   </svg>
                   <span className="text-xs font-semibold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Delivery Location</span>
+                  {detectingGps && (
+                    <span className="text-[10px] flex items-center gap-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
+                      <div className="w-2.5 h-2.5 border-2 rounded-full animate-spin" style={{ borderColor: '#debfc3', borderTopColor: '#840037' }} />
+                      Detecting...
+                    </span>
+                  )}
                 </div>
 
                 {/* Has location — show it */}
                 {hasLocation && !editingAddress ? (
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs truncate font-medium" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{deliveryAddress}</p>
-                      {selectedZone && (
-                        <p className="text-[10px]" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-                          {selectedZone.name} — KSh {baseDeliveryFee}
-                        </p>
-                      )}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs truncate font-medium" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>{deliveryAddress}</p>
+                        {selectedZone && (
+                          <p className="text-[10px]" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
+                            {selectedZone.name} — KSh {baseDeliveryFee}
+                          </p>
+                        )}
+                      </div>
+                      <button onClick={() => setEditingAddress(true)} className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>Change</button>
                     </div>
-                    <button onClick={() => setEditingAddress(true)} className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>Change</button>
+
+                    {/* Location mismatch — pulsing prompt */}
+                    {locationMismatch && (
+                      <button
+                        onClick={handleUseGpsLocation}
+                        className="mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all animate-pulse"
+                        style={{ backgroundColor: 'rgba(132,0,55,0.08)', border: '1px dashed #840037', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06z"/>
+                        </svg>
+                        Not your location? Use detected: {gpsAddress.slice(0, 30)}...
+                      </button>
+                    )}
                   </div>
                 ) : (
                   /* No location or editing — show zone browser */
