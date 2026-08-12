@@ -32,6 +32,8 @@ function OrdersContent() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
+  const isGuest = !user?.customerId;
+
   const loadOrders = useCallback(async () => {
     if (!user?.customerId) {
       setLoading(false);
@@ -176,7 +178,20 @@ function OrdersContent() {
         </div>
 
         {/* Orders List */}
-        {loading ? (
+        {isGuest ? (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4">👤</div>
+            <p className="text-sm font-semibold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
+              Login to view your orders
+            </p>
+            <p className="text-xs mt-1 mb-4" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
+              Enter your phone number at checkout to track orders here
+            </p>
+            <a href="/" className="inline-block px-6 py-2.5 rounded-xl text-xs font-bold text-white" style={{ backgroundColor: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+              Start Shopping
+            </a>
+          </div>
+        ) : loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="h-32 rounded-xl animate-pulse" style={{ backgroundColor: '#E9ECEF' }} />

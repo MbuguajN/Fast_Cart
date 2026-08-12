@@ -20,12 +20,15 @@ function matchZoneByKeywords(text, zones) {
   return bestScore >= 2 ? { zone: bestZone, location: bestLocation } : null;
 }
 
-export default function CheckoutModal({ cart, products, user, locationData, onClose, onOrderSuccess, onRemoveItem, onCompleteProfile, onUpdateLocation }) {
+export default function CheckoutModal({ cart, products, user, locationData, onClose, onOrderSuccess, onRemoveItem, onCompleteProfile, onLookupPhone, onUpdateLocation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState('confirm');
   const [buildingName, setBuildingName] = useState('');
   const [userName, setUserName] = useState(user?.name || '');
+  const [userPhone, setUserPhone] = useState(user?.phone || '');
+  const [phoneLookupDone, setPhoneLookupDone] = useState(!!user?.phone);
+  const [looking, setLooking] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [detectedAddress, setDetectedAddress] = useState('');
   const [selectedZone, setSelectedZone] = useState(null);
@@ -51,6 +54,33 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const deliveryVat = Math.round(baseDeliveryFee * 0.16);
   const deliveryFee = baseDeliveryFee + deliveryVat;
   const grandTotal = subtotal + deliveryFee;
+
+  const handlePhoneLookup = async () => {
+    if (!userPhone || userPhone.length < 10) return;
+    setLooking(true);
+    setError('');
+    try {
+      const result = await onLookupPhone(userPhone);
+      if (result?.found) {
+        setUserName([result.customer.first_name, result.customer.last_name].filter(Boolean).join(' '));
+        const savedZone = result.customer.meta_data?.find(m => m.key === 'delivery_zone')?.value || '';
+        const savedLandmark = result.customer.meta_data?.find(m => m.key === 'landmark_hint')?.value || result.customer.shipping?.address_1 || '';
+        if (savedLandmark) setDetectedAddress(savedLandmark);
+        if (savedZone && zones.length > 0) {
+          const match = zones.find(z => z.name === savedZone);
+          if (match) {
+            setSelectedZone(match);
+            const defaultLoc = match.locations?.[0];
+            if (defaultLoc) setSelectedLocation(defaultLoc);
+          }
+        }
+      }
+      setPhoneLookupDone(true);
+    } catch {
+      setPhoneLookupDone(true);
+    }
+    setLooking(false);
+  };
 
   const handleAutoDetect = () => {
     if (!('geolocation' in navigator)) {
@@ -104,9 +134,11 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   };
 
   const deliveryAddress = detectedAddress || locationData?.text || '';
-  const canPay = userName.trim() && buildingName.trim();
+  const hasPhone = !!user?.phone || phoneLookupDone;
+  const canPay = hasPhone && userName.trim() && buildingName.trim();
 
   const handlePay = async () => {
+    if (!hasPhone) { setError('Please enter your phone number'); return; }
     if (!userName.trim()) { setError('Please enter your name'); return; }
     if (!buildingName.trim()) { setError('Please enter your building name or house number'); return; }
     haptic('medium');
@@ -117,13 +149,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
     try {
       let customerId = user?.customerId;
 
-      // Silent WC customer creation if needed
       if (!customerId) {
         const regRes = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            phone: user?.phone || '',
+            phone: userPhone,
             name: userName.trim(),
             landmark: deliveryAddress || buildingName.trim(),
             zone: selectedZone?.name || user?.zone || '',
@@ -140,6 +171,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
               zone: selectedZone?.name || user?.zone || '',
               zonePrice: baseDeliveryFee,
               customerId,
+              phone: userPhone,
             });
           }
         }
@@ -156,7 +188,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
           locationData: {
             text: fullAddress,
             name: userName.trim(),
-            phone: user?.phone || '',
+            phone: userPhone,
           },
           customerId: customerId || 0,
           customerNote: '',
@@ -185,47 +217,31 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
     }
   };
 
+  const inputStyle = { borderRadius: '10px', border: '2px solid #debfc3', padding: '10px 12px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-    >
-      <div
-        className="w-full max-w-md p-6 shadow-2xl animate-slide-up overflow-hidden max-h-[90vh] flex flex-col"
-        style={{
-          backgroundColor: '#f5f5dc',
-          borderRadius: '0.75rem 0.75rem 0 0',
-          border: '1px solid #E9ECEF',
-        }}
-      >
+    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="w-full max-w-md p-6 shadow-2xl animate-slide-up overflow-hidden max-h-[90vh] flex flex-col"
+        style={{ backgroundColor: '#f5f5dc', borderRadius: '0.75rem 0.75rem 0 0', border: '1px solid #E9ECEF' }}>
+
         {step === 'processing' ? (
           <div className="text-center py-6">
             <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: 'rgba(132, 0, 55, 0.1)' }}>
               <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: '#E9ECEF', borderTopColor: '#840037' }} />
             </div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
-              Redirecting to Paystack...
-            </h3>
-            <p className="text-sm" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-              You&apos;ll be taken to the secure payment page
-            </p>
+            <h3 className="text-lg font-bold mb-2" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Redirecting to Paystack...</h3>
+            <p className="text-sm" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>You&apos;ll be taken to the secure payment page</p>
           </div>
         ) : (
           <>
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="text-xl font-bold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
-                  Checkout
-                </h2>
-                <p className="text-xs" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-                  {totalItems} {totalItems === 1 ? 'item' : 'items'}
-                </p>
+                <h2 className="text-xl font-bold" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Checkout</h2>
+                <p className="text-xs" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>{totalItems} {totalItems === 1 ? 'item' : 'items'}</p>
               </div>
               <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F1F3F5' }}>
-                <svg className="w-4 h-4" fill="none" stroke="#5f5e5e" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <svg className="w-4 h-4" fill="none" stroke="#5f5e5e" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </button>
             </div>
 
@@ -253,31 +269,51 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                         {variantLabel && <span>{variantLabel} · </span>}Qty: {item.quantity}
                       </p>
                     </div>
-                    <p className="text-sm font-bold flex-shrink-0" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
-                      KSh {(itemPrice * item.quantity).toLocaleString()}
-                    </p>
+                    <p className="text-sm font-bold flex-shrink-0" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>KSh {(itemPrice * item.quantity).toLocaleString()}</p>
                     <button onClick={() => onRemoveItem(item.id)} className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#F1F3F5' }}>
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="#5f5e5e" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="#5f5e5e" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
                 );
               })}
 
-              {/* Name */}
-              {!user?.name && (
+              {/* Phone */}
+              {!user?.phone && (
                 <div>
-                  <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
-                    Your Name
-                  </label>
+                  <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Phone Number *</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="tel"
+                      value={userPhone}
+                      onChange={(e) => { setUserPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setError(''); setPhoneLookupDone(false); }}
+                      onBlur={() => { if (userPhone.length === 10) handlePhoneLookup(); }}
+                      placeholder="0712345678"
+                      className="flex-1 bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm"
+                      style={inputStyle}
+                    />
+                    {userPhone.length === 10 && !phoneLookupDone && (
+                      <button onClick={handlePhoneLookup} disabled={looking}
+                        className="px-3 rounded-xl text-xs font-semibold text-white flex-shrink-0 disabled:opacity-50"
+                        style={{ backgroundColor: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+                        {looking ? '...' : 'Check'}
+                      </button>
+                    )}
+                  </div>
+                  {looking && <p className="text-[10px] mt-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>Looking up your account...</p>}
+                </div>
+              )}
+
+              {/* Name */}
+              {hasPhone && !user?.name && (
+                <div>
+                  <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Your Name *</label>
                   <input
                     type="text"
                     value={userName}
                     onChange={(e) => { setUserName(e.target.value); setError(''); }}
                     placeholder="e.g. James Mwangi"
                     className="w-full bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm"
-                    style={{ borderRadius: '10px', border: '2px solid #debfc3', padding: '10px 12px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' }}
+                    style={inputStyle}
                   />
                 </div>
               )}
@@ -301,51 +337,37 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                         </p>
                       )}
                     </div>
-                    <button onClick={() => { setDetectedAddress(''); setSelectedZone(null); setSelectedLocation(null); }} className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-                      Change
-                    </button>
+                    <button onClick={() => { setDetectedAddress(''); setSelectedZone(null); setSelectedLocation(null); }} className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>Change</button>
                   </div>
                 ) : (
-                  <button onClick={handleAutoDetect} disabled={detectingLocation} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold transition-all" style={{ backgroundColor: '#fff', border: '1px solid #debfc3', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
+                  <button onClick={handleAutoDetect} disabled={detectingLocation}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold transition-all"
+                    style={{ backgroundColor: '#fff', border: '1px solid #debfc3', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
                     {detectingLocation ? (
-                      <>
-                        <div className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: '#debfc3', borderTopColor: '#840037' }} />
-                        Detecting...
-                      </>
+                      <><div className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: '#debfc3', borderTopColor: '#840037' }} />Detecting...</>
                     ) : (
-                      <>
-                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-                        </svg>
-                        Auto-detect my location
-                      </>
+                      <><svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>Auto-detect my location</>
                     )}
                   </button>
                 )}
 
                 {detectedAddress && (
-                  <input
-                    type="text"
-                    value={detectedAddress}
-                    onChange={(e) => setDetectedAddress(e.target.value)}
+                  <input type="text" value={detectedAddress} onChange={(e) => setDetectedAddress(e.target.value)}
                     className="w-full mt-2 bg-white border-none focus:ring-0 focus:outline-none outline-none text-xs"
-                    style={{ borderRadius: '8px', border: '1px solid #debfc3', padding: '8px 10px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' }}
-                  />
+                    style={{ borderRadius: '8px', border: '1px solid #debfc3', padding: '8px 10px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' }} />
                 )}
               </div>
 
               {/* Building */}
               <div>
-                <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
-                  Building / House Number *
-                </label>
+                <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>Building / House Number *</label>
                 <input
                   type="text"
                   value={buildingName}
                   onChange={(e) => { setBuildingName(e.target.value); setError(''); }}
                   placeholder="e.g. Blue Rose Apartments, Apt 4B"
                   className="w-full bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm"
-                  style={{ borderRadius: '10px', border: '2px solid #debfc3', padding: '10px 12px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' }}
+                  style={inputStyle}
                 />
               </div>
 
@@ -368,9 +390,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
             </div>
 
             {error && (
-              <div className="mb-3 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(186,26,26,0.08)', border: '1px solid rgba(186,26,26,0.2)', color: '#ba1a1a', fontFamily: 'Montserrat, sans-serif' }}>
-                {error}
-              </div>
+              <div className="mb-3 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(186,26,26,0.08)', border: '1px solid rgba(186,26,26,0.2)', color: '#ba1a1a', fontFamily: 'Montserrat, sans-serif' }}>{error}</div>
             )}
 
             {/* Pay Button */}
@@ -378,20 +398,11 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
               onClick={handlePay}
               disabled={loading || !canPay}
               className="w-full py-3.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] flex items-center justify-center gap-2"
-              style={{ backgroundColor: canPay ? '#840037' : 'rgba(132,0,55,0.5)', color: '#fff', fontFamily: 'Montserrat, sans-serif' }}
-            >
+              style={{ backgroundColor: canPay ? '#840037' : 'rgba(132,0,55,0.5)', color: '#fff', fontFamily: 'Montserrat, sans-serif' }}>
               {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
-                </>
+                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
               ) : (
-                <>
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                  </svg>
-                  Pay KSh {grandTotal.toLocaleString()}
-                </>
+                <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>Pay KSh {grandTotal.toLocaleString()}</>
               )}
             </button>
           </>

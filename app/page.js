@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
-import PhoneEntry from '@/components/PhoneEntry';
 import Header from '@/components/Header';
 import CategoryDock from '@/components/CategoryDock';
 import ProductCard from '@/components/ProductCard';
@@ -15,7 +14,7 @@ import LocationPrompt from '@/components/LocationPrompt';
 import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
-  const { user, phase, phone, submitPhone, completeProfileAtCheckout, resetToEntry, updateProfile, updateEmail } = useAuth();
+  const { user, phase, phone, lookupPhone, completeProfileAtCheckout, updateProfile, updateEmail } = useAuth();
   const [location, setLocation] = useState(null);
   const [activeCategory, setActiveCategory] = useState('fast6');
   const [cart, setCart] = useState([]);
@@ -208,10 +207,6 @@ function AppShell() {
     );
   }
 
-  if (phase === 'entry') {
-    return <PhoneEntry onSubmit={submitPhone} />;
-  }
-
   return (
     <div className="min-h-screen bg-white pb-32">
       <Header location={effectiveLocation} onLocationSet={setLocation} onSearch={setSearchQuery} />
@@ -312,6 +307,7 @@ function AppShell() {
           onOrderSuccess={handleOrderSuccess}
           onRemoveItem={removeItem}
           onCompleteProfile={completeProfileAtCheckout}
+          onLookupPhone={lookupPhone}
           onUpdateLocation={async (updates) => {
             await updateProfile(updates);
             setLocation({ text: updates.landmark, lat: null, lng: null });
