@@ -28,7 +28,15 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
         const match = z.find(zz => zz.name === user.zone);
         if (match) {
           setSelectedZone(match);
-          if (user.landmark) setDeliveryAddress(user.landmark);
+          if (user.landmark) {
+            setDeliveryAddress(user.landmark);
+            // Match landmark to a specific location for correct pricing
+            const landmarkLower = user.landmark.toLowerCase();
+            const matchedLoc = match.locations?.find(loc =>
+              loc.keywords?.some(kw => landmarkLower.includes(kw))
+            );
+            setSelectedLocation(matchedLoc || null);
+          }
         }
       }
     }).catch(() => {});
@@ -65,8 +73,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
           const match = zones.find(z => z.name === savedZone);
           if (match) {
             setSelectedZone(match);
-            const defaultLoc = match.locations?.[0];
-            if (defaultLoc) setSelectedLocation(defaultLoc);
+            // Try to match saved landmark to a specific location
+            const landmarkLower = savedLandmark.toLowerCase();
+            const matchedLoc = match.locations?.find(loc =>
+              loc.keywords?.some(kw => landmarkLower.includes(kw))
+            );
+            setSelectedLocation(matchedLoc || match.locations?.[0] || null);
           }
         }
       }
@@ -145,10 +157,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
             text: fullAddress,
             name: userName.trim(),
             phone: userPhone,
+            zone: selectedZone?.name || '',
           },
           customerId: customerId || 0,
           customerNote: '',
           email: user?.email || '',
+          deliveryFee,
         }),
       });
 

@@ -20,7 +20,7 @@ export async function POST(request) {
   }
 
   try {
-    const { cart, paymentMethod, locationData, customerId, customerNote, email } = await request.json();
+    const { cart, paymentMethod, locationData, customerId, customerNote, email, deliveryFee } = await request.json();
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
@@ -78,9 +78,18 @@ export async function POST(request) {
         city: 'Nairobi',
       },
       line_items: lineItems,
+      shipping_lines: fee > 0 ? [
+        {
+          method_id: 'nairobi_shipping',
+          method_title: 'Nairobi Delivery',
+          total: String(fee),
+        }
+      ] : [],
       customer_note: sanitize(customerNote || '').slice(0, 500),
       meta_data: [
         { key: 'delivery_location', value: deliveryAddress },
+        { key: 'delivery_zone', value: sanitize(locationData?.zone || '') },
+        { key: 'delivery_fee', value: String(fee) },
       ],
     };
 
@@ -99,7 +108,9 @@ export async function POST(request) {
 
     const order = await res.json();
 
-    const total = parseFloat(order.total) || cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    const subtotal = cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    const fee = typeof deliveryFee === 'number' ? deliveryFee : 0;
+    const total = subtotal + fee;
     const customerEmail = validateEmail(email) ? email : `customer_${order.id}@liquordash.com`;
     const reference = generateReference(order.id);
 
