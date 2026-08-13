@@ -113,16 +113,26 @@ function AppShell() {
 
   const BRANDS = useMemo(() => {
     const raw = (syncedBrands.length > 0 ? syncedBrands : FALLBACK_BRANDS).filter((b) => b.visible !== false);
-    return raw.filter((b) => {
-      const bName = (b.name || '').toLowerCase().trim();
-      const bId = String(b.id || b.wcId || '');
-      return PRODUCTS.some((p) => {
-        if (!showOutOfStock && p.inStock === false) return false;
-        const pBrand = (p.brand || '').toLowerCase().trim();
-        const pBrandId = String(p.brandId || '');
-        return pBrand === bName || pBrandId === bId || (bName && pBrand.includes(bName));
-      });
-    });
+    return raw
+      .map((b) => {
+        const bName = (b.name || '').toLowerCase().trim();
+        const bId = String(b.id || b.wcId || '');
+        const matchingProduct = PRODUCTS.find((p) => {
+          if (!showOutOfStock && p.inStock === false) return false;
+          const pBrand = (p.brand || '').toLowerCase().trim();
+          const pBrandId = String(p.brandId || '');
+          return pBrand === bName || pBrandId === bId || (bName && pBrand.includes(bName));
+        });
+
+        const logo = b.image || b.logo || matchingProduct?.image || null;
+
+        return {
+          ...b,
+          logo,
+          hasProduct: !!matchingProduct,
+        };
+      })
+      .filter((b) => b.hasProduct);
   }, [syncedBrands, PRODUCTS, showOutOfStock]);
 
   const displayedProducts = useMemo(() => {

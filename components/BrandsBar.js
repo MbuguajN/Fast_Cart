@@ -121,12 +121,11 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
                 {logoUrl ? (
                   <img
                     alt={`${brand.name} Logo`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover rounded-full"
                     src={logoUrl}
                     onError={(e) => {
-                      // Fallback to initial avatar on error
                       e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                     }}
                   />
                 ) : null}
