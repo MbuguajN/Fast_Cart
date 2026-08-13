@@ -110,12 +110,25 @@ function AppShell() {
   }, []);
 
   const PRODUCTS = syncedProducts.length > 0 ? syncedProducts : FALLBACK_PRODUCTS;
-  const BRANDS = (syncedBrands.length > 0 ? syncedBrands : FALLBACK_BRANDS).filter((b) => b.visible !== false);
+
+  const BRANDS = useMemo(() => {
+    const raw = (syncedBrands.length > 0 ? syncedBrands : FALLBACK_BRANDS).filter((b) => b.visible !== false);
+    return raw.filter((b) => {
+      const bName = (b.name || '').toLowerCase().trim();
+      const bId = String(b.id || b.wcId || '');
+      return PRODUCTS.some((p) => {
+        if (!showOutOfStock && p.inStock === false) return false;
+        const pBrand = (p.brand || '').toLowerCase().trim();
+        const pBrandId = String(p.brandId || '');
+        return pBrand === bName || pBrandId === bId || (bName && pBrand.includes(bName));
+      });
+    });
+  }, [syncedBrands, PRODUCTS, showOutOfStock]);
 
   const displayedProducts = useMemo(() => {
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      let filtered = PRODUCTS.filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+      let filtered = PRODUCTS.filter((p) => p.name.toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q));
       if (!showOutOfStock) {
         filtered = filtered.filter((p) => p.inStock !== false);
       }
@@ -125,13 +138,22 @@ function AppShell() {
     let filtered = PRODUCTS;
 
     if (selectedBrand) {
-      filtered = filtered.filter((p) => p.brand === selectedBrand);
+      const bName = selectedBrand.toLowerCase().trim();
+      filtered = filtered.filter((p) => {
+        const pBrand = (p.brand || '').toLowerCase().trim();
+        return pBrand === bName || pBrand.includes(bName);
+      });
     } else if (activeCategory === 'fast6') {
       filtered = filtered.filter((p) => p.inStock !== false)
         .sort((a, b) => (b.totalSales || 0) - (a.totalSales || 0))
         .slice(0, 6);
     } else {
-      filtered = filtered.filter((p) => p.category === activeCategory);
+      const catKey = activeCategory.toLowerCase().trim();
+      filtered = filtered.filter((p) => {
+        const pCat = (p.category || '').toLowerCase().trim();
+        const pCatName = (p.categoryName || '').toLowerCase().trim();
+        return pCat === catKey || pCatName === catKey || (pCat && catKey && (pCat.includes(catKey) || catKey.includes(pCat)));
+      });
     }
 
     if (!showOutOfStock) {
@@ -240,6 +262,7 @@ function AppShell() {
           activeCategory={activeCategory}
           onCategoryChange={(cat) => { setActiveCategory(cat); setSelectedBrand(null); }}
           products={PRODUCTS}
+          showOutOfStock={showOutOfStock}
         />
 
         {/* Product Grid */}
