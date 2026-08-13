@@ -42,13 +42,8 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
     scrollLeft.current = scrollRef.current.scrollLeft;
   };
 
-  const handleMouseLeave = () => {
-    isDragging.current = false;
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
-  };
+  const handleMouseLeave = () => { isDragging.current = false; };
+  const handleMouseUp = () => { isDragging.current = false; };
 
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
@@ -61,9 +56,9 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
   if (!brands || brands.length === 0) return null;
 
   return (
-    <section className="relative space-y-1 bg-gray-50 border border-gray-100 p-2.5 rounded-2xl group">
-      {/* Header text */}
-      <div className="flex items-center justify-between mb-2 px-1">
+    <section className="relative bg-gray-50 border border-gray-100 p-3 rounded-2xl group">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-3 px-1">
         <button
           onClick={() => onClearBrand?.()}
           className="text-[11px] md:text-[12px] tracking-widest uppercase font-extrabold hover:opacity-70 transition-opacity"
@@ -83,10 +78,10 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
         <div className="h-[1px] flex-grow ml-4" style={{ backgroundColor: '#840037', opacity: 0.2 }} />
       </div>
 
-      {/* Left Arrow Button */}
+      {/* Left Arrow */}
       {showLeftArrow && (
         <button
-          onClick={() => scrollBy(-250)}
+          onClick={() => scrollBy(-280)}
           className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white shadow-md border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-[#840037] hover:text-white transition-all active:scale-95"
           aria-label="Scroll brands left"
         >
@@ -96,45 +91,56 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
         </button>
       )}
 
-      {/* Brands Scroll Container (Rounded Box Cards) */}
+      {/* Scroll Container */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        className="flex gap-3 md:gap-4 overflow-x-auto hide-scrollbar py-1 cursor-grab active:cursor-grabbing select-none"
+        className="flex gap-3 md:gap-4 overflow-x-auto hide-scrollbar pb-1 cursor-grab active:cursor-grabbing select-none"
       >
         {brands.map((brand) => {
           const isSelected = selectedBrand === brand.name;
           const logoUrl = brand.logo || brand.image;
+
           return (
             <button
               key={brand.id || brand.name}
               onClick={() => onSelectBrand?.(brand.name)}
-              className="flex flex-col items-center gap-1.5 transition-all active:scale-95 hover:scale-105 flex-shrink-0"
+              className="flex-shrink-0 transition-all duration-200 active:scale-95 hover:scale-105"
             >
-              {/* Rounded Box Image Container */}
+              {/*
+                Card: w-24 h-24 mobile, w-28 h-28 desktop (≈20% larger than prev w-20/w-24)
+                rounded-2xl, no padding, image bleeds to edges
+                label is an absolute overlay at the bottom
+              */}
               <div
-                className="w-20 h-16 md:w-24 md:h-20 rounded-2xl bg-white shadow-xs hover:shadow-md flex items-center justify-center transition-all overflow-hidden p-2"
+                className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden flex-shrink-0"
                 style={{
-                  border: isSelected ? '2.5px solid #840037' : '1px solid #e5e7eb',
-                  backgroundColor: isSelected ? '#fff5f8' : '#ffffff',
+                  border: isSelected ? '2.5px solid #840037' : '1.5px solid #e5e7eb',
+                  boxShadow: isSelected
+                    ? '0 0 0 3px rgba(132,0,55,0.15), 0 4px 12px rgba(0,0,0,0.12)'
+                    : '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               >
+                {/* Image fills the full card */}
                 {logoUrl ? (
                   <img
-                    alt={`${brand.name} Logo`}
-                    className="w-full h-full object-contain p-0.5"
+                    alt={`${brand.name} logo`}
                     src={logoUrl}
+                    className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling;
+                      if (fallback) fallback.style.display = 'flex';
                     }}
                   />
                 ) : null}
+
+                {/* Fallback initial circle when no image */}
                 <div
-                  className="w-full h-full rounded-xl items-center justify-center text-white text-xs md:text-sm font-extrabold"
+                  className="absolute inset-0 items-center justify-center text-white text-xl font-extrabold"
                   style={{
                     backgroundColor: brand.color || '#840037',
                     fontFamily: 'Montserrat, sans-serif',
@@ -143,24 +149,35 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
                 >
                   {brand.name?.charAt(0) || '?'}
                 </div>
-              </div>
 
-              {/* Brand Name Label */}
-              <span
-                className="text-[10px] md:text-[11px] text-gray-700 truncate max-w-[90px] text-center"
-                style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: isSelected ? 700 : 600 }}
-              >
-                {brand.name}
-              </span>
+                {/* Label overlay — frosted strip at bottom */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 px-1.5 py-1 text-center"
+                  style={{
+                    background: isSelected
+                      ? 'rgba(132,0,55,0.82)'
+                      : 'rgba(0,0,0,0.52)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
+                  }}
+                >
+                  <span
+                    className="block text-white text-[10px] md:text-[11px] font-bold leading-tight truncate"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    {brand.name}
+                  </span>
+                </div>
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Right Arrow Button */}
+      {/* Right Arrow */}
       {showRightArrow && (
         <button
-          onClick={() => scrollBy(250)}
+          onClick={() => scrollBy(280)}
           className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white shadow-md border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-[#840037] hover:text-white transition-all active:scale-95"
           aria-label="Scroll brands right"
         >
