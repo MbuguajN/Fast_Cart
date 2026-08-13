@@ -9,6 +9,7 @@ const NAV = [
   { label: 'Dashboard', href: '/admin', icon: '📊' },
   { label: 'Products', href: '/admin/products', icon: '📦' },
   { label: 'Brands', href: '/admin/brands', icon: '🏷️' },
+  { label: 'Slides & Banners', href: '/admin/slides', icon: '🎞️' },
   { label: 'Settings', href: '/admin/settings', icon: '⚙️' },
 ];
 
@@ -66,7 +67,7 @@ export default function AdminLayout({ children }) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            className="w-8 h-8 rounded-lg flex items-center justify-center md:hidden"
             style={{ backgroundColor: '#F1F3F5' }}
           >
             <svg className="w-4 h-4" fill="none" stroke="#191c1d" viewBox="0 0 24 24">
@@ -106,10 +107,10 @@ export default function AdminLayout({ children }) {
         </div>
       </header>
 
-      {/* Sidebar overlay */}
+      {/* Sidebar overlay (Mobile only) */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-50 md:hidden"
           style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
           onClick={() => setSidebarOpen(false)}
         />
@@ -117,11 +118,12 @@ export default function AdminLayout({ children }) {
 
       {/* Sidebar */}
       <aside
-        className="fixed top-14 left-0 z-50 w-64 h-full border-r transition-transform"
+        className={`fixed top-14 left-0 z-40 w-64 h-[calc(100vh-3.5rem)] border-r transition-transform duration-300 md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
         style={{
           backgroundColor: '#f5f5dc',
           borderColor: '#E9ECEF',
-          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >
         <nav className="p-4 space-y-1">

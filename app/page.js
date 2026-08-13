@@ -9,8 +9,8 @@ import BottomNav from '@/components/BottomNav';
 import FloatingCheckout from '@/components/FloatingCheckout';
 import CheckoutModal from '@/components/CheckoutModal';
 import OrderSuccess from '@/components/OrderSuccess';
-import UpsellPopup from '@/components/UpsellPopup';
-import LocationPrompt from '@/components/LocationPrompt';
+import FeaturedCarousel from '@/components/FeaturedCarousel';
+import BrandsBar from '@/components/BrandsBar';
 import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
@@ -209,69 +209,41 @@ function AppShell() {
 
   return (
     <div className="min-h-screen bg-white pb-32">
-      <Header location={effectiveLocation} onLocationSet={setLocation} onSearch={setSearchQuery} />
-      <main className="px-4 max-w-7xl mx-auto space-y-1 pt-[110px]">
+      <Header
+        location={effectiveLocation}
+        onLocationSet={setLocation}
+        onSearch={setSearchQuery}
+        cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
+        onOpenCart={() => setShowCheckout(true)}
+      />
+      <main className="px-4 md:px-8 max-w-7xl mx-auto space-y-3 pt-[115px] md:pt-[84px]">
+        {/* Featured Slides Carousel */}
+        <FeaturedCarousel products={PRODUCTS} onAddToCart={(id) => addToCart(id)} />
+
         {/* Popular Brands */}
-        <section className="space-y-1 bg-gray-50 border border-gray-100" style={{ padding: '8px 12px', borderRadius: '0.75rem' }}>
-          <div className="flex items-center justify-between mb-2">
-            <button onClick={() => { setSelectedBrand(null); setActiveCategory('fast6'); }} className="text-[11px] tracking-widest uppercase font-bold hover:opacity-70 transition-opacity" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-              {selectedBrand ? `Filtering: ${selectedBrand}` : 'Popular Brands'}
-            </button>
-            {selectedBrand && (
-              <button onClick={() => setSelectedBrand(null)} className="text-[10px] font-semibold underline" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-                Clear
-              </button>
-            )}
-            <div className="h-[1px] flex-grow ml-4" style={{ backgroundColor: '#840037', opacity: 0.2 }} />
-          </div>
-          <div className="flex gap-4 overflow-x-auto hide-scrollbar py-1">
-            {BRANDS.map((brand) => {
-              const isSelected = selectedBrand === brand.name;
-              return (
-                <button
-                  key={brand.id}
-                  onClick={() => {
-                    if (selectedBrand === brand.name) {
-                      setSelectedBrand(null);
-                    } else {
-                      setSelectedBrand(brand.name);
-                      setActiveCategory('fast6');
-                    }
-                  }}
-                  className="flex flex-col items-center gap-1.5 min-w-[64px] transition-all active:scale-95"
-                >
-                  <div
-                    className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center transition-all overflow-hidden p-1"
-                    style={{ border: isSelected ? '2.5px solid #840037' : '1px solid #e5e7eb' }}
-                  >
-                    {brand.logo ? (
-                      <img alt={`${brand.name} Logo`} className="w-full h-full object-contain" src={brand.logo} />
-                    ) : (
-                      <div
-                        className="w-full h-full rounded-full flex items-center justify-center text-white text-sm font-bold"
-                        style={{ backgroundColor: brand.color || '#840037', fontFamily: 'Montserrat, sans-serif' }}
-                      >
-                        {brand.name?.charAt(0) || '?'}
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-gray-700" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: isSelected ? 700 : 500 }}>{brand.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <BrandsBar
+          brands={BRANDS}
+          selectedBrand={selectedBrand}
+          onSelectBrand={(name) => {
+            if (selectedBrand === name) {
+              setSelectedBrand(null);
+            } else {
+              setSelectedBrand(name);
+              setActiveCategory('fast6');
+            }
+          }}
+          onClearBrand={() => setSelectedBrand(null)}
+        />
 
         {/* Categories */}
         <CategoryDock
           activeCategory={activeCategory}
           onCategoryChange={(cat) => { setActiveCategory(cat); setSelectedBrand(null); }}
           products={PRODUCTS}
-          className="-mt-1"
         />
 
         {/* Product Grid */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-8" style={{ gridAutoRows: '1fr' }}>
+        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5 pb-12" style={{ gridAutoRows: '1fr' }}>
           {displayedProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -294,7 +266,7 @@ function AppShell() {
       <FloatingCheckout cart={cart} products={PRODUCTS} onCheckout={() => setShowCheckout(true)} hidden={showCheckout} />
 
       {/* Bottom Navigation */}
-      <BottomNav cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} />
+      <BottomNav cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} />
 
       {/* Modals */}
       {showCheckout && (

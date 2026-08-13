@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
-export default function Header({ location, onLocationSet, onSearch }) {
+export default function Header({ location, onLocationSet, onSearch, cartCount = 0, onOpenCart }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [logo, setLogo] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -20,57 +21,165 @@ export default function Header({ location, onLocationSet, onSearch }) {
   }, []);
 
   return (
-    <header className="fixed top-0 w-full z-50" style={{ backgroundColor: 'rgba(132, 0, 55, 0.9)', backdropFilter: 'blur(12px)' }}>
-      <div className="flex justify-between items-center px-4 md:px-16 h-14 w-full max-w-7xl mx-auto pt-6 pb-2">
-        <div className="flex items-center gap-4">
-          <div className="w-28 h-12 flex items-center pl-2 pb-2">
-            {loaded && logo && (
-              <img src={logo} alt="Logo" className="max-h-10 w-auto object-contain" />
-            )}
+    <header className="fixed top-0 w-full z-50 shadow-md" style={{ backgroundColor: 'rgba(132, 0, 55, 0.95)', backdropFilter: 'blur(12px)' }}>
+      {/* Mobile Layout (< md) */}
+      <div className="md:hidden">
+        <div className="flex justify-between items-center px-4 h-14 w-full pt-4 pb-1">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center">
+              {loaded && logo ? (
+                <img src={logo} alt="Logo" className="max-h-9 w-auto object-contain" />
+              ) : (
+                <span className="text-white font-extrabold text-lg tracking-wider" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  LiquorDash
+                </span>
+              )}
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => onLocationSet?.(null)}>
+            <div className="flex flex-col text-right">
+              <span className="text-[9px] uppercase tracking-widest text-white/80 font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Delivery to
+              </span>
+              <span className="text-[12px] text-white font-bold truncate max-w-[160px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                {location?.text || 'Kilimani, Rose Avenue'}
+              </span>
+            </div>
+            <svg className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
           </div>
         </div>
-        <div className="flex items-center gap-2 pb-1">
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-widest text-white/80 font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-              Delivery to
-            </span>
-            <span className="text-[13px] text-white font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-              {location?.text || 'Kilimani, Rose Avenue'}
-            </span>
+        <div className="px-4 pb-3">
+          <div className="relative group">
+            <div className="w-full h-10 bg-white border border-gray-200 rounded-lg flex items-center px-3 focus-within:ring-2 focus-within:ring-white/50 transition-all duration-300">
+              <svg className="w-5 h-5 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                className="w-full h-full bg-transparent border-none text-gray-900 placeholder-gray-500 text-sm px-3 focus:ring-0 outline-none"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+                placeholder="Search for drinks, mixers or snacks..."
+                type="text"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); onSearch?.(e.target.value); }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(''); onSearch?.(''); }}
+                  className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
-          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
         </div>
       </div>
-      <div className="px-4 md:px-16 pb-3 w-full max-w-7xl mx-auto">
-        <div className="relative group">
-          <div className="w-full h-10 bg-white border border-gray-200 rounded-lg flex items-center px-3 focus-within:ring-2 focus-within:ring-white/50 transition-all duration-300">
-            <svg className="w-5 h-5 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
-              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
-            <input
-              className="w-full h-full bg-transparent border-none text-gray-900 placeholder-gray-500 text-sm px-3 focus:ring-0 outline-none"
-              style={{ fontFamily: 'Montserrat, sans-serif' }}
-              placeholder="Search for drinks, mixers or snacks..."
-              type="text"
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); onSearch?.(e.target.value); }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => { setSearchQuery(''); onSearch?.(''); }}
-                className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+
+      {/* Desktop Layout (≥ md) */}
+      <div className="hidden md:flex items-center justify-between h-16 max-w-7xl mx-auto px-6 gap-6">
+        {/* Brand & Location */}
+        <div className="flex items-center gap-6 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-2">
+            {loaded && logo ? (
+              <img src={logo} alt="Logo" className="max-h-10 w-auto object-contain" />
+            ) : (
+              <span className="text-white font-extrabold text-xl tracking-wider" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                LiquorDash
+              </span>
             )}
-            <svg className="w-5 h-5 flex-shrink-0 cursor-pointer hover:opacity-80 transition-colors" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
+          </Link>
+          <div className="h-6 w-[1px] bg-white/20" />
+          <div className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => onLocationSet?.(null)}>
+            <svg className="w-5 h-5 text-white/90" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-widest text-white/70 font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Delivering to
+              </span>
+              <span className="text-xs text-white font-bold truncate max-w-[200px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                {location?.text || 'Kilimani, Rose Avenue'}
+              </span>
+            </div>
           </div>
+        </div>
+
+        {/* Center Search Bar */}
+        <div className="flex-1 max-w-xl">
+          <div className="relative group">
+            <div className="w-full h-10 bg-white/95 hover:bg-white border border-transparent focus-within:border-white rounded-full flex items-center px-4 shadow-inner transition-all duration-300">
+              <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                className="w-full h-full bg-transparent border-none text-gray-900 placeholder-gray-500 text-sm px-3 focus:ring-0 outline-none"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+                placeholder="Search for drinks, mixers, wine, or snacks..."
+                type="text"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); onSearch?.(e.target.value); }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(''); onSearch?.(''); }}
+                  className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Items */}
+        <div className="flex items-center gap-5 flex-shrink-0">
+          <Link
+            href="/"
+            className="text-white text-sm font-semibold hover:text-white/80 transition-colors"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            Home
+          </Link>
+          <Link
+            href="/orders"
+            className="text-white text-sm font-semibold hover:text-white/80 transition-colors flex items-center gap-1.5"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            <svg className="w-4 h-4 text-white/90" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z" />
+            </svg>
+            Orders
+          </Link>
+
+          <button
+            onClick={() => onOpenCart?.()}
+            className="flex items-center gap-2 bg-white text-[#840037] hover:bg-white/95 px-4 py-2 rounded-full font-bold text-xs shadow-sm hover:shadow transition-all active:scale-95"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+            </svg>
+            <span>Cart</span>
+            {cartCount > 0 && (
+              <span className="bg-[#840037] text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold ml-0.5">
+                {cartCount}
+              </span>
+            )}
+          </button>
+
+          <Link
+            href="/admin"
+            className="text-white/75 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/30 hover:border-white transition-all"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            Admin
+          </Link>
         </div>
       </div>
     </header>

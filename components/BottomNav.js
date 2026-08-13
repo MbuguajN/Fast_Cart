@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function BottomNav({ cartCount, activeTab: activeTabProp }) {
+export default function BottomNav({ cartCount, activeTab: activeTabProp, onOpenCart }) {
   const [activeTab, setActiveTab] = useState(activeTabProp || 'home');
   const router = useRouter();
 
@@ -20,13 +20,19 @@ export default function BottomNav({ cartCount, activeTab: activeTabProp }) {
     } else if (tabId === 'orders') {
       setActiveTab('orders');
       router.push('/orders');
+    } else if (tabId === 'cart') {
+      if (onOpenCart) {
+        onOpenCart();
+      } else {
+        setActiveTab('cart');
+      }
     } else {
       setActiveTab(tabId);
     }
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-[50] border-t border-gray-200" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', boxShadow: '0 -4px 20px rgba(0,0,0,0.08)' }}>
+    <div className="fixed bottom-0 left-0 w-full z-[50] border-t border-gray-200 md:hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', boxShadow: '0 -4px 20px rgba(0,0,0,0.08)' }}>
       <div className="max-w-7xl mx-auto bg-white">
         <div className="flex justify-around items-center h-14 px-2">
           {tabs.map((tab) => (

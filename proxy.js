@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getTokenFromRequest } from '@/lib/auth';
 
-export function middleware(request) {
+export function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // Only protect API routes — pages handled by layout

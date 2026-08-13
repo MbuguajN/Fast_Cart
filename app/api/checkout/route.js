@@ -59,6 +59,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Name and phone are required' }, { status: 400 });
     }
 
+    const subtotal = cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    const fee = typeof deliveryFee === 'number' ? deliveryFee : 0;
+    const total = subtotal + fee;
+
     const orderPayload = {
       payment_method: 'paystack',
       payment_method_title: 'Paystack',
@@ -108,9 +112,6 @@ export async function POST(request) {
 
     const order = await res.json();
 
-    const subtotal = cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
-    const fee = typeof deliveryFee === 'number' ? deliveryFee : 0;
-    const total = subtotal + fee;
     const customerEmail = validateEmail(email) ? email : `customer_${order.id}@liquordash.com`;
     const reference = generateReference(order.id);
 

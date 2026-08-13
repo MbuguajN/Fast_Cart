@@ -51,7 +51,7 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
 
   return (
     <div
-      className="group bg-white rounded-xl border shadow-sm overflow-hidden transition-all duration-300 flex flex-col hover:shadow-md h-full"
+      className="group bg-white rounded-xl border shadow-sm overflow-hidden transition-all duration-300 flex flex-col hover:shadow-xl hover:-translate-y-1 h-full"
       style={{
         borderColor: outOfStock ? '#e5e7eb' : 'rgba(132, 0, 55, 0.2)',
         opacity: outOfStock ? 0.6 : 1,
@@ -65,13 +65,13 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
             fill
             loading="eager"
             className={`object-cover transition-transform duration-500 ${outOfStock ? 'grayscale blur-[2px] scale-105' : 'group-hover:scale-105'}`}
-            sizes="(max-width: 768px) 50vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-4xl">🍹</div>
         )}
         {product.fast6 && !outOfStock && (
-          <div className="absolute top-2 left-2 bg-[#840037] text-white text-[10px] font-bold px-2 py-1 rounded-sm shadow-sm">
+          <div className="absolute top-2 left-2 bg-[#840037] text-white text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-md shadow-sm">
             FAST 6
           </div>
         )}
@@ -83,16 +83,16 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
           </div>
         )}
       </div>
-      <div className="flex flex-col flex-1 p-2 bg-white">
+      <div className="flex flex-col flex-1 p-2.5 md:p-3 bg-white">
         <h3
-          className={`text-[14px] ${outOfStock ? 'text-gray-400' : 'text-gray-900'}`}
+          className={`text-[13px] md:text-[14px] line-clamp-2 ${outOfStock ? 'text-gray-400' : 'text-gray-900'}`}
           style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}
         >
           {product.name}
         </h3>
-        <div className="mt-auto pt-1 flex flex-col gap-1.5">
+        <div className="mt-auto pt-1.5 flex flex-col gap-1.5">
           <span
-            className={`text-[18px] font-bold ${outOfStock ? 'text-gray-400' : 'text-[#840037]'}`}
+            className={`text-[16px] md:text-[18px] font-bold ${outOfStock ? 'text-gray-400' : 'text-[#840037]'}`}
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
             KSh {effectivePrice.toLocaleString()}

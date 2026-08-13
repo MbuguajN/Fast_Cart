@@ -69,11 +69,14 @@ export async function POST() {
   updateStore({ syncStatus: 'syncing' });
 
   try {
-    const [wcProducts, wcCategories] = await Promise.all([
+    const [wcProducts, wcCategories, wcBrands] = await Promise.all([
       wcFetch('products', { per_page: '100', status: 'publish' })
         .then((r) => r.data)
         .catch(() => []),
       wcFetch('products/categories', { per_page: '100' })
+        .then((r) => r.data)
+        .catch(() => []),
+      wcFetch('products/brands', { per_page: '100' })
         .then((r) => r.data)
         .catch(() => []),
     ]);
@@ -81,7 +84,19 @@ export async function POST() {
     const productCount = wcProducts.length;
     const categoryCount = wcCategories.length;
 
-    let brandCount = 0;
+    let brandCount = wcBrands.length;
+
+    if (wcBrands.length > 0) {
+      for (const b of wcBrands) {
+        upsertBrand({
+          wcId: b.id,
+          name: b.name,
+          slug: b.slug,
+          image: b.image?.src || b.thumbnail || null,
+          description: b.description || '',
+        });
+      }
+    }
 
     for (const cat of wcCategories) {
       upsertCategory({

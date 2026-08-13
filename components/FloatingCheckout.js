@@ -15,11 +15,11 @@ export default function FloatingCheckout({ cart, products, onCheckout, hidden })
   }, 0);
 
   return (
-    <div className="fixed bottom-[80px] left-0 w-full z-[60] px-4 pointer-events-none flex justify-center">
+    <div className="fixed bottom-[80px] md:bottom-8 left-0 md:left-auto md:right-8 w-full md:w-auto z-[60] px-4 md:px-0 pointer-events-none flex justify-center md:justify-end">
       <button
         onClick={onCheckout}
-        className="bg-[#840037] text-white rounded-full px-5 py-3 flex items-center justify-between w-full max-w-sm pointer-events-auto active:scale-[0.98] transition-transform"
-        style={{ boxShadow: '0 8px 20px rgba(132,0,55,0.3)' }}
+        className="bg-[#840037] hover:bg-[#6b002c] text-white rounded-full px-6 py-3.5 flex items-center justify-between gap-6 w-full max-w-sm md:w-auto pointer-events-auto active:scale-[0.98] hover:scale-105 transition-all duration-300 shadow-xl"
+        style={{ boxShadow: '0 8px 24px rgba(132,0,55,0.35)' }}
       >
         <div className="flex flex-col items-start">
           <span
