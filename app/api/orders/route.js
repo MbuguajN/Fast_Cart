@@ -1,51 +1,74 @@
 import { NextResponse } from 'next/server';
 import { wcFetch } from '@/lib/wc-config';
 
+function normalizePhone(rawPhone) {
+  if (!rawPhone) return '';
+  const digits = rawPhone.replace(/\D/g, '');
+  if (digits.length >= 9) {
+    return digits.slice(-9); // Return last 9 digits e.g. 712345678
+  }
+  return digits;
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customer');
-    const phone = searchParams.get('phone');
+    const phoneParam = searchParams.get('phone');
     const after = searchParams.get('after');
     const before = searchParams.get('before');
 
-    if (!customerId && !phone) {
-      return NextResponse.json({ orders: [] });
-    }
-
     let allRawOrders = [];
 
-    // Query by customer ID
+    // Query 1: Fetch orders by customer ID with status='any'
     if (customerId) {
-      const params = { customer: customerId, per_page: '100', order: 'desc', orderby: 'date' };
+      const params = { customer: customerId, per_page: '100', status: 'any', order: 'desc', orderby: 'date' };
       if (after) params.after = after;
       if (before) params.before = before;
       try {
         const { data } = await wcFetch('orders', params);
         if (Array.isArray(data)) allRawOrders.push(...data);
       } catch {
-        // ignore
+        // ignore error
       }
     }
 
-    // Query by phone if available
-    if (phone) {
-      const cleanPhone = phone.replace(/\s/g, '');
-      const params = { search: cleanPhone, per_page: '100', order: 'desc', orderby: 'date' };
+    // Query 2: Fetch orders by phone search with status='any'
+    if (phoneParam) {
+      const clean9Digits = normalizePhone(phoneParam);
+      const searchVariants = [phoneParam, `0${clean9Digits}`, `254${clean9Digits}`, `+254${clean9Digits}`, clean9Digits];
+
+      for (const variant of searchVariants) {
+        if (!variant) continue;
+        const params = { search: variant, per_page: '100', status: 'any', order: 'desc', orderby: 'date' };
+        if (after) params.after = after;
+        if (before) params.before = before;
+        try {
+          const { data } = await wcFetch('orders', params);
+          if (Array.isArray(data)) {
+            const matched = data.filter((o) => {
+              const bPhone = normalizePhone(o.billing?.phone);
+              const sPhone = normalizePhone(o.shipping?.phone);
+              return bPhone === clean9Digits || sPhone === clean9Digits || bPhone.includes(clean9Digits);
+            });
+            allRawOrders.push(...matched);
+          }
+        } catch {
+          // ignore error
+        }
+      }
+    }
+
+    // Query 3: Fallback if no customer/phone specified (e.g. store orders view)
+    if (!customerId && !phoneParam) {
+      const params = { per_page: '100', status: 'any', order: 'desc', orderby: 'date' };
       if (after) params.after = after;
       if (before) params.before = before;
       try {
         const { data } = await wcFetch('orders', params);
-        if (Array.isArray(data)) {
-          const matchedByPhone = data.filter((o) => {
-            const bPhone = (o.billing?.phone || '').replace(/\s/g, '');
-            const sPhone = (o.shipping?.phone || '').replace(/\s/g, '');
-            return bPhone === cleanPhone || sPhone === cleanPhone || bPhone.includes(cleanPhone);
-          });
-          allRawOrders.push(...matchedByPhone);
-        }
+        if (Array.isArray(data)) allRawOrders.push(...data);
       } catch {
-        // ignore
+        // ignore error
       }
     }
 
@@ -63,12 +86,15 @@ export async function GET(request) {
 
     const orders = sortedOrders.map((o) => ({
       id: o.id,
-      number: o.number,
+      number: o.number || o.id,
       status: o.status,
       date: o.date_created,
       total: o.total,
       currency: o.currency || 'KES',
       paymentMethod: o.payment_method_title || 'M-Pesa / Card',
+      customerName: [o.billing?.first_name || o.shipping?.first_name, o.billing?.last_name || o.shipping?.last_name].filter(Boolean).join(' ') || 'Customer',
+      customerPhone: o.billing?.phone || o.shipping?.phone || '',
+      customerEmail: o.billing?.email || '',
       items: (o.line_items || [])
         .map((item) => ({
           productId: item.product_id,
@@ -85,7 +111,7 @@ export async function GET(request) {
       },
     }));
 
-    return NextResponse.json({ orders });
+    return NextResponse.json({ orders, count: orders.length });
   } catch (error) {
     return NextResponse.json({ error: error.message, orders: [] }, { status: 500 });
   }
