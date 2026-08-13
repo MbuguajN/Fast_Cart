@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
 import BottomNav from '@/components/BottomNav';
+import Footer from '@/components/Footer';
 
 const STATUS_COLORS = {
   pending: { bg: '#FFF3CD', text: '#856404' },
@@ -298,6 +299,8 @@ function OrdersContent() {
 
         </div>
       </main>
+
+      <Footer />
 
       <BottomNav cartCount={0} activeTab="orders" />
     </div>

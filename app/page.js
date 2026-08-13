@@ -12,6 +12,7 @@ import OrderSuccess from '@/components/OrderSuccess';
 import FeaturedCarousel from '@/components/FeaturedCarousel';
 import BrandsBar from '@/components/BrandsBar';
 import AccountModal from '@/components/AccountModal';
+import Footer from '@/components/Footer';
 import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
@@ -315,6 +316,9 @@ function AppShell() {
           </div>
         )}
       </main>
+
+      {/* Desktop & Mobile Footer */}
+      <Footer />
 
       {/* Floating Checkout Pill */}
       <FloatingCheckout cart={cart} products={PRODUCTS} onCheckout={() => setShowCheckout(true)} hidden={showCheckout} />
