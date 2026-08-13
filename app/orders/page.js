@@ -173,9 +173,12 @@ function OrdersContent() {
               </h2>
               <button
                 onClick={loadOrders}
-                className="text-xs font-bold text-[#840037] hover:underline"
+                className="text-xs font-bold text-[#840037] hover:underline flex items-center gap-1.5"
               >
-                🔄 Refresh Orders
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Refresh Orders</span>
               </button>
             </div>
 
@@ -187,7 +190,11 @@ function OrdersContent() {
               </div>
             ) : filteredOrders.length === 0 ? (
               <div className="bg-white rounded-2xl p-12 border border-gray-200 text-center space-y-3">
-                <span className="text-4xl">🛍️</span>
+                <div className="w-16 h-16 rounded-2xl bg-gray-50 text-gray-400 mx-auto flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/>
+                  </svg>
+                </div>
                 <h3 className="text-base font-bold text-gray-800" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                   No Matching Orders Found
                 </h3>

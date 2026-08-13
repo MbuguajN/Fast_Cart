@@ -12,12 +12,16 @@ import OrderSuccess from '@/components/OrderSuccess';
 import FeaturedCarousel from '@/components/FeaturedCarousel';
 import BrandsBar from '@/components/BrandsBar';
 import AccountModal from '@/components/AccountModal';
+import LocationModal from '@/components/LocationModal';
+import LocationPrompt from '@/components/LocationPrompt';
+import UpsellPopup from '@/components/UpsellPopup';
 import Footer from '@/components/Footer';
 import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
   const { user, phase, phone, lookupPhone, completeProfileAtCheckout, updateProfile, updateEmail } = useAuth();
   const [location, setLocation] = useState(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState('fast6');
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -260,17 +264,17 @@ function AppShell() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-32">
+    <div className="min-h-screen bg-white flex flex-col justify-between">
       <Header
         location={effectiveLocation}
-        onLocationSet={setLocation}
+        onLocationSet={() => setShowLocationModal(true)}
         onSearch={setSearchQuery}
         cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
         onOpenCart={() => setShowCheckout(true)}
         onOpenAccount={() => setShowAccountModal(true)}
         user={user}
       />
-      <main className="px-4 md:px-8 max-w-7xl mx-auto space-y-3 pt-[115px] md:pt-[84px]">
+      <main className="flex-1 px-4 md:px-8 max-w-7xl mx-auto space-y-3 pt-[115px] md:pt-[84px] w-full">
         {/* Featured Slides Carousel */}
         <FeaturedCarousel products={PRODUCTS} onAddToCart={(id) => addToCart(id)} />
 
@@ -363,6 +367,18 @@ function AppShell() {
           onDismiss={() => {
             queueMicrotask(() => setUpsellPopup(null));
           }}
+        />
+      )}
+      {showLocationModal && (
+        <LocationModal
+          currentLocation={effectiveLocation}
+          onConfirm={async (newLoc) => {
+            setLocation(newLoc);
+            if (user) {
+              await updateProfile({ landmark: newLoc.text });
+            }
+          }}
+          onClose={() => setShowLocationModal(false)}
         />
       )}
       {showLocationPrompt && (

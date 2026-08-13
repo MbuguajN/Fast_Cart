@@ -339,8 +339,12 @@ export default function PhoneEntry({ onSubmit }) {
             <>
               {/* Heading */}
               <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <span style={{ fontSize: 'clamp(28px, 8vw, 40px)' }}>🔐</span>
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#840037] flex items-center justify-center shadow-xs">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                  </div>
                 </div>
                 <h2 className="font-bold tracking-tight" style={{ fontFamily: 'Montserrat, sans-serif', color: '#840037', fontSize: 'clamp(18px, 5vw, 24px)', marginBottom: 'clamp(2px, 0.5vh, 6px)' }}>
                   Verify your number

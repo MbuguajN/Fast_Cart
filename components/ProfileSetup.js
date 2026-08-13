@@ -209,8 +209,10 @@ export default function ProfileSetup({ initialName, onSubmit, onCancel }) {
     <div className="flex flex-col h-full overflow-y-auto" style={{ gap: 'clamp(16px, 4vh, 24px)' }}>
       {/* Header */}
       <div className="flex items-start gap-3 mb-2">
-        <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#edeeef' }}>
-          <span className="text-2xl">👋</span>
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-pink-50 text-[#840037]">
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
         </div>
         <div>
           <h2 className="text-xl font-bold tracking-tight mb-0.5" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>

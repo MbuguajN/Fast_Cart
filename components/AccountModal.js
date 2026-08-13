@@ -206,7 +206,13 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
         <div className="p-5 pb-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-[#840037] text-white flex items-center justify-center font-extrabold text-base shadow-sm">
-              {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
+              {user?.name ? (
+                user.name.charAt(0).toUpperCase()
+              ) : (
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+              )}
             </div>
             <div>
               <h2 className="text-base font-extrabold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
@@ -234,7 +240,11 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
               /* Phone Entry */
               <>
                 <div className="text-center space-y-1">
-                  <span className="text-3xl">📱</span>
+                  <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#840037] mx-auto flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+                    </svg>
+                  </div>
                   <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                     Sign In with Phone Number
                   </h3>
@@ -277,7 +287,11 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
               /* OTP Verification */
               <>
                 <div className="text-center space-y-1">
-                  <span className="text-3xl">🔐</span>
+                  <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#840037] mx-auto flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                  </div>
                   <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                     Enter verification code
                   </h3>
@@ -350,25 +364,31 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
             <div className="flex border-b border-gray-100 bg-gray-50/50">
               <button
                 onClick={() => setActiveTab('orders')}
-                className={`flex-1 py-3 text-xs font-extrabold transition-all border-b-2 ${
+                className={`flex-1 py-3 text-xs font-extrabold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'orders'
                     ? 'border-[#840037] text-[#840037] bg-white'
                     : 'border-transparent text-gray-500 hover:text-gray-900'
                 }`}
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
               >
-                📦 Order History ({orders.length})
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z" />
+                </svg>
+                <span>Order History ({orders.length})</span>
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`flex-1 py-3 text-xs font-extrabold transition-all border-b-2 ${
+                className={`flex-1 py-3 text-xs font-extrabold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'profile'
                     ? 'border-[#840037] text-[#840037] bg-white'
                     : 'border-transparent text-gray-500 hover:text-gray-900'
                 }`}
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
               >
-                👤 Profile & Delivery
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+                <span>Profile & Delivery</span>
               </button>
             </div>
 
@@ -383,7 +403,11 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-10 space-y-2">
-                    <span className="text-4xl">🛍️</span>
+                    <div className="w-14 h-14 rounded-2xl bg-gray-50 text-gray-400 mx-auto flex items-center justify-center">
+                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/>
+                      </svg>
+                    </div>
                     <h4 className="text-sm font-bold text-gray-700" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                       No Past Orders Found
                     </h4>
@@ -441,7 +465,10 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
                             className="px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-xs active:scale-95 flex items-center gap-1.5"
                             style={{ fontFamily: 'Montserrat, sans-serif' }}
                           >
-                            <span>🔄 Re-order</span>
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Re-order</span>
                           </button>
                         </div>
                       </div>
