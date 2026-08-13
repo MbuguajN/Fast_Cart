@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default function Header({ location, onLocationSet, onSearch, cartCount = 0, onOpenCart }) {
+export default function Header({ location, onLocationSet, onSearch, cartCount = 0, onOpenCart, onOpenAccount, user }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [logo, setLogo] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -36,65 +36,74 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
               )}
             </Link>
           </div>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => onLocationSet?.(null)}>
-            <div className="flex flex-col text-right">
-              <span className="text-[9px] uppercase tracking-widest text-white/80 font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                Delivery to
-              </span>
-              <span className="text-[12px] text-white font-bold truncate max-w-[160px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                {location?.text || 'Kilimani, Rose Avenue'}
-              </span>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => onLocationSet?.(null)}>
+              <div className="flex flex-col text-right">
+                <span className="text-[9px] uppercase tracking-widest text-white/80 font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  Delivery to
+                </span>
+                <span className="text-[12px] text-white font-bold truncate max-w-[120px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  {location?.text || 'Kilimani, Rose Avenue'}
+                </span>
+              </div>
+              <svg className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
             </div>
-            <svg className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
+
+            <button
+              onClick={() => onOpenAccount?.()}
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center font-bold text-xs shadow-xs transition-all"
+              aria-label="Account"
+            >
+              {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
+            </button>
           </div>
         </div>
-        <div className="px-4 pb-3">
-          <div className="relative group">
-            <div className="w-full h-10 bg-white border border-gray-200 rounded-lg flex items-center px-3 focus-within:ring-2 focus-within:ring-white/50 transition-all duration-300">
-              <svg className="w-5 h-5 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-              </svg>
-              <input
-                className="w-full h-full bg-transparent border-none text-gray-900 placeholder-gray-500 text-sm px-3 focus:ring-0 outline-none"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-                placeholder="Search for drinks, mixers or snacks..."
-                type="text"
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); onSearch?.(e.target.value); }}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => { setSearchQuery(''); onSearch?.(''); }}
-                  className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
+
+        {/* Mobile Search Bar */}
+        <div className="px-4 pb-3 pt-1">
+          <div className="w-full h-9 bg-white/95 border border-transparent rounded-full flex items-center px-3 shadow-inner">
+            <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input
+              className="w-full h-full bg-transparent border-none text-gray-900 placeholder-gray-500 text-xs px-2 focus:ring-0 outline-none"
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+              placeholder="Search drinks, mixers..."
+              type="text"
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); onSearch?.(e.target.value); }}
+            />
+            {searchQuery && (
+              <button onClick={() => { setSearchQuery(''); onSearch?.(''); }} className="text-gray-400 text-xs">
+                ✕
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Desktop Layout (≥ md) */}
-      <div className="hidden md:flex items-center justify-between h-16 max-w-7xl mx-auto px-6 gap-6">
-        {/* Brand & Location */}
+      <div className="hidden md:flex justify-between items-center px-8 h-20 max-w-7xl mx-auto w-full gap-6">
+        {/* Left: Brand Logo & Delivery */}
         <div className="flex items-center gap-6 flex-shrink-0">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center">
             {loaded && logo ? (
-              <img src={logo} alt="Logo" className="max-h-10 w-auto object-contain" />
+              <img src={logo} alt="Logo" className="max-h-12 w-auto object-contain" />
             ) : (
               <span className="text-white font-extrabold text-xl tracking-wider" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                 LiquorDash
               </span>
             )}
           </Link>
-          <div className="h-6 w-[1px] bg-white/20" />
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => onLocationSet?.(null)}>
-            <svg className="w-5 h-5 text-white/90" fill="currentColor" viewBox="0 0 24 24">
+
+          <div
+            className="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-full transition-all"
+            onClick={() => onLocationSet?.(null)}
+          >
+            <svg className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
             <div className="flex flex-col">
@@ -146,6 +155,14 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
           >
             Home
           </Link>
+          <button
+            onClick={() => onOpenAccount?.()}
+            className="text-white text-sm font-semibold hover:text-white/80 transition-colors flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            <span>👤</span>
+            <span className="truncate max-w-[120px]">{user ? (user.name || user.phone) : 'Sign In'}</span>
+          </button>
           <Link
             href="/orders"
             className="text-white text-sm font-semibold hover:text-white/80 transition-colors flex items-center gap-1.5"

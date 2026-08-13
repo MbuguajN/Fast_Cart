@@ -1,0 +1,390 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/lib/auth-context';
+
+export default function AccountModal({ isOpen, onClose, onReorder }) {
+  const { user, phone: authPhone, submitPhone, completeProfileAtCheckout, updateEmail, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile'
+  const [inputPhone, setInputPhone] = useState('');
+  const [nameInput, setNameInput] = useState('');
+  const [landmarkInput, setLandmarkInput] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [loadingAuth, setLoadingAuth] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+
+  // Sync inputs with user state
+  useEffect(() => {
+    if (user) {
+      setNameInput(user.name || '');
+      setLandmarkInput(user.landmark || '');
+      setEmailInput(user.email || '');
+    }
+  }, [user]);
+
+  // Load orders when modal is open and user is logged in
+  const fetchOrders = useCallback(async () => {
+    const custId = user?.customerId;
+    const ph = user?.phone || authPhone;
+    if (!custId && !ph) return;
+
+    setLoadingOrders(true);
+    try {
+      const params = new URLSearchParams();
+      if (custId) params.set('customer', custId);
+      if (ph) params.set('phone', ph);
+
+      const res = await fetch(`/api/orders?${params.toString()}`);
+      const data = await res.json();
+      setOrders(data.orders || []);
+    } catch {
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  }, [user, authPhone]);
+
+  useEffect(() => {
+    if (isOpen && user) {
+      fetchOrders();
+    }
+  }, [isOpen, user, fetchOrders]);
+
+  if (!isOpen) return null;
+
+  const handlePhoneSubmit = async (e) => {
+    e.preventDefault();
+    if (!inputPhone.trim()) return;
+    setLoadingAuth(true);
+    try {
+      await submitPhone(inputPhone.trim());
+      setInputPhone('');
+    } catch (err) {
+      alert('Sign in failed. Please check your phone number.');
+    } finally {
+      setLoadingAuth(false);
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    try {
+      if (nameInput.trim() || landmarkInput.trim()) {
+        await completeProfileAtCheckout({
+          name: nameInput.trim(),
+          landmark: landmarkInput.trim(),
+          zone: user?.zone || '',
+        });
+      }
+      if (emailInput.trim() && emailInput.trim() !== user?.email) {
+        await updateEmail(emailInput.trim());
+      }
+      setEditingProfile(false);
+    } catch {
+      alert('Failed to update profile');
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">Completed</span>;
+      case 'processing':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">Processing</span>;
+      case 'pending':
+      case 'on-hold':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Pending</span>;
+      case 'cancelled':
+      case 'failed':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800">Cancelled</span>;
+      default:
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gray-100 text-gray-800">{status || 'Received'}</span>;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[85vh] border border-gray-100">
+        {/* Modal Header */}
+        <div className="p-5 pb-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#840037] text-white flex items-center justify-center font-extrabold text-base shadow-sm">
+              {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                {user ? user.name || 'My Account' : 'Sign In / Account'}
+              </h2>
+              {user?.phone && (
+                <p className="text-xs font-semibold text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  {user.phone}
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 font-bold transition-all"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Guest Authentication Prompt */}
+        {!user ? (
+          <div className="p-6 space-y-5">
+            <div className="text-center space-y-1">
+              <span className="text-3xl">📱</span>
+              <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Sign In with Phone Number
+              </h3>
+              <p className="text-xs text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Enter your phone number to access your past orders, delivery addresses, and saved preferences.
+              </p>
+            </div>
+
+            <form onSubmit={handlePhoneSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={inputPhone}
+                  onChange={(e) => setInputPhone(e.target.value)}
+                  placeholder="e.g. 0712345678"
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-300 text-sm font-semibold focus:ring-2 focus:ring-[#840037] focus:outline-none"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loadingAuth}
+                className="w-full py-3.5 rounded-2xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-md active:scale-95 disabled:opacity-50"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                {loadingAuth ? 'Signing in...' : 'CONTINUE WITH PHONE'}
+              </button>
+            </form>
+          </div>
+        ) : (
+          /* Authenticated User Interface */
+          <>
+            {/* Tabs */}
+            <div className="flex border-b border-gray-100 bg-gray-50/50">
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`flex-1 py-3 text-xs font-extrabold transition-all border-b-2 ${
+                  activeTab === 'orders'
+                    ? 'border-[#840037] text-[#840037] bg-white'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                }`}
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                📦 Order History ({orders.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`flex-1 py-3 text-xs font-extrabold transition-all border-b-2 ${
+                  activeTab === 'profile'
+                    ? 'border-[#840037] text-[#840037] bg-white'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                }`}
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                👤 Profile & Delivery
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-5 overflow-y-auto flex-1 space-y-4">
+              {activeTab === 'orders' ? (
+                loadingOrders ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="h-28 rounded-2xl bg-gray-100 animate-pulse" />
+                    ))}
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-10 space-y-2">
+                    <span className="text-4xl">🛍️</span>
+                    <h4 className="text-sm font-bold text-gray-700" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      No Past Orders Found
+                    </h4>
+                    <p className="text-xs text-gray-400 max-w-xs mx-auto">
+                      Your completed orders will show up here. Place your first order today!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.map((ord) => (
+                      <div
+                        key={ord.id}
+                        className="bg-white rounded-2xl border border-gray-200 p-4 shadow-2xs space-y-3 hover:border-pink-200 transition-all"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-extrabold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                              Order #{ord.number || ord.id}
+                            </span>
+                            <p className="text-[11px] text-gray-400 font-medium">
+                              {new Date(ord.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                          {getStatusBadge(ord.status)}
+                        </div>
+
+                        {/* Line Items */}
+                        <div className="space-y-1.5 pt-2 border-t border-gray-100">
+                          {ord.items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between text-xs">
+                              <span className="text-gray-700 font-medium truncate max-w-[200px]">
+                                {item.quantity}x {item.name}
+                              </span>
+                              <span className="font-extrabold text-gray-900">
+                                KSh {parseFloat(item.total || item.price * item.quantity).toLocaleString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Order Total & Reorder Button */}
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total</span>
+                            <p className="text-sm font-extrabold text-[#840037]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                              KSh {parseFloat(ord.total).toLocaleString()}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              onReorder?.(ord.items);
+                              onClose();
+                            }}
+                            className="px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-xs active:scale-95 flex items-center gap-1.5"
+                            style={{ fontFamily: 'Montserrat, sans-serif' }}
+                          >
+                            <span>🔄 Re-order</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                /* Profile Tab */
+                <div className="space-y-4">
+                  {!editingProfile ? (
+                    <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-extrabold uppercase text-gray-400 tracking-wider">Customer Details</h4>
+                        <button
+                          onClick={() => setEditingProfile(true)}
+                          className="text-xs font-extrabold text-[#840037] hover:underline"
+                        >
+                          Edit Profile
+                        </button>
+                      </div>
+
+                      <div className="space-y-2 text-xs" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        <div>
+                          <span className="text-gray-400 block text-[10px]">Full Name</span>
+                          <span className="font-extrabold text-gray-900">{user.name || 'Not provided'}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 block text-[10px]">Phone Number</span>
+                          <span className="font-extrabold text-gray-900">{user.phone}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 block text-[10px]">Email Address</span>
+                          <span className="font-extrabold text-gray-900">{user.email || 'Not provided'}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 block text-[10px]">Default Delivery Landmark</span>
+                          <span className="font-extrabold text-gray-900">{user.landmark || 'Not provided'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSaveProfile} className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          value={nameInput}
+                          onChange={(e) => setNameInput(e.target.value)}
+                          placeholder="e.g. James Kamau"
+                          className="w-full px-3 py-2 border rounded-xl text-xs bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          placeholder="james@example.com"
+                          className="w-full px-3 py-2 border rounded-xl text-xs bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                          Delivery Landmark / House No.
+                        </label>
+                        <input
+                          type="text"
+                          value={landmarkInput}
+                          onChange={(e) => setLandmarkInput(e.target.value)}
+                          placeholder="e.g. Westlands Commercial Center, Fl 2"
+                          className="w-full px-3 py-2 border rounded-xl text-xs bg-white"
+                        />
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingProfile(false)}
+                          className="flex-1 py-2 text-xs font-bold rounded-xl bg-gray-200 text-gray-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 py-2 text-xs font-extrabold rounded-xl bg-[#840037] text-white"
+                        >
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      onClose();
+                    }}
+                    className="w-full py-3 rounded-2xl text-xs font-extrabold text-red-600 bg-red-50 hover:bg-red-100 transition-all text-center"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    Sign Out of Account
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

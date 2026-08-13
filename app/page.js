@@ -11,6 +11,7 @@ import CheckoutModal from '@/components/CheckoutModal';
 import OrderSuccess from '@/components/OrderSuccess';
 import FeaturedCarousel from '@/components/FeaturedCarousel';
 import BrandsBar from '@/components/BrandsBar';
+import AccountModal from '@/components/AccountModal';
 import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
@@ -19,6 +20,7 @@ function AppShell() {
   const [activeCategory, setActiveCategory] = useState('fast6');
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [syncedProducts, setSyncedProducts] = useState([]);
   const [syncedBrands, setSyncedBrands] = useState([]);
@@ -224,10 +226,27 @@ function AppShell() {
     setCart([]);
   }, []);
 
-  const handleNewOrder = useCallback(() => {
-    setOrderSuccess(null);
-    setActiveCategory('fast6');
-  }, []);
+  const handleReorder = useCallback((items) => {
+    if (!items || !Array.isArray(items)) return;
+    setCart((prev) => {
+      const newCart = [...prev];
+      for (const item of items) {
+        const prod = PRODUCTS.find(
+          (p) => String(p.id) === String(item.productId) || String(p.wcId) === String(item.productId) || p.name.toLowerCase() === (item.name || '').toLowerCase()
+        );
+        if (prod) {
+          const idx = newCart.findIndex((i) => i.id === prod.id);
+          if (idx >= 0) {
+            newCart[idx].quantity += item.quantity || 1;
+          } else {
+            newCart.push({ id: prod.id, quantity: item.quantity || 1 });
+          }
+        }
+      }
+      return newCart;
+    });
+    setShowCheckout(true);
+  }, [PRODUCTS]);
 
   const effectiveLocation = location || (user?.landmark ? { text: user.landmark, lat: null, lng: null } : null);
 
@@ -247,6 +266,8 @@ function AppShell() {
         onSearch={setSearchQuery}
         cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
         onOpenCart={() => setShowCheckout(true)}
+        onOpenAccount={() => setShowAccountModal(true)}
+        user={user}
       />
       <main className="px-4 md:px-8 max-w-7xl mx-auto space-y-3 pt-[115px] md:pt-[84px]">
         {/* Featured Slides Carousel */}
@@ -299,9 +320,19 @@ function AppShell() {
       <FloatingCheckout cart={cart} products={PRODUCTS} onCheckout={() => setShowCheckout(true)} hidden={showCheckout} />
 
       {/* Bottom Navigation */}
-      <BottomNav cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} />
+      <BottomNav
+        cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
+        onOpenCart={() => setShowCheckout(true)}
+        onOpenAccount={() => setShowAccountModal(true)}
+      />
 
       {/* Modals */}
+      <AccountModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        onReorder={handleReorder}
+      />
+
       {showCheckout && (
         <CheckoutModal
           cart={cart}
