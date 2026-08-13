@@ -61,12 +61,12 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
   if (!brands || brands.length === 0) return null;
 
   return (
-    <section className="relative space-y-1 bg-gray-50 border border-gray-100 p-2.5 rounded-xl group">
+    <section className="relative space-y-1 bg-gray-50 border border-gray-100 p-2.5 rounded-2xl group">
       {/* Header text */}
       <div className="flex items-center justify-between mb-2 px-1">
         <button
           onClick={() => onClearBrand?.()}
-          className="text-[11px] md:text-[12px] tracking-widest uppercase font-bold hover:opacity-70 transition-opacity"
+          className="text-[11px] md:text-[12px] tracking-widest uppercase font-extrabold hover:opacity-70 transition-opacity"
           style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}
         >
           {selectedBrand ? `Filtering: ${selectedBrand}` : 'Popular Brands'}
@@ -96,14 +96,14 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
         </button>
       )}
 
-      {/* Brands Scroll Container */}
+      {/* Brands Scroll Container (Rounded Box Cards) */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        className="flex gap-4 md:gap-6 overflow-x-auto hide-scrollbar py-1 cursor-grab active:cursor-grabbing select-none"
+        className="flex gap-3 md:gap-4 overflow-x-auto hide-scrollbar py-1 cursor-grab active:cursor-grabbing select-none"
       >
         {brands.map((brand) => {
           const isSelected = selectedBrand === brand.name;
@@ -112,16 +112,20 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
             <button
               key={brand.id || brand.name}
               onClick={() => onSelectBrand?.(brand.name)}
-              className="flex flex-col items-center gap-1.5 min-w-[64px] md:min-w-[72px] transition-all active:scale-95 hover:scale-105 flex-shrink-0"
+              className="flex flex-col items-center gap-1.5 transition-all active:scale-95 hover:scale-105 flex-shrink-0"
             >
+              {/* Rounded Box Image Container */}
               <div
-                className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white shadow-sm flex items-center justify-center transition-all overflow-hidden p-1.5"
-                style={{ border: isSelected ? '2.5px solid #840037' : '1px solid #e5e7eb' }}
+                className="w-20 h-16 md:w-24 md:h-20 rounded-2xl bg-white shadow-xs hover:shadow-md flex items-center justify-center transition-all overflow-hidden p-2"
+                style={{
+                  border: isSelected ? '2.5px solid #840037' : '1px solid #e5e7eb',
+                  backgroundColor: isSelected ? '#fff5f8' : '#ffffff',
+                }}
               >
                 {logoUrl ? (
                   <img
                     alt={`${brand.name} Logo`}
-                    className="w-full h-full object-cover rounded-full"
+                    className="w-full h-full object-contain p-0.5"
                     src={logoUrl}
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -130,7 +134,7 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
                   />
                 ) : null}
                 <div
-                  className="w-full h-full rounded-full items-center justify-center text-white text-sm md:text-base font-bold"
+                  className="w-full h-full rounded-xl items-center justify-center text-white text-xs md:text-sm font-extrabold"
                   style={{
                     backgroundColor: brand.color || '#840037',
                     fontFamily: 'Montserrat, sans-serif',
@@ -140,9 +144,11 @@ export default function BrandsBar({ brands = [], selectedBrand, onSelectBrand, o
                   {brand.name?.charAt(0) || '?'}
                 </div>
               </div>
+
+              {/* Brand Name Label */}
               <span
-                className="text-[10px] md:text-[11px] text-gray-700 truncate max-w-[80px]"
-                style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: isSelected ? 700 : 500 }}
+                className="text-[10px] md:text-[11px] text-gray-700 truncate max-w-[90px] text-center"
+                style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: isSelected ? 700 : 600 }}
               >
                 {brand.name}
               </span>
