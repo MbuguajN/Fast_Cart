@@ -12,10 +12,7 @@ export default function BrandsPage() {
     try {
       const res = await fetch('/api/admin/brands');
       const data = await res.json();
-      queueMicrotask(() => {
-        setBrands(Array.isArray(data) ? data : []);
-        setLoading(false);
-      });
+      queueMicrotask(() => { setBrands(Array.isArray(data) ? data : []); setLoading(false); });
     } catch {
       queueMicrotask(() => setLoading(false));
     }
@@ -25,11 +22,7 @@ export default function BrandsPage() {
 
   const startEdit = (brand) => {
     setEditingId(brand.id || brand.wcId);
-    setEditForm({
-      name: brand.name || '',
-      description: brand.description || '',
-      image: brand.image || '',
-    });
+    setEditForm({ name: brand.name || '', description: brand.description || '', image: brand.image || '' });
   };
 
   const saveEdit = async (id) => {
@@ -41,170 +34,146 @@ export default function BrandsPage() {
       });
       setEditingId(null);
       loadBrands();
-    } catch {
-      // silent
-    }
+    } catch { /* silent */ }
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({});
+  const toggleVisibility = async (brand) => {
+    const id = brand.id || brand.wcId;
+    const updated = brand.visible === false ? true : false;
+    setBrands((prev) => prev.map((b) => (b.id === id || b.wcId === id) ? { ...b, visible: updated } : b));
+    try {
+      await fetch('/api/admin/brands', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, visible: updated }),
+      });
+    } catch { /* silent */ }
   };
 
   const handleLogoUpload = async (e, brandId) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('file', file);
     formData.append('brandId', brandId);
-
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
       const data = await res.json();
-      if (data.url) {
-        setEditForm((prev) => ({ ...prev, image: data.url }));
-      }
-    } catch {
-      // silent
-    }
+      if (data.url) setEditForm((prev) => ({ ...prev, image: data.url }));
+    } catch { /* silent */ }
   };
 
+  const visibleCount = brands.filter((b) => b.visible !== false).length;
+  const hiddenCount = brands.filter((b) => b.visible === false).length;
+
   return (
-    <div>
-      <h1
-        className="text-xl font-bold mb-4"
-        style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-      >
-        Brands
-      </h1>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Brands</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {brands.length} brands · {visibleCount} visible · {hiddenCount} hidden
+          </p>
+        </div>
+      </div>
 
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 rounded-xl animate-pulse" style={{ backgroundColor: '#E9ECEF' }} />
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (<div key={i} className="h-40 rounded-2xl animate-pulse bg-gray-100" />))}
         </div>
       ) : brands.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-sm font-semibold" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-            No brands synced yet
-          </p>
-          <p className="text-xs mt-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-            Sync WooCommerce to pull brands from product attributes
-          </p>
+        <div className="text-center py-16 bg-white rounded-2xl border border-gray-200/80">
+          <p className="text-sm font-semibold text-gray-400">No brands synced yet</p>
+          <p className="text-xs text-gray-400 mt-1">Sync WooCommerce to pull brands from product attributes</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {brands.map((b) => {
             const id = b.id || b.wcId;
             const isEditing = editingId === id;
+            const isHidden = b.visible === false;
+
             return (
               <div
                 key={id}
-                className="flex items-center gap-3 p-3 rounded-xl border"
-                style={{ borderColor: '#E9ECEF', backgroundColor: '#ffffff' }}
+                className={`bg-white rounded-2xl border overflow-hidden transition-all group ${isHidden ? 'opacity-50' : 'hover:shadow-md'}`}
+                style={{ borderColor: isEditing ? '#840037' : '#e5e7eb' }}
               >
-                {/* Logo */}
-                <div className="flex-shrink-0">
-                  {isEditing && editForm.image ? (
-                    <img src={editForm.image} alt="Logo" className="w-12 h-12 rounded-lg object-cover" />
-                  ) : b.image ? (
-                    <img src={b.image} alt={b.name} className="w-12 h-12 rounded-lg object-cover" />
-                  ) : (
-                    <div
-                      className="w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold"
-                      style={{ backgroundColor: 'rgba(132,0,55,0.1)', color: '#840037', fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      {b.name?.charAt(0) || '?'}
+                {isEditing ? (
+                  /* Edit mode */
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex-shrink-0">
+                        {editForm.image ? (
+                          <img src={editForm.image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-lg font-bold" style={{ color: '#840037' }}>{b.name?.charAt(0)}</span>
+                        )}
+                      </div>
+                      <label className="text-[10px] font-semibold px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors text-gray-600">
+                        Upload Logo
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, id)} />
+                      </label>
                     </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  {isEditing ? (
                     <input
                       type="text"
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="w-full px-2 py-1 rounded text-sm border font-semibold"
-                      style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
+                      className="w-full px-3 py-2 rounded-lg text-sm border border-gray-200 font-semibold outline-none focus:border-[#840037]/40"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
                     />
-                  ) : (
-                    <p className="text-sm font-semibold truncate" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>
-                      {b.name}
-                    </p>
-                  )}
-                  <p className="text-xs" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-                    {b.slug || b.wcId}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                {isEditing ? (
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <label
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
-                      style={{ backgroundColor: '#E9ECEF', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      Upload Logo
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleLogoUpload(e, id)}
-                      />
-                    </label>
-                    <button
-                      onClick={() => saveEdit(id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-                      style={{ backgroundColor: '#840037', fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                      style={{ backgroundColor: '#E9ECEF', color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      Cancel
-                    </button>
+                    <div className="flex gap-2">
+                      <button onClick={() => saveEdit(id)} className="flex-1 py-2 rounded-lg text-xs font-bold text-white" style={{ backgroundColor: '#840037' }}>
+                        Save
+                      </button>
+                      <button onClick={() => setEditingId(null)} className="px-3 py-2 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={async () => {
-                        const updated = b.visible === false ? true : false;
-                        setBrands((prev) => prev.map((br) => (br.id === id || br.wcId === id) ? { ...br, visible: updated } : br));
-                        try {
-                          await fetch('/api/admin/brands', {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id, visible: updated }),
-                          });
-                        } catch {}
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                      style={{
-                        backgroundColor: b.visible === false ? '#E9ECEF' : '#840037',
-                        color: b.visible === false ? '#5f5e5e' : '#ffffff',
-                        fontFamily: 'Montserrat, sans-serif',
-                      }}
-                    >
-                      {b.visible === false ? 'Hidden' : 'Visible'}
-                    </button>
-                    <button
-                      onClick={() => startEdit(b)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0"
-                      style={{ backgroundColor: '#E9ECEF', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      Edit
-                    </button>
-                  </div>
+                  /* View mode */
+                  <>
+                    <div className="p-5 flex flex-col items-center text-center">
+                      <div className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden mb-3"
+                        style={{ backgroundColor: b.image ? 'transparent' : (b.color || '#840037') + '15' }}>
+                        {b.image ? (
+                          <img src={b.image} alt={b.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <span className="text-2xl font-bold" style={{ color: b.color || '#840037' }}>
+                            {b.name?.charAt(0) || '?'}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-900 truncate w-full" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {b.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {b.productCount || 0} product{(b.productCount || 0) !== 1 ? 's' : ''}
+                      </p>
+                      {!b.image && (
+                        <span className="text-[9px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mt-2 font-medium">
+                          No logo
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex border-t border-gray-100">
+                      <button
+                        onClick={() => toggleVisibility(b)}
+                        className="flex-1 py-2.5 text-[10px] font-semibold text-center transition-colors hover:bg-gray-50"
+                        style={{ color: isHidden ? '#dc2626' : '#10b981' }}
+                      >
+                        {isHidden ? 'Hidden' : 'Visible'}
+                      </button>
+                      <div className="w-px bg-gray-100" />
+                      <button
+                        onClick={() => startEdit(b)}
+                        className="flex-1 py-2.5 text-[10px] font-semibold text-center text-gray-500 hover:text-[#840037] hover:bg-gray-50 transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             );

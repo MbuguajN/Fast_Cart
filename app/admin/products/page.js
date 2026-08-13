@@ -15,11 +15,7 @@ export default function ProductsPage() {
     try {
       const res = await fetch('/api/admin/products');
       const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
-      queueMicrotask(() => {
-        setProducts(list);
-        setLoading(false);
-      });
+      queueMicrotask(() => { setProducts(Array.isArray(data) ? data : []); setLoading(false); });
     } catch {
       queueMicrotask(() => setLoading(false));
     }
@@ -31,21 +27,15 @@ export default function ProductsPage() {
     let list = [...products];
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.name?.toLowerCase().includes(q) ||
-          p.sku?.toLowerCase().includes(q) ||
-          p.brandName?.toLowerCase().includes(q)
+      list = list.filter((p) =>
+        p.name?.toLowerCase().includes(q) ||
+        p.sku?.toLowerCase().includes(q) ||
+        p.brandName?.toLowerCase().includes(q)
       );
     }
-    if (categoryFilter !== 'all') {
-      list = list.filter((p) => p.categoryName === categoryFilter);
-    }
-    if (stockFilter === 'instock') {
-      list = list.filter((p) => p.stockStatus === 'instock');
-    } else if (stockFilter === 'outofstock') {
-      list = list.filter((p) => p.stockStatus === 'outofstock');
-    }
+    if (categoryFilter !== 'all') list = list.filter((p) => p.categoryName === categoryFilter);
+    if (stockFilter === 'instock') list = list.filter((p) => p.stockStatus === 'instock');
+    else if (stockFilter === 'outofstock') list = list.filter((p) => p.stockStatus === 'outofstock');
     return list;
   }, [search, categoryFilter, stockFilter, products]);
 
@@ -53,11 +43,7 @@ export default function ProductsPage() {
 
   const startEdit = (product) => {
     setEditingId(product.wcId);
-    setEditForm({
-      price: product.price || '',
-      stockStatus: product.stockStatus || 'instock',
-      stockQuantity: product.stockQuantity ?? '',
-    });
+    setEditForm({ price: product.price || '', stockStatus: product.stockStatus || 'instock', stockQuantity: product.stockQuantity ?? '' });
   };
 
   const saveEdit = async (wcId) => {
@@ -65,60 +51,53 @@ export default function ProductsPage() {
       await fetch('/api/admin/products', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wcId,
-          price: editForm.price,
-          stockStatus: editForm.stockStatus,
-          stockQuantity: editForm.stockQuantity === '' ? null : parseInt(editForm.stockQuantity),
-        }),
+        body: JSON.stringify({ wcId, price: editForm.price, stockStatus: editForm.stockStatus, stockQuantity: editForm.stockQuantity === '' ? null : parseInt(editForm.stockQuantity) }),
       });
       setEditingId(null);
       loadProducts();
-    } catch {
-      // silent
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({});
+    } catch { /* silent */ }
   };
 
   return (
-    <div>
-      <h1
-        className="text-xl font-bold mb-4"
-        style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-      >
-        Products
-      </h1>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Products</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{filtered.length} of {products.length} products</p>
+        </div>
+      </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Search products…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] px-3 py-2 rounded-lg text-sm border"
-          style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
-        />
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1 min-w-[200px] relative">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Search products, SKU, brand..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-white border border-gray-200 outline-none focus:border-[#840037]/40 transition-all"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          />
+        </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm border"
-          style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
+          className="px-4 py-2.5 rounded-xl text-sm bg-white border border-gray-200 outline-none cursor-pointer"
+          style={{ fontFamily: 'Inter, sans-serif' }}
         >
           <option value="all">All Categories</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
+          {categories.map((c) => (<option key={c} value={c}>{c}</option>))}
         </select>
         <select
           value={stockFilter}
           onChange={(e) => setStockFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm border"
-          style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
+          className="px-4 py-2.5 rounded-xl text-sm bg-white border border-gray-200 outline-none cursor-pointer"
+          style={{ fontFamily: 'Inter, sans-serif' }}
         >
           <option value="all">All Stock</option>
           <option value="instock">In Stock</option>
@@ -126,119 +105,83 @@ export default function ProductsPage() {
         </select>
       </div>
 
-      <p className="text-xs mb-3" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-        {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
-      </p>
-
+      {/* Products table */}
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-20 rounded-xl animate-pulse" style={{ backgroundColor: '#E9ECEF' }} />
-          ))}
+        <div className="space-y-2">
+          {[...Array(8)].map((_, i) => (<div key={i} className="h-16 rounded-xl animate-pulse bg-gray-100" />))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-sm font-semibold" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-            No products found
-          </p>
-          <p className="text-xs mt-1" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-            Try syncing with WooCommerce first
-          </p>
+        <div className="text-center py-16 bg-white rounded-2xl border border-gray-200/80">
+          <p className="text-sm font-semibold text-gray-400">No products match your filters</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((p) => (
-            <div
-              key={p.wcId}
-              className="flex items-center gap-3 p-3 rounded-xl border"
-              style={{ borderColor: '#E9ECEF', backgroundColor: '#ffffff' }}
-            >
-              {p.image && (
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p
-                  className="text-sm font-semibold truncate"
-                  style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-                >
-                  {p.name}
-                </p>
-                <p className="text-xs" style={{ color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}>
-                  {p.categoryName} {p.brandName ? `· ${p.brandName}` : ''} {p.sku ? `· SKU: ${p.sku}` : ''}
-                </p>
-              </div>
+        <div className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden">
+          {/* Header */}
+          <div className="hidden md:grid md:grid-cols-[1fr_120px_120px_100px_80px] gap-4 px-5 py-3 bg-gray-50/80 border-b border-gray-100">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Product</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 text-right">Price</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 text-center">Stock</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 text-center">Qty</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 text-center">Action</span>
+          </div>
 
-              {editingId === p.wcId ? (
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <input
-                    type="number"
-                    value={editForm.price}
-                    onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                    className="w-20 px-2 py-1 rounded text-xs border text-right"
-                    style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
-                    placeholder="Price"
-                  />
-                  <select
-                    value={editForm.stockStatus}
-                    onChange={(e) => setEditForm({ ...editForm, stockStatus: e.target.value })}
-                    className="px-2 py-1 rounded text-xs border"
-                    style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    <option value="instock">In Stock</option>
-                    <option value="outofstock">Out of Stock</option>
-                    <option value="onbackorder">Backorder</option>
-                  </select>
-                  <input
-                    type="number"
-                    value={editForm.stockQuantity}
-                    onChange={(e) => setEditForm({ ...editForm, stockQuantity: e.target.value })}
-                    className="w-16 px-2 py-1 rounded text-xs border text-right"
-                    style={{ borderColor: '#E9ECEF', fontFamily: 'Montserrat, sans-serif' }}
-                    placeholder="Qty"
-                  />
-                  <button
-                    onClick={() => saveEdit(p.wcId)}
-                    className="px-2 py-1 rounded text-xs font-semibold text-white"
-                    style={{ backgroundColor: '#840037', fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={cancelEdit}
-                    className="px-2 py-1 rounded text-xs font-semibold"
-                    style={{ backgroundColor: '#E9ECEF', color: '#5f5e5e', fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="text-right">
-                    <p className="text-sm font-bold" style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}>
-                      KSh {parseFloat(p.price || 0).toLocaleString()}
-                    </p>
-                    <p className="text-[10px]" style={{
-                      color: p.stockStatus === 'instock' ? '#28a745' : '#dc3545',
-                      fontFamily: 'Montserrat, sans-serif',
-                    }}>
-                      {p.stockStatus === 'instock' ? `In Stock (${p.stockQuantity ?? '?'})` : p.stockStatus === 'outofstock' ? 'Out of Stock' : p.stockStatus}
+          <div className="divide-y divide-gray-100">
+            {filtered.map((p) => (
+              <div key={p.wcId} className="md:grid md:grid-cols-[1fr_120px_120px_100px_80px] gap-4 px-5 py-3 items-center hover:bg-gray-50/30 transition-colors">
+                {/* Product info */}
+                <div className="flex items-center gap-3">
+                  {p.image ? (
+                    <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
+                    <p className="text-[10px] text-gray-400 truncate">
+                      {p.categoryName}{p.brandName ? ` · ${p.brandName}` : ''}{p.sku ? ` · ${p.sku}` : ''}
                     </p>
                   </div>
-                  <button
-                    onClick={() => startEdit(p)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                    style={{ backgroundColor: '#E9ECEF', color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Edit
-                  </button>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {editingId === p.wcId ? (
+                  <>
+                    <input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                      className="w-full px-2 py-1.5 rounded-lg text-xs border border-gray-200 text-right outline-none" placeholder="Price" />
+                    <select value={editForm.stockStatus} onChange={(e) => setEditForm({ ...editForm, stockStatus: e.target.value })}
+                      className="w-full px-2 py-1.5 rounded-lg text-xs border border-gray-200 outline-none">
+                      <option value="instock">In Stock</option>
+                      <option value="outofstock">Out of Stock</option>
+                      <option value="onbackorder">Backorder</option>
+                    </select>
+                    <input type="number" value={editForm.stockQuantity} onChange={(e) => setEditForm({ ...editForm, stockQuantity: e.target.value })}
+                      className="w-full px-2 py-1.5 rounded-lg text-xs border border-gray-200 text-right outline-none" placeholder="Qty" />
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => saveEdit(p.wcId)} className="flex-1 py-1.5 rounded-lg text-[10px] font-bold text-white" style={{ backgroundColor: '#840037' }}>Save</button>
+                      <button onClick={() => setEditingId(null)} className="py-1.5 px-2 rounded-lg text-[10px] text-gray-500 hover:bg-gray-100">✕</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold text-right" style={{ color: '#840037' }}>KSh {parseFloat(p.price || 0).toLocaleString()}</p>
+                    <div className="flex justify-center">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        p.stockStatus === 'instock' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${p.stockStatus === 'instock' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                        {p.stockStatus === 'instock' ? 'In Stock' : 'Out'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-center text-gray-600">{p.stockQuantity ?? '—'}</p>
+                    <div className="flex justify-center">
+                      <button onClick={() => startEdit(p)} className="text-[10px] font-semibold px-3 py-1.5 rounded-lg text-[#840037] bg-pink-50 hover:bg-pink-100 transition-colors">
+                        Edit
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

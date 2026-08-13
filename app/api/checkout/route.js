@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { wcUrl } from '@/lib/wc-config';
 import { initializePayment, generateReference } from '@/lib/paystack';
 import { rateLimitRequest } from '@/lib/rate-limit';
+import { findOrCreateCustomer } from '@/lib/customer';
 
 function sanitize(str) {
   if (typeof str !== 'string') return '';
@@ -63,11 +64,28 @@ export async function POST(request) {
     const fee = typeof deliveryFee === 'number' ? deliveryFee : 0;
     const total = subtotal + fee;
 
+    let finalCustomerId = customerId || 0;
+    
+    if (!finalCustomerId && customerPhone) {
+      try {
+        const customer = await findOrCreateCustomer({ 
+          phone: customerPhone, 
+          name: customerName, 
+          email: validateEmail(email) ? email : undefined, 
+          landmark: deliveryAddress, 
+          zone: locationData?.zone 
+        });
+        finalCustomerId = customer.id;
+      } catch (err) {
+        console.error('Failed to find or create customer during checkout', err);
+      }
+    }
+
     const orderPayload = {
       payment_method: 'paystack',
       payment_method_title: 'Paystack',
       set_paid: false,
-      customer_id: customerId || 0,
+      customer_id: finalCustomerId,
       billing: {
         first_name: customerName,
         last_name: '',

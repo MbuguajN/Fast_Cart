@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { wcFetch } from '@/lib/wc-config';
+import { findCustomerByPhone } from '@/lib/customer';
 
 function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
@@ -13,10 +14,17 @@ function normalizePhone(rawPhone) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get('customer');
+    let customerId = searchParams.get('customer');
     const phoneParam = searchParams.get('phone');
     const after = searchParams.get('after');
     const before = searchParams.get('before');
+
+    if (!customerId && phoneParam) {
+      const customer = await findCustomerByPhone(phoneParam);
+      if (customer) {
+        customerId = customer.id;
+      }
+    }
 
     let allRawOrders = [];
 

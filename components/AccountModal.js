@@ -1,19 +1,46 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 export default function AccountModal({ isOpen, onClose, onReorder }) {
-  const { user, phone: authPhone, submitPhone, completeProfileAtCheckout, updateEmail, logout } = useAuth();
+  const { user, phase, phone: authPhone, otpMeta, submitPhone, verifyOtp, resendOtp, cancelOtp, completeProfileAtCheckout, updateEmail, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile'
   const [inputPhone, setInputPhone] = useState('');
   const [nameInput, setNameInput] = useState('');
   const [landmarkInput, setLandmarkInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [loadingAuth, setLoadingAuth] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
+
+  // OTP state
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [countdown, setCountdown] = useState(60);
+  const otpRefs = useRef([]);
+
+  const isOtpPhase = phase === 'otp_pending';
+
+  // Countdown for resend
+  useEffect(() => {
+    if (!isOtpPhase || !isOpen) return;
+    setCountdown(60);
+    const interval = setInterval(() => {
+      setCountdown((c) => { if (c <= 1) { clearInterval(interval); return 0; } return c - 1; });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isOtpPhase, isOpen]);
+
+  // Auto-focus first OTP input
+  useEffect(() => {
+    if (isOtpPhase && isOpen && otpRefs.current[0]) {
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    }
+  }, [isOtpPhase, isOpen]);
 
   // Sync inputs with user state
   useEffect(() => {
@@ -58,14 +85,82 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
     e.preventDefault();
     if (!inputPhone.trim()) return;
     setLoadingAuth(true);
+    setAuthError('');
     try {
-      await submitPhone(inputPhone.trim());
-      setInputPhone('');
+      const result = await submitPhone(inputPhone.trim());
+      if (result?.error) {
+        setAuthError(result.error);
+      }
     } catch (err) {
-      alert('Sign in failed. Please check your phone number.');
+      setAuthError('Sign in failed. Please check your phone number.');
     } finally {
       setLoadingAuth(false);
     }
+  };
+
+  // OTP handlers
+  const handleOtpChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1);
+    const newDigits = [...otpDigits];
+    newDigits[index] = digit;
+    setOtpDigits(newDigits);
+    if (otpError) setOtpError('');
+    if (digit && index < 5) otpRefs.current[index + 1]?.focus();
+    if (digit && index === 5) {
+      const code = [...newDigits.slice(0, 5), digit].join('');
+      if (code.length === 6) handleOtpVerify(code);
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) otpRefs.current[index - 1]?.focus();
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length > 0) {
+      const newDigits = [...otpDigits];
+      for (let i = 0; i < pasted.length && i < 6; i++) newDigits[i] = pasted[i];
+      setOtpDigits(newDigits);
+      if (pasted.length === 6) handleOtpVerify(pasted);
+      else otpRefs.current[Math.min(pasted.length, 5)]?.focus();
+    }
+  };
+
+  const handleOtpVerify = async (code) => {
+    if (!code || code.length !== 6) return;
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const result = await verifyOtp(code);
+      if (result?.error) {
+        setOtpError(result.error);
+        setOtpDigits(['', '', '', '', '', '']);
+        otpRefs.current[0]?.focus();
+      }
+    } catch {
+      setOtpError('Verification failed.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleOtpResend = async () => {
+    if (countdown > 0) return;
+    setOtpError('');
+    setOtpDigits(['', '', '', '', '', '']);
+    const result = await resendOtp();
+    if (result?.error) setOtpError(result.error);
+    else setCountdown(60);
+  };
+
+  const handleOtpBack = () => {
+    cancelOtp();
+    setOtpDigits(['', '', '', '', '', '']);
+    setOtpError('');
+    setInputPhone('');
+    setLoadingAuth(false);
   };
 
   const handleSaveProfile = async (e) => {
@@ -132,44 +227,121 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
           </button>
         </div>
 
-        {/* Guest Authentication Prompt */}
+        {/* Guest Authentication Prompt / OTP Verification */}
         {!user ? (
           <div className="p-6 space-y-5">
-            <div className="text-center space-y-1">
-              <span className="text-3xl">📱</span>
-              <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                Sign In with Phone Number
-              </h3>
-              <p className="text-xs text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                Enter your phone number to access your past orders, delivery addresses, and saved preferences.
-              </p>
-            </div>
+            {!isOtpPhase ? (
+              /* Phone Entry */
+              <>
+                <div className="text-center space-y-1">
+                  <span className="text-3xl">📱</span>
+                  <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    Sign In with Phone Number
+                  </h3>
+                  <p className="text-xs text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    We&apos;ll send a verification code to your email on file
+                  </p>
+                </div>
 
-            <form onSubmit={handlePhoneSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={inputPhone}
-                  onChange={(e) => setInputPhone(e.target.value)}
-                  placeholder="e.g. 0712345678"
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-300 text-sm font-semibold focus:ring-2 focus:ring-[#840037] focus:outline-none"
+                <form onSubmit={handlePhoneSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={inputPhone}
+                      onChange={(e) => { setInputPhone(e.target.value); setAuthError(''); }}
+                      placeholder="e.g. 0712345678"
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-300 text-sm font-semibold focus:ring-2 focus:ring-[#840037] focus:outline-none"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    />
+                  </div>
+
+                  {authError && (
+                    <p className="text-xs text-red-600 text-center font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>{authError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loadingAuth}
+                    className="w-full py-3.5 rounded-2xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-md active:scale-95 disabled:opacity-50"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    {loadingAuth ? 'Sending code...' : 'CONTINUE WITH PHONE'}
+                  </button>
+                </form>
+              </>
+            ) : (
+              /* OTP Verification */
+              <>
+                <div className="text-center space-y-1">
+                  <span className="text-3xl">🔐</span>
+                  <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    Enter verification code
+                  </h3>
+                  <p className="text-xs text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    {otpMeta?.emailSent ? (
+                      <>Sent to <strong className="text-[#840037]">{otpMeta.maskedEmail}</strong></>
+                    ) : (
+                      <>Enter your verification code{otpMeta?.devCode ? <> — <strong className="text-[#840037]">Dev: {otpMeta.devCode}</strong></> : null}</>
+                    )}
+                  </p>
+                </div>
+
+                {/* 6-digit OTP inputs */}
+                <div className="flex justify-center gap-2" onPaste={handleOtpPaste}>
+                  {otpDigits.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => { otpRefs.current[i] = el; }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      className="w-11 h-13 text-center font-extrabold text-lg rounded-xl border-2 focus:outline-none transition-all"
+                      style={{
+                        borderColor: otpError ? '#ba1a1a' : digit ? '#840037' : '#d1d5db',
+                        color: '#191c1d',
+                        fontFamily: 'Montserrat, sans-serif',
+                        boxShadow: digit ? '0 0 6px rgba(132,0,55,0.15)' : 'none',
+                      }}
+                      disabled={otpLoading}
+                    />
+                  ))}
+                </div>
+
+                {otpError && (
+                  <p className="text-xs text-red-600 text-center font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>{otpError}</p>
+                )}
+
+                <button
+                  onClick={() => handleOtpVerify(otpDigits.join(''))}
+                  disabled={otpDigits.join('').length !== 6 || otpLoading}
+                  className="w-full py-3.5 rounded-2xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-md active:scale-95 disabled:opacity-50"
                   style={{ fontFamily: 'Montserrat, sans-serif' }}
-                />
-              </div>
+                >
+                  {otpLoading ? 'Verifying...' : 'VERIFY & SIGN IN'}
+                </button>
 
-              <button
-                type="submit"
-                disabled={loadingAuth}
-                className="w-full py-3.5 rounded-2xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-md active:scale-95 disabled:opacity-50"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-              >
-                {loadingAuth ? 'Signing in...' : 'CONTINUE WITH PHONE'}
-              </button>
-            </form>
+                <div className="flex items-center justify-between">
+                  <button onClick={handleOtpBack} className="text-xs font-bold text-gray-500 hover:text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    ← Change number
+                  </button>
+                  <button
+                    onClick={handleOtpResend}
+                    disabled={countdown > 0}
+                    className="text-xs font-bold disabled:opacity-40"
+                    style={{ fontFamily: 'Montserrat, sans-serif', color: '#840037' }}
+                  >
+                    {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           /* Authenticated User Interface */

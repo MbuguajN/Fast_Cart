@@ -116,13 +116,12 @@ export async function POST() {
       );
       let brandName = brandAttr?.options?.[0] || '';
 
-      if (!brandName) {
-        const nameParts = p.name.trim().split(/\s+/);
-        brandName = nameParts[0] || '';
-        if (nameParts.length > 1 && /^(the|a|an)$/i.test(nameParts[0])) {
-          brandName = nameParts.slice(0, 2).join(' ');
-        }
+      // If no brand attribute, check if a WC brand taxonomy term was assigned
+      if (!brandName && Array.isArray(p.brands) && p.brands.length > 0) {
+        brandName = p.brands[0].name || '';
       }
+
+      // No fallback guessing from product name — that creates junk brands
 
       const productType = p.type || 'simple';
 

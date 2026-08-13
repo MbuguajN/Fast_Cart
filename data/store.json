@@ -1,5 +1,5 @@
 {
-  "lastSync": "2026-07-31T11:04:23.445Z",
+  "lastSync": "2026-08-13T18:41:39.537Z",
   "products": [
     {
       "wcId": 4524,
@@ -22,8 +22,11 @@
       "shortDescription": "<p>Jinro Is Back</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.043Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.716Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4520,
@@ -40,14 +43,17 @@
       ],
       "categoryId": 166,
       "categoryName": "Soju",
-      "brandId": "brand_peach",
-      "brandName": "Peach",
+      "brandId": "brand_jinro",
+      "brandName": "Jinro",
       "description": "<p>Peach Soju</p>\n",
       "shortDescription": "<p>Peach Soju</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.046Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.718Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4516,
@@ -64,14 +70,17 @@
       ],
       "categoryId": 166,
       "categoryName": "Soju",
-      "brandId": "brand_plum",
-      "brandName": "Plum",
+      "brandId": "brand_jinro",
+      "brandName": "Jinro",
       "description": "<p>Plum Soju</p>\n",
       "shortDescription": "<p>Plum Soju</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.049Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.720Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4512,
@@ -88,14 +97,17 @@
       ],
       "categoryId": 166,
       "categoryName": "Soju",
-      "brandId": "brand_grapefruit",
-      "brandName": "Grapefruit",
+      "brandId": "brand_jinro",
+      "brandName": "Jinro",
       "description": "<p>Grapefruit Soju</p>\n",
       "shortDescription": "<p>Grapefruit Soju</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.052Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.721Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4508,
@@ -112,14 +124,17 @@
       ],
       "categoryId": 166,
       "categoryName": "Soju",
-      "brandId": "brand_lemon",
-      "brandName": "Lemon",
+      "brandId": "brand_jinro",
+      "brandName": "Jinro",
       "description": "<p>Lemon Soju</p>\n",
       "shortDescription": "<p>Lemon Soju</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.055Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.723Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4504,
@@ -136,14 +151,17 @@
       ],
       "categoryId": 166,
       "categoryName": "Soju",
-      "brandId": "brand_strawberry",
-      "brandName": "Strawberry",
+      "brandId": "brand_jinro",
+      "brandName": "Jinro",
       "description": "<p>Strawberry Soju</p>\n",
       "shortDescription": "<p>Strawberry Soju</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.058Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.725Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4500,
@@ -160,14 +178,17 @@
       ],
       "categoryId": 166,
       "categoryName": "Soju",
-      "brandId": "brand_green",
-      "brandName": "Green",
+      "brandId": "brand_jinro",
+      "brandName": "Jinro",
       "description": "<p>Green Grape Soju</p>\n",
       "shortDescription": "<p>Green Grape Soju</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.061Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.726Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4360,
@@ -190,8 +211,11 @@
       "shortDescription": "<p>35%</p>\n",
       "sku": "K250408",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.064Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.728Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4356,
@@ -208,14 +232,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.067Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.733Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4353,
@@ -238,8 +265,11 @@
       "shortDescription": "<p>35%</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.070Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.735Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4036,
@@ -256,14 +286,30 @@
       ],
       "categoryId": 78,
       "categoryName": "Non-Alcoholic",
-      "brandId": "brand_happy",
-      "brandName": "Happy",
+      "brandId": null,
+      "brandName": "",
       "description": "",
       "shortDescription": "",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.074Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:35.737Z",
+      "upsellIds": [],
+      "type": "variable",
+      "attributes": [
+        {
+          "name": "Flavor",
+          "options": [
+            "Tamarind",
+            "Beetroot",
+            "Pineapple",
+            "Watermelon",
+            "Hibiscus",
+            "Tropical",
+            "Sugarcane"
+          ]
+        }
+      ],
+      "variations": []
     },
     {
       "wcId": 3737,
@@ -286,8 +332,11 @@
       "shortDescription": "<p>35%</p>\n",
       "sku": "K250207",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.077Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.902Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3358,
@@ -304,14 +353,17 @@
       ],
       "categoryId": 73,
       "categoryName": "Mixers",
-      "brandId": "brand_krest",
-      "brandName": "Krest",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>Krest Bitter Lemon Soft Drink is an adult soft drink that can be enjoyed on its own or as mixers with your favourite beverage. This is a zingy carbonated drink that can be enjoyed on its own or combined with alcohol or fruit juice. It is versatile, refreshing, full of flavour, and tasty. It is a great alternative to diet tonic water. It makes you feel refreshed and full of life. This bubbly water has sodium carbonate, it is a perfect balance between sweetness and bitter taste. It does not have any calories, no added sugar or artificial sweeteners.</p>\n",
       "shortDescription": "<p>Krest Bitter Lemon Soft Drink is an adult soft drink that can be enjoyed on its own or as mixers with your favourite beverage.</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.082Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.908Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3355,
@@ -328,14 +380,17 @@
       ],
       "categoryId": 73,
       "categoryName": "Mixers",
-      "brandId": "brand_schweppes",
-      "brandName": "Schweppes",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>Schweppes Tonic Water boasts a flavorful blend of quinine and lemon, resulting in a satisfying taste that is both clean and long-lasting.</p>\n",
       "shortDescription": "<p>Schweppes Tonic Water boasts a flavorful blend of quinine and lemon, resulting in a satisfying taste that is both clean and long-lasting.</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.085Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.913Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3340,
@@ -352,14 +407,17 @@
       ],
       "categoryId": 73,
       "categoryName": "Mixers",
-      "brandId": "brand_fanta",
-      "brandName": "Fanta",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>Fanta Passion Fruit Drink is a highquality concentrated crush made with the finest ingredients. It adds a perfect zing to your cocktails and mocktails with this crush. This crush is easy to use you just need to add it to your juice or soda. This drink has an intense passion fruit flavour. This delicious Fanta Passion Fruit Drink is surely satisfied your taste buds. Perfect to share with family and friends.</p>\n",
       "shortDescription": "",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.089Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.919Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3339,
@@ -376,14 +434,17 @@
       ],
       "categoryId": 73,
       "categoryName": "Mixers",
-      "brandId": "brand_fanta",
-      "brandName": "Fanta",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>Fanta Passion Fruit Drink is a highquality concentrated crush made with the finest ingredients. It adds a perfect zing to your cocktails and mocktails with this crush. This crush is easy to use you just need to add it to your juice or soda. This drink has an intense passion fruit flavour. This delicious Fanta Passion Fruit Drink is surely satisfied your taste buds. Perfect to share with family and friends.</p>\n",
       "shortDescription": "<p>Fanta Passion Fruit Drink is a high-quality concentrated crush made with the finest ingredients. It adds a perfect zing to your cocktails and mocktails with this crush.</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.092Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.925Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3338,
@@ -400,14 +461,17 @@
       ],
       "categoryId": 73,
       "categoryName": "Mixers",
-      "brandId": "brand_regular",
-      "brandName": "Regular",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>The Coca-Cola PET 2L is a 2-liter plastic bottle packaging of the iconic Coca-Cola soft drink. The bottle is made from PET (polyethylene terephthalate), which is lightweight, durable, and recyclable. It features the classic red label with the white Coca-Cola logo, maintaining the brand's signature design. The bottle is ergonomically shaped for easy handling and pouring, with a screw-on cap that ensures a tight seal to maintain carbonation and freshness. This size is ideal for sharing in family gatherings, social events, or for storing in the refrigerator for individual servings over time.</p>\n<p>&nbsp;</p>\n",
       "shortDescription": "<p>The Coca-Cola PET 2L is a 2-liter plastic bottle packaging of the iconic Coca-Cola soft drink. The bottle is made from PET (polyethylene terephthalate), which is lightweight, durable, and recyclable.</p>\n<p>&nbsp;</p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.095Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.930Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3322,
@@ -424,14 +488,17 @@
       ],
       "categoryId": 121,
       "categoryName": "Chasers",
-      "brandId": "brand_dasani",
-      "brandName": "Dasani",
+      "brandId": null,
+      "brandName": "",
       "description": "",
       "shortDescription": "",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.098Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.938Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 3292,
@@ -448,14 +515,28 @@
       ],
       "categoryId": 73,
       "categoryName": "Mixers",
-      "brandId": "brand_sprite",
-      "brandName": "Sprite",
+      "brandId": null,
+      "brandName": "",
       "description": "",
       "shortDescription": "",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.101Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.944Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [
+        {
+          "name": "Flavour",
+          "options": [
+            "Fanta",
+            "Blackcurrant",
+            "Coca Cola",
+            "Sprite",
+            "Passion"
+          ]
+        }
+      ],
+      "variations": []
     },
     {
       "wcId": 3294,
@@ -472,14 +553,17 @@
       ],
       "categoryId": 121,
       "categoryName": "Chasers",
-      "brandId": "brand_regular",
-      "brandName": "Regular",
+      "brandId": null,
+      "brandName": "",
       "description": "",
       "shortDescription": "",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.105Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.949Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2459,
@@ -496,14 +580,25 @@
       ],
       "categoryId": 89,
       "categoryName": "Party Packs",
-      "brandId": "brand_after",
-      "brandName": "After",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><i><span style=\"font-weight: 400;\">For Teams That Work Hard, Win Big, and Definitely Need A Break!</span></i><i><span style=\"font-weight: 400;\"><br />\n</span></i><i><span style=\"font-weight: 400;\">HAPPY HOUR, THE PARTY STARTS HERE.</span></i></p>\n<p><b>Executive Pack (10+ Pax)</b></p>\n<ul>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 Bottle Malfy Gin Originale 750ml (37.5%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 Bottle Olmeca Tequila Gold 700ml (35%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 Bottle Jameson Whiskey 1L (40%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 Bottle TGL Whisky Founders Reserve 700ml (40%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 × 2L PET Coke Soda</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 × 2L PET Sprite Soda</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">4 × 500ml PET Tonic</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">Drinks Card (Assorted Mixology Highlights &amp; Perfect Pour Instructions)</span></li>\n</ul>\n<p><b>Party Pack Perks:</b><span style=\"font-weight: 400;\">  </span></p>\n<ul>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">A Branded Malfy Fan </span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">2 TGL Glasses</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">2 TGL Card Holders</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">4 Jameson Original Paper Cups </span></li>\n</ul>\n",
       "shortDescription": "<p><i><span style=\"font-weight: 400;\">Team Bonding, Office Celebrations, Post-Work Parties.</span></i></p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.108Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.954Z",
+      "upsellIds": [],
+      "type": "woosb",
+      "attributes": [
+        {
+          "name": "Pack",
+          "options": [
+            "Deluxe (8-12)",
+            "Regular (4-6)"
+          ]
+        }
+      ],
+      "variations": []
     },
     {
       "wcId": 2480,
@@ -520,14 +615,25 @@
       ],
       "categoryId": 89,
       "categoryName": "Party Packs",
-      "brandId": "brand_game",
-      "brandName": "Game",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><i><span style=\"font-weight: 400;\">Warning: May Cause Loud Winners, Sore Losers and High-Stakes Laughter. </span></i><i><span style=\"font-weight: 400;\">Bring Out Your Competitive Spirit! </span></i><i><span style=\"font-weight: 400;\"><br />\n</span></i><i><span style=\"font-weight: 400;\">HAPPY HOUR, THE PARTY STARTS HERE.</span></i></p>\n<p><b>Starter Pack (4–6 Pax)</b></p>\n<ul>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 Bottle Jameson Whiskey 1L (40%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 Bottle Ballantine’s Finest Whisky 1L (40%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 × 2L PET Coke Soda</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">Drinks Card (Whiskey Mixer Recipes &amp; Perfect Pour Instructions)</span></li>\n</ul>\n<p><b>Party Pack Perks:</b><span style=\"font-weight: 400;\"> </span></p>\n<ul>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">Ballantine’s Glasses</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">2 Jameson Original Paper Cups </span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">2 Ballantine’s Paper Cups</span></li>\n</ul>\n",
       "shortDescription": "<p><span style=\"font-weight: 400;\">Game Nights, House Parties, Competitive Friend Circles</span></p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.111Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.959Z",
+      "upsellIds": [],
+      "type": "woosb",
+      "attributes": [
+        {
+          "name": "Pack",
+          "options": [
+            "Deluxe (8-12)",
+            "Regular (4-6)"
+          ]
+        }
+      ],
+      "variations": []
     },
     {
       "wcId": 2484,
@@ -544,14 +650,25 @@
       ],
       "categoryId": 89,
       "categoryName": "Party Packs",
-      "brandId": "brand_sundowner",
-      "brandName": "Sundowner",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><i><span style=\"font-weight: 400;\">The Perfect Gateway To Golden-Hour Catch-Ups, Balcony Sunsets, And Stories That Last All Night. HAPPY HOUR, THE PARTY STARTS HERE.</span></i></p>\n<p><b>Soft Launch (5 Pax)</b></p>\n<ul>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">2 Bottles Olmeca Tequila Gold 700ml (35%)</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">2 × 500ml PET Tonic</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">1 x 2L PET Sprite Soda</span></li>\n<li style=\"font-weight: 400;\" aria-level=\"1\"><span style=\"font-weight: 400;\">Drinks Card (Tequila Cocktail Recipes &amp; Perfect Pour Instructions)</span></li>\n</ul>\n<p><b>Party Pack Perks:</b><span style=\"font-weight: 400;\"> Olmeca Silver Limited Edition Cards</span></p>\n",
       "shortDescription": "<p><span style=\"font-weight: 400;\">Sunset Drinks, Rooftop Hangouts, Early Evening Socialising.</span></p>\n",
       "sku": "",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.114Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.964Z",
+      "upsellIds": [],
+      "type": "woosb",
+      "attributes": [
+        {
+          "name": "Pack",
+          "options": [
+            "Deluxe (8-12)",
+            "Regular (4-6)"
+          ]
+        }
+      ],
+      "variations": []
     },
     {
       "wcId": 2924,
@@ -574,8 +691,11 @@
       "shortDescription": "<p>40%</p>\n",
       "sku": "K270812",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.118Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.973Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2921,
@@ -598,8 +718,11 @@
       "shortDescription": "<p>40%</p>\n",
       "sku": "K270833",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.121Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.977Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2859,
@@ -616,14 +739,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p><br data-mce-bogus=\"1\"></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K160409",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.124Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.984Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2848,
@@ -646,8 +772,11 @@
       "shortDescription": "",
       "sku": "K270838",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.127Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.988Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2845,
@@ -670,8 +799,11 @@
       "shortDescription": "",
       "sku": "K270813",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.130Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.993Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2815,
@@ -688,14 +820,17 @@
       ],
       "categoryId": 28,
       "categoryName": "Liquers",
-      "brandId": "brand_malibu",
-      "brandName": "Malibu",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>21%</p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K146600",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.134Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:36.998Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2810,
@@ -712,18 +847,21 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_jameson",
-      "brandName": "Jameson",
+      "brandId": "brand_jameson_irish_whiskey",
+      "brandName": "Jameson Irish Whiskey",
       "description": "<p>Jameson Irish Whiskey is a blended Irish Whiskey. What's that we hear you say? Well first we take the best of pot still and fine grain whiskeys. Then we triple distill them- not because we have to because we want to as it gives it its signature smoothness. Finally we age them in oak casks for a minimum of 4 years. It’s where we recommend starting your whiskey journey. How to drink it? Any way you like. Just add mates and widen the circle. Triple distilled, twice as smooth, one of a kind.​</p>\n",
       "shortDescription": "<p>Jameson Irish Whiskey is a blended Irish Whiskey. What&#8217;s that we hear you say? Well first we take the best of pot still and fine grain whiskeys.</p>\n",
       "sku": "K101102",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.137Z",
+      "lastSynced": "2026-08-13T18:41:37.005Z",
       "upsellIds": [
         3322,
         3358,
         3355
-      ]
+      ],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2805,
@@ -740,14 +878,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_jameson",
-      "brandName": "Jameson",
+      "brandId": "brand_jameson_irish_whiskey",
+      "brandName": "Jameson Irish Whiskey",
       "description": "<p><em>40%</em></p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K101835",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.140Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.010Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2802,
@@ -770,8 +911,11 @@
       "shortDescription": "",
       "sku": "K150955",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.143Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.017Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2799,
@@ -794,8 +938,11 @@
       "shortDescription": "",
       "sku": "K150603",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.146Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.024Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2796,
@@ -818,8 +965,11 @@
       "shortDescription": "<p>1 litre</p>\n",
       "sku": "K150956",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.149Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.030Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 2793,
@@ -836,14 +986,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantine's",
-      "brandName": "Ballantine's",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K140726",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.152Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.037Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 712,
@@ -866,8 +1019,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K270839",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.156Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.042Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 897,
@@ -884,14 +1040,17 @@
       ],
       "categoryId": 27,
       "categoryName": "Rum",
-      "brandId": "brand_bumbu",
-      "brandName": "Bumbu",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Elevate your spirits with Bumbu Original – a collection of 6x70cl, where the richness of Caribbean flavors and the depth of craftsmanship create a truly luxurious experience.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K922000",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.160Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.047Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 885,
@@ -908,14 +1067,17 @@
       ],
       "categoryId": 75,
       "categoryName": "Sparkling",
-      "brandId": "brand_luc",
-      "brandName": "Luc",
+      "brandId": "brand_belaire",
+      "brandName": "Belaire",
       "description": "<p><span>Immerse in the allure of Luc Belaire Luxe Rosé – a set of 6x75cl, where the perfect blend of sophistication and romance unfolds in every bubble.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K924003",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.164Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.056Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 883,
@@ -932,14 +1094,17 @@
       ],
       "categoryId": 75,
       "categoryName": "Sparkling",
-      "brandId": "brand_luc",
-      "brandName": "Luc",
+      "brandId": "brand_belaire",
+      "brandName": "Belaire",
       "description": "<p><span>Indulge in pure elegance with Luc Belaire Gold – a collection of 6x75cl, where each golden sip encapsulates the essence of celebration.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K924002",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.168Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.060Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 880,
@@ -956,14 +1121,17 @@
       ],
       "categoryId": 75,
       "categoryName": "Sparkling",
-      "brandId": "brand_luc",
-      "brandName": "Luc",
+      "brandId": "brand_belaire",
+      "brandName": "Belaire",
       "description": "<p><span>Experience luxury like never before with Luc Belaire Luxe – a set of 6x75cl, where the opulence of a fine sparkling wine meets the thrill of celebration.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K924001",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.172Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.066Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 878,
@@ -980,14 +1148,17 @@
       ],
       "categoryId": 75,
       "categoryName": "Sparkling",
-      "brandId": "brand_luc",
-      "brandName": "Luc",
+      "brandId": "brand_belaire",
+      "brandName": "Belaire",
       "description": "<p><span>Elevate your celebrations with Luc Belaire Rosé – a collection of 6x75cl, where elegance meets a burst of red fruit flavors in every effervescent sip.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K924000",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.175Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.071Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 875,
@@ -1010,8 +1181,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K141308",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.178Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.076Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 862,
@@ -1028,14 +1202,17 @@
       ],
       "categoryId": 28,
       "categoryName": "Liquers",
-      "brandId": "brand_ricard",
-      "brandName": "Ricard",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>45%</p>\n",
       "shortDescription": "",
       "sku": "K410400",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.197Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.082Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 853,
@@ -1052,14 +1229,17 @@
       ],
       "categoryId": 23,
       "categoryName": "Wine",
-      "brandId": "brand_jacobs",
-      "brandName": "Jacobs",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Elevate your palate with Jacob's Creek Classic Shiraz – a set of 6x75cl, where the bold and spicy notes of Australian Shiraz create a wine of unparalleled richness and intensity.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Elevate your palate with Jacob's Creek Classic Shiraz – a set of 6x75cl, where the bold and spicy notes of Australian Shiraz create a wine of unparalleled richness and intensity.</span></p>\n",
       "shortDescription": "",
       "sku": "K917204",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.201Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.087Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 837,
@@ -1076,14 +1256,17 @@
       ],
       "categoryId": 23,
       "categoryName": "Wine",
-      "brandId": "brand_jacobs",
-      "brandName": "Jacobs",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Indulge in the luxury of Jacob's Creek Reserve Shiraz – a set of 6x75cl, where the bold and spicy notes of Australian Shiraz create a wine of unparalleled richness.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Indulge in the luxury of Jacob's Creek Reserve Shiraz – a set of 6x75cl, where the bold and spicy notes of Australian Shiraz create a wine of unparalleled richness.</span></p>\n",
       "shortDescription": "",
       "sku": "K917206",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.205Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.091Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 829,
@@ -1100,14 +1283,17 @@
       ],
       "categoryId": 23,
       "categoryName": "Wine",
-      "brandId": "brand_campo",
-      "brandName": "Campo",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Elevate your palate with the luxury of Campo Viejo Tempranillo – a collection of 6x75cl, where the bold and fruity notes create a wine of unparalleled richness.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Elevate your palate with the luxury of Campo Viejo Tempranillo – a collection of 6x75cl, where the bold and fruity notes create a wine of unparalleled richness.</span></p>\n",
       "shortDescription": "",
       "sku": "K917209",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.208Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.096Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 821,
@@ -1124,14 +1310,17 @@
       ],
       "categoryId": 28,
       "categoryName": "Liquers",
-      "brandId": "brand_kahlua",
-      "brandName": "Kahlua",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Experience the opulence of Kahlua Liqueur – a set of 12x70cl, where the rich coffee flavor and velvety texture combine to create a drink of unparalleled luxury.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K148202",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.211Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.101Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 816,
@@ -1154,8 +1343,11 @@
       "shortDescription": "",
       "sku": "K250502",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.214Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.106Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 808,
@@ -1178,8 +1370,11 @@
       "shortDescription": "",
       "sku": "K250405",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.217Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.110Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 801,
@@ -1196,14 +1391,17 @@
       ],
       "categoryId": 27,
       "categoryName": "Rum",
-      "brandId": "brand_havana",
-      "brandName": "Havana",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K440300",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.221Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.116Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 799,
@@ -1220,14 +1418,17 @@
       ],
       "categoryId": 27,
       "categoryName": "Rum",
-      "brandId": "brand_havana",
-      "brandName": "Havana",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Experience the sophistication of Havana Club Rhum 7 Ans – a collection of 6x70cl, where seven years of aging craft a spirit that exudes luxury with every drop.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K440700",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.224Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.121Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 797,
@@ -1244,14 +1445,17 @@
       ],
       "categoryId": 27,
       "categoryName": "Rum",
-      "brandId": "brand_havana",
-      "brandName": "Havana",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Indulge in the luxury of Havana Club Rhum Anejo 3 Years Old – a set of 6x70cl, where the Caribbean sun-soaked aging process unfolds in every sip.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K440600",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.227Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.125Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 789,
@@ -1268,14 +1472,17 @@
       ],
       "categoryId": 53,
       "categoryName": "Champagne",
-      "brandId": "brand_mumm",
-      "brandName": "Mumm",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>12%</p>\n",
       "shortDescription": "",
       "sku": "K500351",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.230Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.131Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 778,
@@ -1298,8 +1505,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K270815",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.233Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.135Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 710,
@@ -1316,14 +1526,17 @@
       ],
       "categoryId": 29,
       "categoryName": "Gin",
-      "brandId": "brand_monkey",
-      "brandName": "Monkey",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Delve into the Black Forest with Monkey 47 Schwarzwald Gin – a 6x50cl gift pack that encapsulates the exotic allure of 47 botanicals, a true gin connoisseur's delight.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Delve into the Black Forest with Monkey 47 Schwarzwald Gin – a 6x50cl gift pack that encapsulates the exotic allure of 47 botanicals, a true gin connoisseur's delight.</span></p>\n",
       "shortDescription": "",
       "sku": "K142101",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.238Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.138Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 707,
@@ -1340,14 +1553,17 @@
       ],
       "categoryId": 29,
       "categoryName": "Gin",
-      "brandId": "brand_inverroche",
-      "brandName": "Inverroche",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Immerse yourself in the greenery of Inverroche Gin Verdant – a 6x75cl set that harmonizes the freshness of botanicals, capturing the spirit of the coastal garden.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Immerse yourself in the greenery of Inverroche Gin Verdant – a 6x75cl set that harmonizes the freshness of botanicals, capturing the spirit of the coastal garden.</span></p>\n",
       "shortDescription": "",
       "sku": "K143001",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.241Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.140Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 705,
@@ -1364,14 +1580,17 @@
       ],
       "categoryId": 29,
       "categoryName": "Gin",
-      "brandId": "brand_inverroche",
-      "brandName": "Inverroche",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Elevate your gin experience with Inverroche Gin Classic – a 6x75cl set that defines the art of craft gin, inspired by the lush landscapes of the Cape.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Elevate your gin experience with Inverroche Gin Classic – a 6x75cl set that defines the art of craft gin, inspired by the lush landscapes of the Cape.</span></p>\n",
       "shortDescription": "",
       "sku": "K143000",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.244Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.143Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 702,
@@ -1388,14 +1607,17 @@
       ],
       "categoryId": 29,
       "categoryName": "Gin",
-      "brandId": "brand_inverroche",
-      "brandName": "Inverroche",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Embark on a sensory adventure with Inverroche Gin Amber – a 6x75cl set that captures the essence of South African fynbos, a symphony of botanical complexity.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Embark on a sensory adventure with Inverroche Gin Amber – a 6x75cl set that captures the essence of South African fynbos, a symphony of botanical complexity.</span></p>\n",
       "shortDescription": "",
       "sku": "K143002",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.249Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.146Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 700,
@@ -1418,8 +1640,11 @@
       "shortDescription": "",
       "sku": "K144001",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.253Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.148Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 698,
@@ -1442,8 +1667,11 @@
       "shortDescription": "",
       "sku": "K144000",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.257Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.150Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 696,
@@ -1466,8 +1694,11 @@
       "shortDescription": "",
       "sku": "K144002",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.260Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.152Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 692,
@@ -1484,14 +1715,17 @@
       ],
       "categoryId": 29,
       "categoryName": "Gin",
-      "brandId": "brand_beefeater",
-      "brandName": "Beefeater",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Unveil the craftsmanship of Beefeater Gin – a 12x75cl set, where tradition meets innovation, creating a timeless gin experience.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K141601",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.264Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.153Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 689,
@@ -1514,8 +1748,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K141701",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.268Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.155Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 686,
@@ -1538,8 +1775,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K141503",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.272Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.157Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 683,
@@ -1562,8 +1802,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K141305",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.276Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.159Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 677,
@@ -1586,8 +1829,11 @@
       "shortDescription": "",
       "sku": "K141304",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.279Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.160Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 675,
@@ -1604,14 +1850,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_royal",
-      "brandName": "Royal",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Elevate your gatherings with Royal Stag Whisky – a collection of 24x37.5cl bottles, embodying the spirit of regal celebrations.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K710105",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.282Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.164Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 673,
@@ -1628,14 +1877,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_royal",
-      "brandName": "Royal",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Unveil the majestic character of Royal Stag Whisky – a 12x75cl collection, where each bottle is a testament to royal refinement.</span></p>\n<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K710104",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.285Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.166Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 671,
@@ -1652,14 +1904,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_imperial",
-      "brandName": "Imperial",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span>Discover the elegance of Imperial Blue Whisky – a collection of 24x37.5cl bottles, an ode to the perfect pour. </span></p>\n<p><span>40%</span></p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K720106",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.289Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.168Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 668,
@@ -1676,14 +1931,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_imperial",
-      "brandName": "Imperial",
+      "brandId": null,
+      "brandName": "",
       "description": "<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K720105",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.293Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.169Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 660,
@@ -1700,14 +1958,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_royal",
-      "brandName": "Royal",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Indulge in the regal experience of Royal Salute 21-Year-Old – a 6x70cl set presented in étuis, a celebration of elegance and enduring excellence.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Indulge in the regal experience of Royal Salute 21-Year-Old – a 6x70cl set presented in étuis, a celebration of elegance and enduring excellence.</span></p>\n",
       "shortDescription": "",
       "sku": "K168800",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.296Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.171Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 657,
@@ -1724,14 +1985,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p>43%</p>\n",
       "shortDescription": "",
       "sku": "K160606",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.299Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.173Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 655,
@@ -1748,14 +2012,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Journey through the archives of flavor with The Glenlivet 21-Year-Old – a trio of 70cl bottles that encapsulate the richness of time.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Journey through the archives of flavor with The Glenlivet 21-Year-Old – a trio of 70cl bottles that encapsulate the richness of time.</span></p>\n",
       "shortDescription": "",
       "sku": "K160601",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.302Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.174Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 650,
@@ -1772,14 +2039,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p><span>Commemorate the passage of time with The Glenlivet 18-Year-Old – a 6x70cl set elegantly presented in étuis, embodying the pinnacle of Scotch refinement.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K160503",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.305Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.176Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 647,
@@ -1796,14 +2066,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p><span>Experience the legacy of The Glenlivet 15-Year-Old – a 6x70cl set encased in an etui, where every sip tells a tale of exceptional ageing.</span></p>\n<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K160352",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.308Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.178Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 644,
@@ -1820,14 +2093,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p><span>Immerse yourself in the heritage of The Glenlivet 12-Year-Old – a 12x70cl set in an exquisite etui, capturing the essence of refinement.</span></p>\n<p>40%</p>\n",
       "shortDescription": "<p>40%</p>\n",
       "sku": "K160402",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.311Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.181Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 642,
@@ -1844,14 +2120,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_the_glenlivet",
-      "brandName": "The Glenlivet",
+      "brandId": "brand_glenlivet",
+      "brandName": "Glenlivet",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Embark on a journey with The Glenlivet Whisky Founders Reserve – a 6x70cl ensemble that defines the epitome of Scotch excellence.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Embark on a journey with The Glenlivet Whisky Founders Reserve – a 6x70cl ensemble that defines the epitome of Scotch excellence.</span></p>\n",
       "shortDescription": "",
       "sku": "K160408",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.314Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.183Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 640,
@@ -1868,14 +2147,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_jameson",
-      "brandName": "Jameson",
+      "brandId": "brand_jameson_irish_whiskey",
+      "brandName": "Jameson Irish Whiskey",
       "description": "<p>Experience the essence of Jameson Whiskey – a 6x100cl set in a keyhole presentation, a journey through the heart of Ireland's finest.</p>\n<p><strong>Buy 2 Jameson 1L and get a free Jameson Connect Ticket. </strong></p>\n<p><strong>*Offer valid while stocks last. T&amp;C's apply.</strong></p>\n",
       "shortDescription": "",
       "sku": "K101137",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.317Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.185Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 638,
@@ -1885,25 +2167,28 @@
       "regularPrice": "2802",
       "salePrice": "",
       "stockStatus": "instock",
-      "stockQuantity": 58,
+      "stockQuantity": 57,
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/09/Artboard-1-1.webp",
       "images": [
         "https://myhappyhour.co.ke/wp-content/uploads/2023/09/Artboard-1-1.webp"
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_jameson",
-      "brandName": "Jameson",
+      "brandId": "brand_jameson_irish_whiskey",
+      "brandName": "Jameson Irish Whiskey",
       "description": "<p><span>Unveil the timeless tradition of Jameson Whiskey – a 12x75cl set in a keyhole presentation, a testament to the art of whiskey craftsmanship.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K101136",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.320Z",
+      "lastSynced": "2026-08-13T18:41:37.186Z",
       "upsellIds": [
         3322,
         3358,
         3355
-      ]
+      ],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 633,
@@ -1920,14 +2205,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_jameson",
-      "brandName": "Jameson",
+      "brandId": "brand_jameson_irish_whiskey",
+      "brandName": "Jameson Irish Whiskey",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Immerse yourself in the grandeur of Jameson Whiskey – a 450cl bottle cradled in a genuine cradle. A true collector's masterpiece.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Immerse yourself in the grandeur of Jameson Whiskey – a 450cl bottle cradled in a genuine cradle. A true collector's masterpiece.</span></p>\n",
       "shortDescription": "",
       "sku": "K600022",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.323Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.188Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 629,
@@ -1950,8 +2238,11 @@
       "shortDescription": "",
       "sku": "K150703",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.327Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.190Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 626,
@@ -1974,8 +2265,11 @@
       "shortDescription": "",
       "sku": "K150932",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.330Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.193Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 624,
@@ -1992,14 +2286,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantine's",
-      "brandName": "Ballantine's",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p>copy</p>\n",
       "shortDescription": "",
       "sku": "K140724",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.334Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.195Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 620,
@@ -2016,14 +2313,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantine's",
-      "brandName": "Ballantine's",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p>copy</p>\n",
       "shortDescription": "",
       "sku": "K140651",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.338Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.197Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 618,
@@ -2040,14 +2340,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantines",
-      "brandName": "Ballantines",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Immerse yourself in the opulence of Ballantine's 17-Year-Old Whisky – a 12x70cl set encased in a luxurious etui. Where sophistication meets celebration.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Immerse yourself in the opulence of Ballantine's 17-Year-Old Whisky – a 12x70cl set encased in a luxurious etui. Where sophistication meets celebration.</span></p>\n",
       "shortDescription": "",
       "sku": "K140600",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.341Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.199Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 610,
@@ -2064,14 +2367,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantines",
-      "brandName": "Ballantines",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Immerse yourself in the legacy of Ballantine's Finest Whisky – a duo of 450cl bottles that embody the epitome of luxury.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Immerse yourself in the legacy of Ballantine's Finest Whisky – a duo of 450cl bottles that embody the epitome of luxury.</span></p>\n",
       "shortDescription": "",
       "sku": "K140222",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.344Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.201Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 608,
@@ -2088,14 +2394,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantines",
-      "brandName": "Ballantines",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p><span>Indulge in the grandeur of Ballantine's Finest Whisky – a 100cl statement of sophistication. Embrace the extraordinary.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K140218",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.347Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.203Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 605,
@@ -2112,14 +2421,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantines",
-      "brandName": "Ballantines",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p><span>Elevate your evenings with Ballantine's Finest Whisky – a 75cl testament to the finest craftsmanship. Unleash the extraordinary.</span></p>\n",
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K140214",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.351Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.205Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 603,
@@ -2136,14 +2448,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_aberlour",
-      "brandName": "Aberlour",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Experience the artistry of Aberlour Single Malt 12-Year-Old – a trio of perfection in a 70cl canister. Indulge in the finest.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Experience the artistry of Aberlour Single Malt 12-Year-Old – a trio of perfection in a 70cl canister. Indulge in the finest.</span></p>\n",
       "shortDescription": "",
       "sku": "K190702",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.354Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.206Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 600,
@@ -2160,14 +2475,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_ballantines",
-      "brandName": "Ballantines",
+      "brandId": "brand_ballantine’s",
+      "brandName": "Ballantine’s",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Unveil the timeless elegance of Ballantine's Finest Whisky – now in a convenient 37.5cl size. Where refinement meets convenience.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:12604,&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;11&quot;:3,&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Unveil the timeless elegance of Ballantine's Finest Whisky – now in a convenient 37.5cl size. Where refinement meets convenience.</span></p>\n",
       "shortDescription": "",
       "sku": "K140204",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.357Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.208Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 598,
@@ -2184,14 +2502,17 @@
       ],
       "categoryId": 24,
       "categoryName": "Whiskey",
-      "brandId": "brand_aberlour",
-      "brandName": "Aberlour",
+      "brandId": null,
+      "brandName": "",
       "description": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Unearth the exquisite richness of Aberlour 16-Year-Old Double Cask – a triumphant trio in a 70cl canister, crafted for the true connoisseur.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:14781,&quot;3&quot;:{&quot;1&quot;:0,&quot;3&quot;:1},&quot;5&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;7&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:1,&quot;11&quot;:3,&quot;14&quot;:{&quot;1&quot;:3,&quot;3&quot;:1},&quot;15&quot;:&quot;Candara&quot;,&quot;16&quot;:13}\">Unearth the exquisite richness of Aberlour 16-Year-Old Double Cask – a triumphant trio in a 70cl canister, crafted for the true connoisseur.</span></p>\n",
       "shortDescription": "",
       "sku": "K190161",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.360Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.210Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 582,
@@ -2214,8 +2535,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K200351",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.364Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.212Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 578,
@@ -2238,8 +2562,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K200706",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.367Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.214Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 575,
@@ -2262,8 +2589,11 @@
       "shortDescription": "",
       "sku": "K200802",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.370Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.216Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 573,
@@ -2286,8 +2616,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K200502",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.373Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.218Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 568,
@@ -2310,8 +2643,11 @@
       "shortDescription": "",
       "sku": "K200902",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.377Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.221Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 563,
@@ -2334,8 +2670,11 @@
       "shortDescription": "",
       "sku": "K200950",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.380Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.224Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 561,
@@ -2358,8 +2697,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K200203",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.383Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.226Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 559,
@@ -2382,8 +2724,11 @@
       "shortDescription": "<p><br data-mce-bogus=\"1\"></p>\n",
       "sku": "K200102",
       "weight": "",
-      "lastSynced": "2026-07-31T11:04:20.386Z",
-      "upsellIds": []
+      "lastSynced": "2026-08-13T18:41:37.228Z",
+      "upsellIds": [],
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     },
     {
       "wcId": 4658,
@@ -2393,341 +2738,44 @@
       "regularPrice": "1",
       "salePrice": "",
       "stockStatus": "instock",
-      "stockQuantity": 1,
+      "stockQuantity": 10,
       "image": "",
       "images": [],
       "categoryId": 15,
       "categoryName": "Uncategorized",
-      "brandId": "brand_test",
-      "brandName": "test",
+      "brandId": null,
+      "brandName": "",
       "description": "",
       "shortDescription": "",
       "sku": "",
       "weight": "",
       "upsellIds": [],
-      "lastSynced": "2026-07-31T11:04:20.039Z"
+      "lastSynced": "2026-08-13T18:41:35.713Z",
+      "type": "simple",
+      "attributes": [],
+      "variations": []
     }
   ],
   "brands": [
     {
-      "id": "brand_jinro",
-      "wcId": "brand_jinro",
-      "name": "Jinro",
-      "slug": "jinro",
-      "image": null,
-      "color": "#840037"
-    },
-    {
-      "id": "brand_peach",
-      "wcId": "brand_peach",
-      "name": "Peach",
-      "slug": "peach",
-      "image": null,
-      "color": "#5b0024"
-    },
-    {
-      "id": "brand_plum",
-      "wcId": "brand_plum",
-      "name": "Plum",
-      "slug": "plum",
-      "image": null,
-      "color": "#00321a"
-    },
-    {
-      "id": "brand_grapefruit",
-      "wcId": "brand_grapefruit",
-      "name": "Grapefruit",
-      "slug": "grapefruit",
-      "image": null,
-      "color": "#004b29"
-    },
-    {
-      "id": "brand_lemon",
-      "wcId": "brand_lemon",
-      "name": "Lemon",
-      "slug": "lemon",
-      "image": null,
-      "color": "#5f5e5e"
-    },
-    {
-      "id": "brand_strawberry",
-      "wcId": "brand_strawberry",
-      "name": "Strawberry",
-      "slug": "strawberry",
-      "image": null,
-      "color": "#191c1d"
-    },
-    {
-      "id": "brand_green",
-      "wcId": "brand_green",
-      "name": "Green",
-      "slug": "green",
-      "image": null,
-      "color": "#ba1a1a"
-    },
-    {
-      "id": "brand_olmeca",
-      "wcId": "brand_olmeca",
-      "name": "Olmeca",
-      "slug": "olmeca",
-      "image": null,
-      "color": "#ae2a54"
-    },
-    {
-      "id": "brand_the_glenlivet",
-      "wcId": "brand_the_glenlivet",
-      "name": "The Glenlivet",
-      "slug": "the_glenlivet",
-      "image": null,
-      "color": "#840037"
-    },
-    {
-      "id": "brand_happy",
-      "wcId": "brand_happy",
-      "name": "Happy",
-      "slug": "happy",
-      "image": null,
-      "color": "#5b0024"
-    },
-    {
-      "id": "brand_krest",
-      "wcId": "brand_krest",
-      "name": "Krest",
-      "slug": "krest",
-      "image": null,
-      "color": "#00321a"
-    },
-    {
-      "id": "brand_schweppes",
-      "wcId": "brand_schweppes",
-      "name": "Schweppes",
-      "slug": "schweppes",
-      "image": null,
-      "color": "#004b29"
-    },
-    {
-      "id": "brand_fanta",
-      "wcId": "brand_fanta",
-      "name": "Fanta",
-      "slug": "fanta",
-      "image": null,
-      "color": "#5f5e5e"
-    },
-    {
-      "id": "brand_regular",
-      "wcId": "brand_regular",
-      "name": "Regular",
-      "slug": "regular",
-      "image": null,
-      "color": "#191c1d"
-    },
-    {
-      "id": "brand_dasani",
-      "wcId": "brand_dasani",
-      "name": "Dasani",
-      "slug": "dasani",
-      "image": null,
-      "color": "#ba1a1a"
-    },
-    {
-      "id": "brand_sprite",
-      "wcId": "brand_sprite",
-      "name": "Sprite",
-      "slug": "sprite",
-      "image": null,
-      "color": "#ae2a54"
-    },
-    {
-      "id": "brand_after",
-      "wcId": "brand_after",
-      "name": "After",
-      "slug": "after",
-      "image": null,
-      "color": "#840037"
-    },
-    {
-      "id": "brand_game",
-      "wcId": "brand_game",
-      "name": "Game",
-      "slug": "game",
-      "image": null,
-      "color": "#5b0024"
-    },
-    {
-      "id": "brand_sundowner",
-      "wcId": "brand_sundowner",
-      "name": "Sundowner",
-      "slug": "sundowner",
-      "image": null,
-      "color": "#00321a"
-    },
-    {
-      "id": "brand_martell",
-      "wcId": "brand_martell",
-      "name": "Martell",
-      "slug": "martell",
-      "image": null,
-      "color": "#004b29"
-    },
-    {
-      "id": "brand_malibu",
-      "wcId": "brand_malibu",
-      "name": "Malibu",
-      "slug": "malibu",
-      "image": null,
-      "color": "#5f5e5e"
-    },
-    {
-      "id": "brand_jameson",
-      "wcId": "brand_jameson",
-      "name": "Jameson",
-      "slug": "jameson",
-      "image": null,
-      "color": "#191c1d"
-    },
-    {
-      "id": "brand_chivas",
-      "wcId": "brand_chivas",
-      "name": "Chivas",
-      "slug": "chivas",
-      "image": null,
-      "color": "#ba1a1a"
+      "id": "brand_glenlivet",
+      "wcId": "brand_glenlivet",
+      "name": "Glenlivet",
+      "slug": "glenlivet",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-32.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 8
     },
     {
       "id": "brand_ballantine_s",
       "wcId": "brand_ballantine_s",
-      "name": "Ballantine's",
+      "name": "Ballantine’s",
       "slug": "ballantine_s",
       "image": null,
-      "color": "#ae2a54"
-    },
-    {
-      "id": "brand_bumbu",
-      "wcId": "brand_bumbu",
-      "name": "Bumbu",
-      "slug": "bumbu",
-      "image": null,
-      "color": "#840037"
-    },
-    {
-      "id": "brand_luc",
-      "wcId": "brand_luc",
-      "name": "Luc",
-      "slug": "luc",
-      "image": null,
-      "color": "#5b0024"
-    },
-    {
-      "id": "brand_beefeater",
-      "wcId": "brand_beefeater",
-      "name": "Beefeater",
-      "slug": "beefeater",
-      "image": null,
-      "color": "#00321a"
-    },
-    {
-      "id": "brand_ricard",
-      "wcId": "brand_ricard",
-      "name": "Ricard",
-      "slug": "ricard",
-      "image": null,
-      "color": "#004b29"
-    },
-    {
-      "id": "brand_jacobs",
-      "wcId": "brand_jacobs",
-      "name": "Jacobs",
-      "slug": "jacobs",
-      "image": null,
-      "color": "#5f5e5e"
-    },
-    {
-      "id": "brand_campo",
-      "wcId": "brand_campo",
-      "name": "Campo",
-      "slug": "campo",
-      "image": null,
-      "color": "#191c1d"
-    },
-    {
-      "id": "brand_kahlua",
-      "wcId": "brand_kahlua",
-      "name": "Kahlua",
-      "slug": "kahlua",
-      "image": null,
-      "color": "#ba1a1a"
-    },
-    {
-      "id": "brand_havana",
-      "wcId": "brand_havana",
-      "name": "Havana",
-      "slug": "havana",
-      "image": null,
-      "color": "#ae2a54"
-    },
-    {
-      "id": "brand_mumm",
-      "wcId": "brand_mumm",
-      "name": "Mumm",
-      "slug": "mumm",
-      "image": null,
-      "color": "#840037"
-    },
-    {
-      "id": "brand_monkey",
-      "wcId": "brand_monkey",
-      "name": "Monkey",
-      "slug": "monkey",
-      "image": null,
-      "color": "#5b0024"
-    },
-    {
-      "id": "brand_inverroche",
-      "wcId": "brand_inverroche",
-      "name": "Inverroche",
-      "slug": "inverroche",
-      "image": null,
-      "color": "#00321a"
-    },
-    {
-      "id": "brand_malfy",
-      "wcId": "brand_malfy",
-      "name": "Malfy",
-      "slug": "malfy",
-      "image": null,
-      "color": "#004b29"
-    },
-    {
-      "id": "brand_royal",
-      "wcId": "brand_royal",
-      "name": "Royal",
-      "slug": "royal",
-      "image": null,
-      "color": "#5f5e5e"
-    },
-    {
-      "id": "brand_imperial",
-      "wcId": "brand_imperial",
-      "name": "Imperial",
-      "slug": "imperial",
-      "image": null,
-      "color": "#191c1d"
-    },
-    {
-      "id": "brand_ballantines",
-      "wcId": "brand_ballantines",
-      "name": "Ballantines",
-      "slug": "ballantines",
-      "image": null,
-      "color": "#ba1a1a"
-    },
-    {
-      "id": "brand_aberlour",
-      "wcId": "brand_aberlour",
-      "name": "Aberlour",
-      "slug": "aberlour",
-      "image": null,
-      "color": "#ae2a54"
+      "color": "#ae2a54",
+      "visible": true,
+      "productCount": 8
     },
     {
       "id": "brand_absolut",
@@ -2735,15 +2783,89 @@
       "name": "Absolut",
       "slug": "absolut",
       "image": null,
-      "color": "#840037"
+      "color": "#840037",
+      "visible": true,
+      "productCount": 8
     },
     {
-      "id": "brand_test",
-      "wcId": "brand_test",
-      "name": "test",
-      "slug": "test",
+      "id": "brand_jinro",
+      "wcId": "brand_jinro",
+      "name": "Jinro",
+      "slug": "jinro",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2026/07/jinro-logo.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 7
+    },
+    {
+      "id": "brand_martell",
+      "wcId": "brand_martell",
+      "name": "Martell",
+      "slug": "martell",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-29.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 6
+    },
+    {
+      "id": "brand_olmeca",
+      "wcId": "brand_olmeca",
+      "name": "Olmeca",
+      "slug": "olmeca",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-33.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 5
+    },
+    {
+      "id": "brand_jameson_irish_whiskey",
+      "wcId": "brand_jameson_irish_whiskey",
+      "name": "Jameson Irish Whiskey",
+      "slug": "jameson_irish_whiskey",
       "image": null,
-      "color": "#5b0024"
+      "color": "#5f5e5e",
+      "visible": true,
+      "productCount": 5
+    },
+    {
+      "id": "brand_chivas",
+      "wcId": "brand_chivas",
+      "name": "Chivas",
+      "slug": "chivas",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-28.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 5
+    },
+    {
+      "id": "brand_beefeater",
+      "wcId": "brand_beefeater",
+      "name": "Beefeater",
+      "slug": "beefeater",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-26.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 5
+    },
+    {
+      "id": "brand_belaire",
+      "wcId": "brand_belaire",
+      "name": "Belaire",
+      "slug": "belaire",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-35.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 4
+    },
+    {
+      "id": "brand_malfy",
+      "wcId": "brand_malfy",
+      "name": "Malfy",
+      "slug": "malfy",
+      "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-30.webp",
+      "color": "#840037",
+      "visible": true,
+      "productCount": 3
     }
   ],
   "categories": [
@@ -2754,7 +2876,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/10/Images-11.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.961Z"
+      "lastSynced": "2026-08-13T18:41:35.657Z"
     },
     {
       "wcId": 31,
@@ -2763,7 +2885,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-3.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.964Z"
+      "lastSynced": "2026-08-13T18:41:35.662Z"
     },
     {
       "wcId": 53,
@@ -2772,7 +2894,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.968Z"
+      "lastSynced": "2026-08-13T18:41:35.665Z"
     },
     {
       "wcId": 121,
@@ -2781,7 +2903,7 @@
       "image": null,
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.971Z"
+      "lastSynced": "2026-08-13T18:41:35.667Z"
     },
     {
       "wcId": 132,
@@ -2790,7 +2912,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/10/Manhattan-Cocktail.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.974Z"
+      "lastSynced": "2026-08-13T18:41:35.669Z"
     },
     {
       "wcId": 30,
@@ -2799,7 +2921,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-6.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.977Z"
+      "lastSynced": "2026-08-13T18:41:35.671Z"
     },
     {
       "wcId": 49,
@@ -2808,7 +2930,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/09/tamanna-rumee-5n2XtbvekO8-unsplash.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.981Z"
+      "lastSynced": "2026-08-13T18:41:35.674Z"
     },
     {
       "wcId": 29,
@@ -2817,7 +2939,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Link.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.985Z"
+      "lastSynced": "2026-08-13T18:41:35.676Z"
     },
     {
       "wcId": 131,
@@ -2826,7 +2948,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/freepik__add-the-martell-xo-cognac-bottle-from-the-referenc__85339-e1765186016861.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.989Z"
+      "lastSynced": "2026-08-13T18:41:35.679Z"
     },
     {
       "wcId": 28,
@@ -2835,7 +2957,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-5.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.993Z"
+      "lastSynced": "2026-08-13T18:41:35.682Z"
     },
     {
       "wcId": 73,
@@ -2844,7 +2966,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/10/Images-12.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.996Z"
+      "lastSynced": "2026-08-13T18:41:35.684Z"
     },
     {
       "wcId": 133,
@@ -2853,7 +2975,7 @@
       "image": null,
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:19.999Z"
+      "lastSynced": "2026-08-13T18:41:35.687Z"
     },
     {
       "wcId": 78,
@@ -2862,7 +2984,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-8.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.003Z"
+      "lastSynced": "2026-08-13T18:41:35.690Z"
     },
     {
       "wcId": 89,
@@ -2871,7 +2993,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/image_fx_-2025-03-18T103144.060-6.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.007Z"
+      "lastSynced": "2026-08-13T18:41:35.692Z"
     },
     {
       "wcId": 27,
@@ -2880,7 +3002,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-4.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.012Z"
+      "lastSynced": "2026-08-13T18:41:35.694Z"
     },
     {
       "wcId": 166,
@@ -2889,7 +3011,7 @@
       "image": null,
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.015Z"
+      "lastSynced": "2026-08-13T18:41:35.696Z"
     },
     {
       "wcId": 75,
@@ -2898,7 +3020,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/10/Images-10.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.019Z"
+      "lastSynced": "2026-08-13T18:41:35.702Z"
     },
     {
       "wcId": 26,
@@ -2907,7 +3029,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-2.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.023Z"
+      "lastSynced": "2026-08-13T18:41:35.704Z"
     },
     {
       "wcId": 15,
@@ -2916,7 +3038,7 @@
       "image": null,
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.026Z"
+      "lastSynced": "2026-08-13T18:41:35.706Z"
     },
     {
       "wcId": 25,
@@ -2925,7 +3047,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/10/Link-1.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.029Z"
+      "lastSynced": "2026-08-13T18:41:35.707Z"
     },
     {
       "wcId": 24,
@@ -2934,7 +3056,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Whiskey.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.032Z"
+      "lastSynced": "2026-08-13T18:41:35.709Z"
     },
     {
       "wcId": 23,
@@ -2943,7 +3065,7 @@
       "image": "https://myhappyhour.co.ke/wp-content/uploads/2023/10/Images-02.webp",
       "description": "",
       "display": "default",
-      "lastSynced": "2026-07-31T11:04:20.035Z"
+      "lastSynced": "2026-08-13T18:41:35.711Z"
     }
   ],
   "syncStatus": "idle",
@@ -2954,5 +3076,73 @@
     "showOutOfStock": false,
     "logo": "/api/uploads/brand_1785340974428_o62osy.svg",
     "background": "/api/uploads/brand_1785341332987_q3l6bn.jpg"
-  }
+  },
+  "slides": [
+    {
+      "id": "slide_1",
+      "title": "Jaba Beetroot Happy Hour",
+      "subtitle": "Chilled & refreshing organic blend delivered in 20 minutes",
+      "image": "/uploads/slides/1-Happy-Hour-Jaba-Beetroot-banners-12-8-26.jpg",
+      "badge": "SPECIAL OFFER",
+      "buttonText": "Order Now",
+      "active": true,
+      "order": 1,
+      "productId": null
+    },
+    {
+      "id": "slide_2",
+      "title": "Jaba Pineapple Flash Sale",
+      "subtitle": "Sweet tropical infusion to kickstart your party",
+      "image": "/uploads/slides/2-Happy-Hour-Jaba-Pineapple-banners-12-8-26.jpg",
+      "badge": "POPULAR",
+      "buttonText": "Order Now",
+      "active": true,
+      "order": 2,
+      "productId": null
+    },
+    {
+      "id": "slide_3",
+      "title": "Jaba Watermelon Chilled",
+      "subtitle": "Ice cold watermelon elixir for warm Nairobi nights",
+      "image": "/uploads/slides/3-Happy-Hour-Jaba-Watermelon-banners-12-8-26.jpg",
+      "badge": "FRESH ARRIVAL",
+      "buttonText": "Order Now",
+      "active": true,
+      "order": 3,
+      "productId": null
+    },
+    {
+      "id": "slide_4",
+      "title": "Jaba Tamarind Delight",
+      "subtitle": "Tangy tamarind flavor with a smooth finish",
+      "image": "/uploads/slides/4-Happy-Hour-Jaba-Tamarind-banners-12-8-26.jpg",
+      "badge": "FEATURED",
+      "buttonText": "Order Now",
+      "active": true,
+      "order": 4,
+      "productId": null
+    },
+    {
+      "id": "slide_5",
+      "title": "Jaba Tropical Mix",
+      "subtitle": "Exotic fruit blend for the ultimate happy hour",
+      "image": "/uploads/slides/5-Happy-Hour-Jaba-Tropical-banners-12-8-26.jpg",
+      "badge": "HAPPY HOUR",
+      "buttonText": "Order Now",
+      "active": true,
+      "order": 5,
+      "productId": null
+    },
+    {
+      "id": "slide_6",
+      "title": "Jaba Hibiscus Infusion",
+      "subtitle": "Rich floral hibiscus elixir, crafted to perfection",
+      "image": "/uploads/slides/6-Happy-Hour-Jaba-Hibiscus-banners-12-8-26.jpg",
+      "badge": "TRENDING",
+      "buttonText": "Order Now",
+      "active": true,
+      "order": 6,
+      "productId": null
+    }
+  ]
 }
