@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { haptic } from '@/lib/haptic';
+import ShareButton from '@/components/ShareButton';
 
 export default function ProductCard({ product, quantity, onAdd, onIncrement, onDecrement, onVariantChange }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -58,25 +60,30 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
       }}
     >
       <div className="aspect-square relative overflow-hidden bg-gray-50">
-        {product.image ? (
-          <Image
-            src={selectedVariant?.image || product.image}
-            alt={product.name}
-            fill
-            loading="eager"
-            className={`object-cover transition-transform duration-500 ${outOfStock ? 'grayscale blur-[2px] scale-105' : 'group-hover:scale-105'}`}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-4xl">🍹</div>
-        )}
+        <Link href={`/product/${product.slug || product.wcId || product.id}`} className="block w-full h-full">
+          {product.image ? (
+            <Image
+              src={selectedVariant?.image || product.image}
+              alt={product.name}
+              fill
+              loading="eager"
+              className={`object-cover transition-transform duration-500 ${outOfStock ? 'grayscale blur-[2px] scale-105' : 'group-hover:scale-105'}`}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-4xl">🍹</div>
+          )}
+        </Link>
         {product.fast6 && !outOfStock && (
-          <div className="absolute top-2 left-2 bg-[#840037] text-white text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-md shadow-sm">
+          <div className="absolute top-2 left-2 z-10 bg-[#840037] text-white text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-md shadow-sm pointer-events-none">
             FAST 6
           </div>
         )}
+        <div className="absolute top-2 right-2 z-10">
+          <ShareButton product={product} variant="icon" />
+        </div>
         {outOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <span className="bg-gray-900/70 text-white text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               OUT OF STOCK
             </span>
@@ -84,12 +91,14 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
         )}
       </div>
       <div className="flex flex-col flex-1 p-2.5 md:p-3 bg-white">
-        <h3
-          className={`text-[13px] md:text-[14px] line-clamp-2 ${outOfStock ? 'text-gray-400' : 'text-gray-900'}`}
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}
-        >
-          {product.name}
-        </h3>
+        <Link href={`/product/${product.slug || product.wcId || product.id}`} className="hover:text-[#840037] transition-colors">
+          <h3
+            className={`text-[13px] md:text-[14px] line-clamp-2 ${outOfStock ? 'text-gray-400' : 'text-gray-900'}`}
+            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}
+          >
+            {product.name}
+          </h3>
+        </Link>
         <div className="mt-auto pt-1.5 flex flex-col gap-1.5">
           <span
             className={`text-[16px] md:text-[18px] font-bold ${outOfStock ? 'text-gray-400' : 'text-[#840037]'}`}
