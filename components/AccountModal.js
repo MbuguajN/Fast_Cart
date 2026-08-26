@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 export default function AccountModal({ isOpen, onClose, onReorder }) {
-  const { user, phase, phone: authPhone, otpMeta, submitPhone, verifyOtp, resendOtp, cancelOtp, completeProfileAtCheckout, updateEmail, logout } = useAuth();
+  const { user, phase, phone: authPhone, otpMeta, submitPhone, verifyOtp, loginWithPassword, resendOtp, cancelOtp, completeProfileAtCheckout, updateEmail, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile'
   const [inputPhone, setInputPhone] = useState('');
   const [nameInput, setNameInput] = useState('');
@@ -23,7 +23,14 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
   const [countdown, setCountdown] = useState(60);
   const otpRefs = useRef([]);
 
+  // Password login state
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const isOtpPhase = phase === 'otp_pending';
+  const isPasswordPhase = phase === 'needs_password';
 
   // Countdown for resend
   useEffect(() => {
@@ -161,6 +168,26 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
     setOtpError('');
     setInputPhone('');
     setLoadingAuth(false);
+    setPasswordInput('');
+    setPasswordError('');
+  };
+
+  // Password login handler
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!passwordInput) return;
+    setPasswordLoading(true);
+    setPasswordError('');
+    try {
+      const result = await loginWithPassword(passwordInput);
+      if (result?.error) {
+        setPasswordError(result.error);
+      }
+    } catch {
+      setPasswordError('Login failed. Please try again.');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   const handleSaveProfile = async (e) => {
@@ -236,7 +263,7 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
         {/* Guest Authentication Prompt / OTP Verification */}
         {!user ? (
           <div className="p-6 space-y-5">
-            {!isOtpPhase ? (
+            {!isOtpPhase && !isPasswordPhase ? (
               /* Phone Entry */
               <>
                 <div className="text-center space-y-1">
@@ -279,9 +306,77 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
                     className="w-full py-3.5 rounded-2xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-md active:scale-95 disabled:opacity-50"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    {loadingAuth ? 'Sending code...' : 'CONTINUE WITH PHONE'}
+                    {loadingAuth ? 'Checking...' : 'CONTINUE WITH PHONE'}
                   </button>
                 </form>
+              </>
+            ) : isPasswordPhase ? (
+              /* Password Login via CoCart */
+              <>
+                <div className="text-center space-y-1">
+                  <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#840037] mx-auto flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    Enter your password
+                  </h3>
+                  <p className="text-xs text-gray-500" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                    Sign in with your phone number <strong className="text-[#840037]">{authPhone}</strong> and account password
+                  </p>
+                </div>
+
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                  <div className="relative">
+                    <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      Password
+                    </label>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={passwordInput}
+                      onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
+                      placeholder="Enter your account password"
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-300 text-sm font-semibold focus:ring-2 focus:ring-[#840037] focus:outline-none pr-12"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-8 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+
+                  {passwordError && (
+                    <p className="text-xs text-red-600 text-center font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>{passwordError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={passwordLoading || !passwordInput}
+                    className="w-full py-3.5 rounded-2xl text-xs font-extrabold text-white bg-[#840037] hover:bg-[#6b002c] transition-all shadow-md active:scale-95 disabled:opacity-50"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    {passwordLoading ? 'Signing in...' : 'SIGN IN WITH PASSWORD'}
+                  </button>
+                </form>
+
+                <button onClick={handleOtpBack} className="text-xs font-bold text-gray-500 hover:text-gray-900" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  ← Change number
+                </button>
               </>
             ) : (
               /* OTP Verification */

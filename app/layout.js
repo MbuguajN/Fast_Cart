@@ -1,5 +1,6 @@
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
 
 const montserrat = Montserrat({
   variable: "--font-sans",
@@ -19,11 +20,17 @@ export const viewport = {
   userScalable: false,
 };
 
+import { CartProvider } from "@/lib/cart-context";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${montserrat.variable}`}>
       <body>
-        {children}
+        <AuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 export default function PhoneEntry({ onSubmit }) {
-  const { phase, otpMeta, verifyOtp, resendOtp, cancelOtp } = useAuth();
+  const { phase, otpMeta, verifyOtp, loginWithPassword, resendOtp, cancelOtp } = useAuth();
   const [digits, setDigits] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,6 +21,13 @@ export default function PhoneEntry({ onSubmit }) {
 
   const isValid = digits.length >= 9;
   const isOtpPhase = phase === 'otp_pending';
+  const isPasswordPhase = phase === 'needs_password';
+
+  // Password login state
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -162,6 +169,26 @@ export default function PhoneEntry({ onSubmit }) {
     setOtpDigits(['', '', '', '', '', '']);
     setOtpError('');
     setLoading(false);
+    setPasswordInput('');
+    setPasswordError('');
+  };
+
+  // Password login handler
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!passwordInput) return;
+    setPasswordLoading(true);
+    setPasswordError('');
+    try {
+      const result = await loginWithPassword(passwordInput);
+      if (result?.error) {
+        setPasswordError(result.error);
+      }
+    } catch {
+      setPasswordError('Login failed. Please try again.');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   return (
@@ -218,7 +245,7 @@ export default function PhoneEntry({ onSubmit }) {
       >
         <div className="w-full flex flex-col items-center flex-1 overflow-y-auto justify-between" style={{ padding: 'clamp(16px, 4vh, 28px) clamp(20px, 5vw, 24px) clamp(12px, 2vh, 20px)' }}>
 
-          {!isOtpPhase ? (
+          {!isOtpPhase && !isPasswordPhase ? (
             /* ─── Phone Entry Screen ─── */
             <>
               {/* Item 1: Heading */}
@@ -333,6 +360,113 @@ export default function PhoneEntry({ onSubmit }) {
                   <a className="font-semibold hover:underline" style={{ color: '#840037' }} href="#">Privacy Policy</a>
                 </p>
               </footer>
+            </>
+          ) : isPasswordPhase ? (
+            /* ─── Password Login Screen (CoCart) ─── */
+            <>
+              {/* Heading */}
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#840037] flex items-center justify-center shadow-xs">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="font-bold tracking-tight" style={{ fontFamily: 'Montserrat, sans-serif', color: '#840037', fontSize: 'clamp(18px, 5vw, 24px)', marginBottom: 'clamp(2px, 0.5vh, 4px)' }}>
+                  Enter your password
+                </h2>
+                <p className="text-center" style={{ fontFamily: 'Montserrat, sans-serif', color: '#574145', fontSize: 'clamp(12px, 3.2vw, 15px)' }}>
+                  Sign in with your account password
+                </p>
+              </div>
+
+              {/* Password Input */}
+              <form onSubmit={handlePasswordSubmit} className="w-full" style={{ marginTop: 'clamp(8px, 2vh, 16px)' }}>
+                <div className="relative w-full" style={{ height: 'clamp(44px, 11vw, 52px)' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={passwordInput}
+                    onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
+                    placeholder="Enter your password"
+                    className="w-full h-full bg-white border-none focus:ring-0 focus:outline-none transition-all outline-none"
+                    style={{
+                      borderRadius: '12px',
+                      border: `2px solid ${passwordError ? '#ba1a1a' : '#debfc3'}`,
+                      padding: '0 clamp(40px, 10vw, 52px) 0 clamp(10px, 2.5vw, 16px)',
+                      fontSize: 'clamp(14px, 4vw, 18px)',
+                      boxShadow: passwordError
+                        ? '0 0 8px rgba(186,26,26,0.2), 0 0 20px rgba(186,26,26,0.1)'
+                        : '0 0 8px rgba(132,0,55,0.15), 0 0 20px rgba(132,0,55,0.08)',
+                      color: '#191c1d',
+                      fontFamily: 'Montserrat, sans-serif',
+                    }}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
+                {/* Error */}
+                {passwordError && (
+                  <p
+                    className="text-center"
+                    style={{ fontFamily: 'Montserrat, sans-serif', color: '#ba1a1a', fontSize: 'clamp(11px, 3vw, 14px)', marginTop: '8px' }}
+                  >
+                    {passwordError}
+                  </p>
+                )}
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={!passwordInput || passwordLoading}
+                  className="w-full text-white font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    height: 'clamp(44px, 11vw, 52px)',
+                    backgroundColor: '#840037',
+                    borderRadius: '12px',
+                    fontFamily: 'Montserrat, sans-serif',
+                    fontSize: 'clamp(14px, 3.8vw, 16px)',
+                    marginTop: 'clamp(8px, 2vh, 16px)',
+                  }}
+                >
+                  {passwordLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Signing in...
+                    </div>
+                  ) : (
+                    <span>Sign In</span>
+                  )}
+                </button>
+              </form>
+
+              {/* Back */}
+              <div className="flex items-center justify-center w-full">
+                <button
+                  onClick={handleBack}
+                  className="font-semibold"
+                  style={{ fontFamily: 'Montserrat, sans-serif', color: '#574145', fontSize: 'clamp(11px, 3vw, 13px)' }}
+                >
+                  ← Change number
+                </button>
+              </div>
             </>
           ) : (
             /* ─── OTP Verification Screen ─── */

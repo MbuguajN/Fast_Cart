@@ -21,7 +21,7 @@ export async function POST(request) {
   }
 
   try {
-    const { cart, paymentMethod, locationData, customerId, customerNote, email, deliveryFee } = await request.json();
+    const { cart, paymentMethod, locationData, customerId, customerNote, email, deliveryFee, kraPin } = await request.json();
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
@@ -112,6 +112,7 @@ export async function POST(request) {
         { key: 'delivery_location', value: deliveryAddress },
         { key: 'delivery_zone', value: sanitize(locationData?.zone || '') },
         { key: 'delivery_fee', value: String(fee) },
+        ...(kraPin ? [{ key: 'kra_pin', value: sanitize(kraPin) }] : []),
       ],
     };
 
@@ -139,7 +140,7 @@ export async function POST(request) {
 
     const paystackData = await initializePayment({
       email: customerEmail,
-      amount: total,
+      amount: parseFloat(order.total),
       reference,
       metadata: {
         order_id: order.id,

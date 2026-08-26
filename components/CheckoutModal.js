@@ -40,6 +40,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const [error, setError] = useState('');
   const [step, setStep] = useState('confirm');
   const [buildingName, setBuildingName] = useState('');
+  const [kraPin, setKraPin] = useState('');
   const [userName, setUserName] = useState(user?.name || '');
   const [userPhone, setUserPhone] = useState(user?.phone || '');
   const [phoneLookupDone, setPhoneLookupDone] = useState(!!user?.phone);
@@ -259,6 +260,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
           customerNote: '',
           email: user?.email || '',
           deliveryFee,
+          kraPin: kraPin.trim(),
         }),
       });
 
@@ -506,6 +508,19 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                       onChange={(e) => { setBuildingName(e.target.value); setError(''); }}
                       placeholder="e.g. Blue Rose Apartments, Apt 4B"
                       className="w-full bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm"
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  {/* KRA PIN (Optional) */}
+                  <div>
+                    <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>KRA PIN (Optional)</label>
+                    <input
+                      type="text"
+                      value={kraPin}
+                      onChange={(e) => { setKraPin(e.target.value.toUpperCase()); setError(''); }}
+                      placeholder="e.g. A123456789B"
+                      className="w-full bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm uppercase"
                       style={inputStyle}
                     />
                   </div>

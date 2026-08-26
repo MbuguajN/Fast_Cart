@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { AuthProvider, useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 import BottomNav from '@/components/BottomNav';
+import AccountModal from '@/components/AccountModal';
 import Footer from '@/components/Footer';
 
 const STATUS_COLORS = {
@@ -34,6 +35,7 @@ function OrdersContent() {
   const [phoneSearch, setPhoneSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   useEffect(() => {
     if (user?.phone && !phoneSearch) {
@@ -278,15 +280,19 @@ function OrdersContent() {
       </main>
 
       <Footer />
-      <BottomNav cartCount={0} activeTab="orders" />
+      <BottomNav
+        cartCount={0}
+        activeTab="orders"
+        onOpenAccount={() => setShowAccountModal(true)}
+      />
+      <AccountModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+      />
     </div>
   );
 }
 
 export default function OrdersPage() {
-  return (
-    <AuthProvider>
-      <OrdersContent />
-    </AuthProvider>
-  );
+  return <OrdersContent />;
 }

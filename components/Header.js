@@ -165,6 +165,14 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             </svg>
           </button>
 
+          <Link
+            href="/brands"
+            className="text-white text-xs font-semibold hover:text-white/80 transition-all flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 px-3.5 py-2.5 rounded-full"
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            Brands
+          </Link>
+
           {/* User Account / Profile & Orders Button */}
           <button
             onClick={() => onOpenAccount?.()}

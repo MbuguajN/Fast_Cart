@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { AuthProvider, useAuth } from '@/lib/auth-context';
+import { useAuth } from "@/lib/auth-context";
+import { useCart } from "@/lib/cart-context";
 import Header from '@/components/Header';
 import CategoryDock from '@/components/CategoryDock';
 import ProductCard from '@/components/ProductCard';
@@ -23,7 +24,7 @@ function AppShell() {
   const [location, setLocation] = useState(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState('fast6');
-  const [cart, setCart] = useState([]);
+  const { cart, setCart, addToCart, incrementItem, decrementItem, removeItem, clearCart, getQuantity, setProducts, upsellPopup, setUpsellPopup } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
@@ -33,7 +34,6 @@ function AppShell() {
   const [showOutOfStock, setShowOutOfStock] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
-  const [upsellPopup, setUpsellPopup] = useState(null);
   const [appLoaded, setAppLoaded] = useState(false);
 
   useEffect(() => {
@@ -116,7 +116,12 @@ function AppShell() {
       .catch(() => {});
   }, []);
 
+
   const PRODUCTS = syncedProducts.length > 0 ? syncedProducts : FALLBACK_PRODUCTS;
+
+  useEffect(() => {
+    setProducts(PRODUCTS);
+  }, [PRODUCTS, setProducts]);
 
   const BRANDS = useMemo(() => {
     const raw = (syncedBrands.length > 0 ? syncedBrands : FALLBACK_BRANDS).filter((b) => b.visible !== false);
@@ -180,78 +185,30 @@ function AppShell() {
     return filtered;
   }, [activeCategory, selectedBrand, showOutOfStock, searchQuery, PRODUCTS]);
 
-  const addToCart = useCallback((productId, variantId = null) => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => {
-      const exists = prev.find((i) => i.id === productId);
-      if (exists) return prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity + 1, variantId: variantId || i.variantId } : i);
-      return [...prev, { id: productId, variantId, quantity: 1 }];
-    });
-
-    const product = PRODUCTS.find((p) => p.id === productId);
-    if (!product?.upsellIds?.length) return;
-
-    const upsellProducts = product.upsellIds
-      .map((id) => PRODUCTS.find((p) => p.id === id))
-      .filter((p) => p && p.inStock !== false);
-
-    if (upsellProducts.length > 0) {
-      setTimeout(() => {
-        queueMicrotask(() => setUpsellPopup({ product, upsellProducts }));
-      }, 300);
-    }
-  }, [PRODUCTS]);
-
-  const incrementItem = useCallback((productId) => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity + 1 } : i));
-  }, []);
-
-  const decrementItem = useCallback((productId) => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.map((i) => i.id === productId ? { ...i, quantity: i.quantity - 1 } : i).filter((i) => i.quantity > 0));
-  }, []);
-
-  const removeItem = useCallback((productId) => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-    setCart((prev) => prev.filter((i) => i.id !== productId));
-
-    if (typeof window !== 'undefined') {
-      const shown = JSON.parse(localStorage.getItem('upsells_shown') || '[]');
-      const updated = shown.filter((id) => id !== productId);
-      localStorage.setItem('upsells_shown', JSON.stringify(updated));
-    }
-  }, []);
-
-  const getQuantity = useCallback((productId) => cart.find((i) => i.id === productId)?.quantity || 0, [cart]);
 
   const handleOrderSuccess = useCallback((order) => {
     setShowCheckout(false);
     setOrderSuccess(order);
-    setCart([]);
-  }, []);
+    clearCart();
+  }, [clearCart]);
 
   const handleReorder = useCallback((items) => {
     if (!items || !Array.isArray(items)) return;
-    setCart((prev) => {
-      const newCart = [...prev];
-      for (const item of items) {
-        const prod = PRODUCTS.find(
-          (p) => String(p.id) === String(item.productId) || String(p.wcId) === String(item.productId) || p.name.toLowerCase() === (item.name || '').toLowerCase()
-        );
-        if (prod) {
-          const idx = newCart.findIndex((i) => i.id === prod.id);
-          if (idx >= 0) {
-            newCart[idx].quantity += item.quantity || 1;
-          } else {
-            newCart.push({ id: prod.id, quantity: item.quantity || 1 });
-          }
+    for (const item of items) {
+      const prod = PRODUCTS.find(
+        (p) => String(p.id) === String(item.productId) || String(p.wcId) === String(item.productId) || p.name.toLowerCase() === (item.name || '').toLowerCase()
+      );
+      if (prod) {
+        // Just call addToCart (it handles quantity by calling it multiple times)
+        const quantity = item.quantity || 1;
+        for (let i = 0; i < quantity; i++) {
+          addToCart(prod.id);
         }
       }
-      return newCart;
-    });
+    }
+    setShowAccountModal(false);
     setShowCheckout(true);
-  }, [PRODUCTS]);
+  }, [PRODUCTS, addToCart]);
 
   const effectiveLocation = location || (user?.landmark ? { text: user.landmark, lat: null, lng: null } : null);
 
@@ -358,7 +315,7 @@ function AppShell() {
           }}
         />
       )}
-      {orderSuccess && <OrderSuccess order={orderSuccess} onNewOrder={handleNewOrder} onUpdateEmail={updateEmail} />}
+      {orderSuccess && <OrderSuccess order={orderSuccess} onNewOrder={() => setOrderSuccess(null)} onUpdateEmail={updateEmail} />}
       {upsellPopup && (
         <UpsellPopup
           product={upsellPopup.product}
@@ -395,9 +352,5 @@ function AppShell() {
 }
 
 export default function Home() {
-  return (
-    <AuthProvider>
-      <AppShell />
-    </AuthProvider>
-  );
+  return <AppShell />;
 }
