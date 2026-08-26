@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getBrands, getProducts, getSettings, isProductInStock } from '@/lib/data-store';
 import BrandView from './BrandView';
+import JabaView from '../jaba/JabaView';
 
 function mapProduct(p) {
   const catName = p.categoryName || '';
@@ -14,6 +15,7 @@ function mapProduct(p) {
 
   return {
     id: p.wcId || p.id,
+    wcId: p.wcId || p.id,
     name: p.name,
     slug: p.slug,
     type: p.type || 'simple',
@@ -88,6 +90,14 @@ async function getBrandData(slug) {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
+  const normalized = String(slug).toLowerCase().trim();
+  if (normalized === 'jaba' || normalized === 'brand_jaba') {
+    return {
+      title: 'Jaba Juice - Pick Your Flavour. Pour Your Happy. | Happy Hour Nairobi',
+      description: 'Explore authentic Happy Hour Jaba Juice flavours: Tropical, Sugarcane, Hibiscus, Tamarind, Watermelon, Pineapple, and Beetroot. Delivered chilled in 20 minutes.',
+    };
+  }
+
   const data = await getBrandData(slug);
   if (!data) return { title: 'Brand Not Found | LiquorDash' };
   return { 
@@ -98,10 +108,16 @@ export async function generateMetadata({ params }) {
 
 export default async function BrandPage({ params }) {
   const { slug } = await params;
+  const normalized = String(slug).toLowerCase().trim();
   const data = await getBrandData(slug);
 
   if (!data) {
     notFound();
+  }
+
+  // If Jaba, render custom bespoke Jaba design
+  if (normalized === 'jaba' || normalized === 'brand_jaba' || data.brand?.name?.toLowerCase() === 'jaba') {
+    return <JabaView jabaProducts={data.products} />;
   }
 
   return <BrandView brand={data.brand} initialProducts={data.products} />;

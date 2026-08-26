@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Header({ location, onLocationSet, onSearch, cartCount = 0, onOpenCart, onOpenAccount, user }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [logo, setLogo] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const pathname = usePathname();
+
+  const isJaba = pathname?.includes('/jaba') || pathname?.includes('/brands/jaba');
+  const isBrands = pathname?.startsWith('/brands') && !pathname?.includes('/brands/jaba');
 
   useEffect(() => {
     fetch('/api/settings')
@@ -25,10 +30,10 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
       {/* Mobile Layout (< md) */}
       <div className="md:hidden">
         <div className="flex justify-between items-center px-4 h-14 w-full pt-4 pb-1">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <Link href="/" className="flex items-center">
               {loaded && logo ? (
-                <img src={logo} alt="Logo" className="max-h-10 w-auto object-contain" />
+                <img src={logo} alt="Logo" className="max-h-9 w-auto object-contain" />
               ) : (
                 <span className="text-white font-extrabold text-lg tracking-wider" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                   LiquorDash
@@ -37,7 +42,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             </Link>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20 active:scale-95 px-2.5 py-1 rounded-full transition-all text-left"
@@ -48,19 +53,20 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
               </svg>
               <div className="flex flex-col">
-                <span className="text-[8px] uppercase tracking-widest text-white/70 font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                  Delivery to
+                <span className="text-[8px] uppercase tracking-wider text-white/70 font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                  Deliver to
                 </span>
                 <span className="text-[11px] text-white font-bold truncate max-w-[100px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                  {location?.text || 'Set Address'}
+                  {location?.text ? location.text.split(',')[0] : 'Set Location'}
                 </span>
               </div>
             </button>
 
+            {/* Profile Button */}
             <button
               onClick={() => onOpenAccount?.()}
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center font-bold text-xs shadow-xs transition-all active:scale-95"
-              aria-label="Account"
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white text-xs font-bold transition-all overflow-hidden border border-white/20"
+              title={user ? `${user.name || user.phone} - Account` : 'Sign In'}
             >
               {user?.name ? (
                 user.name.charAt(0).toUpperCase()
@@ -96,9 +102,9 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
         </div>
       </div>
 
-      {/* Desktop Layout (≥ md) */}
-      <div className="hidden md:flex justify-between items-center px-8 h-20 max-w-7xl mx-auto w-full gap-6">
-        {/* Left: Brand Logo (+10% size) */}
+      {/* Desktop Layout (≥ md): Logo -> Jaba & Brands Links -> Search Bar -> Delivery Address -> User Account -> Cart */}
+      <div className="hidden md:flex justify-between items-center px-8 h-20 max-w-7xl mx-auto w-full gap-5">
+        {/* 1. Left: Brand Logo */}
         <div className="flex items-center flex-shrink-0">
           <Link href="/" className="flex items-center hover:opacity-95 transition-opacity" title="Happy Hour / LiquorDash Home">
             {loaded && logo ? (
@@ -111,17 +117,59 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
           </Link>
         </div>
 
-        {/* Center Search Bar */}
-        <div className="flex-1 max-w-xl">
+        {/* 2. Standout Page Navigation Links (Jaba & Brands - Before Search & Delivery Address) */}
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          {/* Jaba Brand Link - High-Impact Amber/Gold Glow */}
+          <Link
+            href="/brands/jaba"
+            className={`text-xs font-black transition-all flex items-center gap-2 px-4 py-2.5 rounded-full active:scale-95 shadow-sm group ${
+              isJaba
+                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-gray-950 ring-2 ring-amber-300/80 shadow-amber-500/20 shadow-md scale-105'
+                : 'bg-gradient-to-r from-amber-400/30 to-amber-500/20 text-amber-200 border border-amber-300/50 hover:bg-amber-400/40 hover:text-white hover:border-amber-300 hover:scale-105'
+            }`}
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            <div className="relative flex items-center justify-center">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute opacity-75" />
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+            </div>
+            <span className="tracking-wide">JABA</span>
+            <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-md bg-black/20 text-amber-100 group-hover:bg-black/30 transition-colors font-extrabold">
+              HOT
+            </span>
+          </Link>
+
+          {/* Brands Directory Link - Frosted Glass Luxury Badge */}
+          <Link
+            href="/brands"
+            className={`text-xs font-bold transition-all flex items-center gap-2 px-4 py-2.5 rounded-full active:scale-95 shadow-sm ${
+              isBrands
+                ? 'bg-white text-[#840037] ring-2 ring-white/60 shadow-md scale-105'
+                : 'bg-white/15 text-white border border-white/25 hover:bg-white/25 hover:border-white/40 hover:scale-105'
+            }`}
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
+            </svg>
+            <span className="tracking-wide">BRANDS</span>
+          </Link>
+        </div>
+
+        {/* 3. Center Search Bar */}
+        <div className="flex-1 max-w-md">
           <div className="relative group">
             <div className="w-full h-11 bg-white/95 hover:bg-white border border-transparent focus-within:border-white rounded-full flex items-center px-4 shadow-inner transition-all duration-300">
               <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#840037' }} fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 11.99 14 9.5 14z"/>
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
               </svg>
               <input
                 className="w-full h-full bg-transparent border-none text-gray-900 placeholder-gray-500 text-sm px-3 focus:ring-0 outline-none"
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
-                placeholder="Search for drinks, mixers, wine, or snacks..."
+                placeholder="Search for drinks, mixers, wine..."
                 type="text"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); onSearch?.(e.target.value); }}
@@ -131,7 +179,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
                   onClick={() => { setSearchQuery(''); onSearch?.(''); }}
                   className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  <svg className="w-3.5 h-3.5" style={{ color: '#9ca3af' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -140,24 +188,24 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
           </div>
         </div>
 
-        {/* Right: Delivering To, User Account / Orders, Cart */}
-        <div className="flex items-center gap-3.5 flex-shrink-0">
-          {/* Delivering To Indicator (Right Side & Clickable) */}
+        {/* 4. Right: Delivering To, User Account, Cart */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Delivering To Indicator */}
           <button
             type="button"
             onClick={() => onLocationSet?.(null)}
-            className="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 active:scale-95 px-4 py-2 rounded-full transition-all text-left group"
+            className="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 active:scale-95 px-3.5 py-2 rounded-full transition-all text-left group border border-white/15"
             title="Click to set or change your delivery address"
           >
             <svg className="w-4 h-4 text-white group-hover:scale-110 transition-transform flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-widest text-white/70 font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              <span className="text-[8px] uppercase tracking-widest text-white/70 font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                 Delivering to
               </span>
-              <span className="text-xs text-white font-bold truncate max-w-[150px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                {location?.text || 'Set Location'}
+              <span className="text-xs text-white font-bold truncate max-w-[120px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                {location?.text ? location.text.split(',')[0] : 'Set Location'}
               </span>
             </div>
             <svg className="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -165,18 +213,10 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             </svg>
           </button>
 
-          <Link
-            href="/brands"
-            className="text-white text-xs font-semibold hover:text-white/80 transition-all flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 px-3.5 py-2.5 rounded-full"
-            style={{ fontFamily: 'Montserrat, sans-serif' }}
-          >
-            Brands
-          </Link>
-
-          {/* User Account / Profile & Orders Button */}
+          {/* User Account / Profile Button */}
           <button
             onClick={() => onOpenAccount?.()}
-            className="text-white text-xs font-semibold hover:text-white/80 transition-all flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 px-3.5 py-2.5 rounded-full"
+            className="text-white text-xs font-semibold hover:text-white/80 transition-all flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 px-3.5 py-2.5 rounded-full border border-white/15 cursor-pointer"
             style={{ fontFamily: 'Montserrat, sans-serif' }}
             title={user ? `${user.name || user.phone} - View Account & Orders` : 'Sign in to view orders and profile'}
           >
@@ -190,19 +230,16 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
               )}
             </div>
             <div className="flex flex-col text-left">
-              <span className="truncate max-w-[100px] text-xs font-bold leading-tight">
+              <span className="truncate max-w-[80px] text-xs font-bold leading-tight">
                 {user ? (user.name || user.phone) : 'Sign In'}
               </span>
-              {user && (
-                <span className="text-[9px] text-white/70 leading-tight">Orders &amp; Account</span>
-              )}
             </div>
           </button>
 
           {/* Cart Button */}
           <button
             onClick={() => onOpenCart?.()}
-            className="flex items-center gap-2 bg-white text-[#840037] hover:bg-white/95 px-4 py-2.5 rounded-full font-bold text-xs shadow-sm hover:shadow transition-all active:scale-95"
+            className="flex items-center gap-2 bg-white text-[#840037] hover:bg-amber-300 hover:text-gray-950 px-4 py-2.5 rounded-full font-extrabold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -210,7 +247,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             </svg>
             <span>Cart</span>
             {cartCount > 0 && (
-              <span className="bg-[#840037] text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold ml-0.5">
+              <span className="bg-[#840037] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-xs">
                 {cartCount}
               </span>
             )}
