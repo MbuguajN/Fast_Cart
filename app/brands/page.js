@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getBrands } from '@/lib/data-store';
+import { getBrands, getProducts, getSettings, isProductInStock } from '@/lib/data-store';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BottomNav from '@/components/BottomNav';
@@ -10,7 +10,25 @@ export const metadata = {
 };
 
 export default async function BrandsPage() {
-  const brands = getBrands().filter((b) => b.visible !== false);
+  const settings = getSettings();
+  const showOutOfStock = settings.showOutOfStock !== false;
+  const rawProducts = getProducts();
+
+  const brands = getBrands().filter((b) => {
+    if (b.visible === false) return false;
+    if (!showOutOfStock) {
+      const bName = (b.name || '').toLowerCase().trim();
+      const bId = String(b.wcId || b.id || '');
+      const hasInStock = rawProducts.some((p) => {
+        const pBrand = (p.brandName || '').toLowerCase().trim();
+        const pBrandId = String(p.brandId || '');
+        const matches = pBrand === bName || pBrandId === bId || (bName && pBrand.includes(bName));
+        return matches && isProductInStock(p);
+      });
+      return hasInStock;
+    }
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between">
@@ -61,30 +79,18 @@ export default async function BrandsPage() {
                   </span>
                 </div>
 
-                {/* Name Label Overlay */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 py-2.5 px-2 flex items-center justify-center backdrop-blur-md transition-all duration-300 group-hover:bg-[#840037]/90"
-                  style={{
-                    background: 'rgba(25,28,29,0.75)',
-                  }}
-                >
-                  <span
-                    className="text-xs md:text-sm font-bold text-white uppercase tracking-wider text-center line-clamp-1 leading-tight w-full drop-shadow-md"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
+                {/* Dark overlay with brand name at bottom */}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-6 flex items-end">
+                  <span className="text-white text-xs md:text-sm font-bold truncate w-full text-center drop-shadow-sm" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                     {brand.name}
                   </span>
                 </div>
               </Link>
             );
           })}
-          {brands.length === 0 && (
-            <div className="col-span-full py-16 text-center text-gray-500 text-sm">
-              No brands found.
-            </div>
-          )}
         </div>
       </main>
+
       <Footer />
       <BottomNav />
     </div>

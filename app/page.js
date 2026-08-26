@@ -17,10 +17,9 @@ import LocationModal from '@/components/LocationModal';
 import LocationPrompt from '@/components/LocationPrompt';
 import UpsellPopup from '@/components/UpsellPopup';
 import Footer from '@/components/Footer';
-import { PRODUCTS as FALLBACK_PRODUCTS, BRANDS as FALLBACK_BRANDS } from '@/lib/products';
 
 function AppShell() {
-  const { user, phase, phone, lookupPhone, completeProfileAtCheckout, updateProfile, updateEmail } = useAuth();
+  const { user, phase, lookupPhone, completeProfileAtCheckout, updateProfile, updateEmail } = useAuth();
   const [location, setLocation] = useState(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState('fast6');
@@ -48,12 +47,15 @@ function AppShell() {
     } else if (paymentStatus === 'failed') {
       window.history.replaceState({}, '', '/');
     }
-  }, []);
+  }, [setCart]);
 
   useEffect(() => {
     fetch('/api/products')
       .then((r) => r.json())
       .then((data) => {
+        if (data.showOutOfStock !== undefined) {
+          setShowOutOfStock(data.showOutOfStock !== false);
+        }
         if (data.products && data.products.length > 0) {
           setSyncedProducts(data.products.map((p) => {
             const catName = p.categoryName || '';
@@ -62,8 +64,17 @@ function AppShell() {
               .replace(/\s+/g, '-')
               .replace(/[^a-z0-9-]/g, '')
               .replace(/-+/g, '-');
+            
+            const isInstock = p.stockStatus === 'instock' && (
+              p.stockQuantity === null ||
+              p.stockQuantity === undefined ||
+              p.stockQuantity === '' ||
+              Number(p.stockQuantity) > 0 ||
+              p.type === 'variable'
+            );
+
             return {
-              id: p.wcId,
+              id: p.wcId || p.id,
               name: p.name,
               slug: p.slug,
               type: p.type || 'simple',
@@ -73,9 +84,10 @@ function AppShell() {
               images: p.images || [],
               category: catSlug,
               fast6: false,
-              inStock: p.stockStatus === 'instock',
-              stockQty: p.stockQuantity ?? 99,
+              inStock: isInstock,
+              stockQty: p.stockQuantity ?? (isInstock ? 99 : 0),
               brand: p.brandName || '',
+              brandId: p.brandId || null,
               sku: p.sku || '',
               size: p.shortDescription?.replace(/<[^>]*>/g, '').trim() || '',
               upsellIds: p.upsellIds || [],
@@ -84,18 +96,21 @@ function AppShell() {
               variations: p.variations || [],
             };
           }));
-          if (data.brands && data.brands.length > 0) {
-            setSyncedBrands(data.brands.map((b) => ({
-              id: b.wcId || b.id,
-              name: b.name,
-              logo: b.image || null,
-              color: b.color || '#840037',
-              visible: b.visible !== false,
-            })));
-          }
+        }
+        if (data.brands && data.brands.length > 0) {
+          setSyncedBrands(data.brands.map((b) => ({
+            id: b.wcId || b.id,
+            name: b.name,
+            logo: b.image || b.logo || null,
+            banner: b.banner || null,
+            color: b.color || '#840037',
+            visible: b.visible !== false,
+          })));
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('Failed to load products:', err);
+      })
       .finally(() => setAppLoaded(true));
   }, []);
 
@@ -110,21 +125,22 @@ function AppShell() {
       .then((r) => r.json())
       .then((data) => {
         queueMicrotask(() => {
-          setShowOutOfStock(data.showOutOfStock !== false);
+          if (data.showOutOfStock !== undefined) {
+            setShowOutOfStock(data.showOutOfStock !== false);
+          }
         });
       })
       .catch(() => {});
   }, []);
 
-
-  const PRODUCTS = syncedProducts.length > 0 ? syncedProducts : FALLBACK_PRODUCTS;
+  const PRODUCTS = syncedProducts;
 
   useEffect(() => {
     setProducts(PRODUCTS);
   }, [PRODUCTS, setProducts]);
 
   const BRANDS = useMemo(() => {
-    const raw = (syncedBrands.length > 0 ? syncedBrands : FALLBACK_BRANDS).filter((b) => b.visible !== false);
+    const raw = syncedBrands.filter((b) => b.visible !== false);
     return raw
       .map((b) => {
         const bName = (b.name || '').toLowerCase().trim();
@@ -136,7 +152,7 @@ function AppShell() {
           return pBrand === bName || pBrandId === bId || (bName && pBrand.includes(bName));
         });
 
-        const logo = b.image || b.logo || matchingProduct?.image || null;
+        const logo = b.logo || b.image || matchingProduct?.image || null;
 
         return {
           ...b,
@@ -185,7 +201,6 @@ function AppShell() {
     return filtered;
   }, [activeCategory, selectedBrand, showOutOfStock, searchQuery, PRODUCTS]);
 
-
   const handleOrderSuccess = useCallback((order) => {
     setShowCheckout(false);
     setOrderSuccess(order);
@@ -199,7 +214,6 @@ function AppShell() {
         (p) => String(p.id) === String(item.productId) || String(p.wcId) === String(item.productId) || p.name.toLowerCase() === (item.name || '').toLowerCase()
       );
       if (prod) {
-        // Just call addToCart (it handles quantity by calling it multiple times)
         const quantity = item.quantity || 1;
         for (let i = 0; i < quantity; i++) {
           addToCart(prod.id);

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getBrands, getProducts } from '@/lib/data-store';
+import { getBrands, getProducts, getSettings, isProductInStock } from '@/lib/data-store';
 import BrandView from './BrandView';
 
 function mapProduct(p) {
@@ -9,6 +9,9 @@ function mapProduct(p) {
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-');
+  
+  const inStock = isProductInStock(p);
+
   return {
     id: p.wcId || p.id,
     name: p.name,
@@ -20,8 +23,8 @@ function mapProduct(p) {
     images: p.images || [],
     category: catSlug,
     fast6: false,
-    inStock: p.stockStatus === 'instock',
-    stockQty: p.stockQuantity ?? 99,
+    inStock,
+    stockQty: p.stockQuantity ?? (inStock ? 99 : 0),
     brand: p.brandName || '',
     sku: p.sku || '',
     size: p.shortDescription?.replace(/<[^>]*>/g, '').trim() || '',
@@ -60,12 +63,20 @@ async function getBrandData(slug) {
 
   if (!brand) return null;
 
+  const settings = getSettings();
+  const showOutOfStock = settings.showOutOfStock !== false;
+
   const rawProducts = getProducts();
   const bName = (brand.name || '').toLowerCase().trim();
   const bId = String(brand.wcId || brand.id || '');
 
   const brandProducts = rawProducts
     .filter(p => {
+      // Respect showOutOfStock setting
+      if (!showOutOfStock && !isProductInStock(p)) {
+        return false;
+      }
+
       const pBrand = (p.brandName || '').toLowerCase().trim();
       const pBrandId = String(p.brandId || '');
       return pBrand === bName || pBrandId === bId || (bName && pBrand.includes(bName));

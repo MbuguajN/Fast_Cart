@@ -1,27 +1,11 @@
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getProducts, getBrands } from '@/lib/data-store';
-import { PRODUCTS as FALLBACK_PRODUCTS } from '@/lib/products';
+import { getProductBySlug, getProducts, getBrands, getSettings, isProductInStock } from '@/lib/data-store';
 import { getAbsoluteProductUrl } from '@/lib/social-share';
 import ProductView from './ProductView';
 
-function resolveProduct(slug) {
-  let product = getProductBySlug(slug);
-  if (!product) {
-    // Check fallback products
-    const normalized = String(slug).toLowerCase().trim();
-    product = FALLBACK_PRODUCTS.find(
-      (p) =>
-        (p.slug && p.slug.toLowerCase() === normalized) ||
-        String(p.id) === normalized ||
-        p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === normalized
-    ) || null;
-  }
-  return product;
-}
-
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const product = resolveProduct(slug);
+  const product = getProductBySlug(slug);
 
   if (!product) {
     return {
@@ -71,7 +55,7 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
-  const product = resolveProduct(slug);
+  const product = getProductBySlug(slug);
 
   if (!product) {
     notFound();
@@ -87,11 +71,15 @@ export default async function ProductDetailPage({ params }) {
       (product.brandName && b.name.toLowerCase() === product.brandName.toLowerCase())
   ) || null;
 
-  // Find related products (same category or same brand, max 6)
-  const relatedProducts = (allProducts.length > 0 ? allProducts : FALLBACK_PRODUCTS)
+  const settings = getSettings();
+  const showOutOfStock = settings.showOutOfStock !== false;
+
+  // Find related products (same category or same brand, max 6, respecting out of stock setting)
+  const relatedProducts = allProducts
     .filter(
       (p) =>
         (p.id !== product.id && p.wcId !== product.wcId) &&
+        (showOutOfStock || isProductInStock(p)) &&
         ((product.categoryId && p.categoryId === product.categoryId) ||
           (product.brandName && p.brandName && p.brandName.toLowerCase() === product.brandName.toLowerCase()))
     )
@@ -105,4 +93,3 @@ export default async function ProductDetailPage({ params }) {
     />
   );
 }
-
