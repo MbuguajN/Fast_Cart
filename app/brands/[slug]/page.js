@@ -10,7 +10,7 @@ function mapProduct(p) {
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-');
   return {
-    id: p.wcId,
+    id: p.wcId || p.id,
     name: p.name,
     slug: p.slug,
     type: p.type || 'simple',
@@ -34,7 +34,30 @@ function mapProduct(p) {
 
 async function getBrandData(slug) {
   const brands = getBrands();
-  const brand = brands.find(b => b.slug === slug || b.id === slug || String(b.wcId) === slug);
+  const normalizedSlug = String(slug).toLowerCase().trim();
+  const slugDashed = normalizedSlug.replace(/_/g, '-');
+  const slugUnderscored = normalizedSlug.replace(/-/g, '_');
+
+  const brand = brands.find(b => {
+    const bSlug = String(b.slug || '').toLowerCase().trim();
+    const bId = String(b.id || '').toLowerCase().trim();
+    const bWcId = String(b.wcId || '').toLowerCase().trim();
+    const bName = String(b.name || '').toLowerCase().trim();
+    const bNameDashed = bName.replace(/[^a-z0-9]+/g, '-');
+    const bNameUnderscored = bName.replace(/[^a-z0-9]+/g, '_');
+
+    return (
+      bSlug === normalizedSlug ||
+      bSlug === slugDashed ||
+      bSlug === slugUnderscored ||
+      bId === normalizedSlug ||
+      bId === `brand_${slugUnderscored}` ||
+      bWcId === normalizedSlug ||
+      bNameDashed === slugDashed ||
+      bNameUnderscored === slugUnderscored
+    );
+  });
+
   if (!brand) return null;
 
   const rawProducts = getProducts();

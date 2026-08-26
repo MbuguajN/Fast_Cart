@@ -2961,7 +2961,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-32.webp",
       "visible": true,
       "description": "",
-      "productCount": 8
+      "productCount": 8,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Hero-TGL.webp"
     },
     {
       "id": "brand_ballantine_s",
@@ -2973,7 +2974,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-25.webp",
       "visible": true,
       "description": "Ballantine’s Scotch Whisky is a masterful blend of malt and grain whiskies, known for its rich, creamy character. Whether neat, on the rocks, or in a cocktail, it stays true to its smooth Scottish roots. ​",
-      "productCount": 8
+      "productCount": 8,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Ballantines-Hero.webp"
     },
     {
       "id": "brand_absolut",
@@ -2985,7 +2987,8 @@
       "logo": "/api/uploads/upload_1787739184345_74ds21.webp",
       "visible": true,
       "description": "",
-      "productCount": 8
+      "productCount": 8,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/12/Absolut-Cover-1.webp"
     },
     {
       "id": "brand_jinro",
@@ -2997,7 +3000,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2026/07/jinro-logo.webp",
       "visible": true,
       "description": "",
-      "productCount": 7
+      "productCount": 7,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2026/03/freepik__talk__61619-1.webp"
     },
     {
       "id": "brand_jaba",
@@ -3009,7 +3013,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2026/08/HAPPY-HOUR-JABA-JUICE-STICKERS-2.webp",
       "visible": true,
       "description": "",
-      "productCount": 7
+      "productCount": 7,
+      "banner": "/api/uploads/upload_1787745711546_dz7g08.webp"
     },
     {
       "id": "brand_martell",
@@ -3021,7 +3026,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-29.webp",
       "visible": true,
       "description": "",
-      "productCount": 6
+      "productCount": 6,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Martell-Hero.webp"
     },
     {
       "id": "brand_olmeca",
@@ -3033,7 +3039,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-33.webp",
       "visible": true,
       "description": "",
-      "productCount": 5
+      "productCount": 5,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Hero-Olmeca.webp"
     },
     {
       "id": "brand_jameson_irish_whiskey",
@@ -3045,7 +3052,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-31.webp",
       "visible": true,
       "description": "",
-      "productCount": 5
+      "productCount": 5,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Jameson-SPD-Desktop-1-1.webp"
     },
     {
       "id": "brand_chivas",
@@ -3057,7 +3065,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-28.webp",
       "visible": true,
       "description": "",
-      "productCount": 5
+      "productCount": 5,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Hero-Chivas.webp"
     },
     {
       "id": "brand_belaire",
@@ -3069,7 +3078,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-35.webp",
       "visible": true,
       "description": "",
-      "productCount": 5
+      "productCount": 5,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Hero-Belaire.webp"
     },
     {
       "id": "brand_beefeater",
@@ -3081,7 +3091,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-26.webp",
       "visible": true,
       "description": "",
-      "productCount": 5
+      "productCount": 5,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Hero.webp"
     },
     {
       "id": "brand_malfy",
@@ -3093,7 +3104,8 @@
       "logo": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Group-30.webp",
       "visible": true,
       "description": "",
-      "productCount": 3
+      "productCount": 3,
+      "banner": "https://myhappyhour.co.ke/wp-content/uploads/2025/03/Malfy-Hero.webp"
     }
   ],
   "categories": [
@@ -3336,7 +3348,7 @@
   "settings": {
     "pollingInterval": 30,
     "webhookSecret": "sMbP0OIYdveAnGtKSBr6nmzvxsU7lIyFB9KvgfWGb4ymbn5EdN9m9kduSvSFSKkG",
-    "autoSync": false,
+    "autoSync": true,
     "showOutOfStock": false,
     "logo": "/api/uploads/brand_1785340974428_o62osy.svg",
     "background": "/api/uploads/brand_1785341332987_q3l6bn.jpg"
