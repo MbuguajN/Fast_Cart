@@ -12,10 +12,11 @@ export default function BottomNav({ cartCount = 0, onOpenCart, onOpenAccount, us
   const { user: authUser, logout } = useAuth();
   const user = userProp || authUser;
 
-  // Close "More" drawer on route change
-  useEffect(() => {
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (prevPath !== pathname) {
+    setPrevPath(pathname);
     setMoreOpen(false);
-  }, [pathname]);
+  }
 
   // Prevent background scrolling when "More" drawer is open
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function BottomNav({ cartCount = 0, onOpenCart, onOpenAccount, us
   const isHome = pathname === '/';
   const isBrands = pathname.startsWith('/brands') && !pathname.includes('/brands/jaba');
   const isJaba = pathname.includes('/jaba') || pathname.includes('/brands/jaba');
+  const isMixology = pathname.startsWith('/mixology') || pathname.startsWith('/mix');
   const isOrders = pathname.startsWith('/orders');
 
   return (
@@ -240,6 +242,40 @@ export default function BottomNav({ cartCount = 0, onOpenCart, onOpenAccount, us
                     </div>
                     <div className="text-[10px] text-gray-500">
                       Spirits, beers, wines
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/mixology"
+                  className="flex items-center gap-3 p-3.5 rounded-xl border border-pink-200 bg-pink-50/40 hover:bg-pink-100/60 transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-pink-200 text-[#840037] flex items-center justify-center text-lg">
+                    🍹
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-gray-900 group-hover:text-[#840037]">
+                      Mixology
+                    </div>
+                    <div className="text-[10px] text-gray-500">
+                      Cocktails &amp; Recipes
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/trade"
+                  className="flex items-center gap-3 p-3.5 rounded-xl border border-rose-200 bg-rose-50/30 hover:bg-rose-100/50 transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-rose-200 text-[#840037] flex items-center justify-center text-lg">
+                    🏢
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-gray-900 group-hover:text-[#840037]">
+                      B2B Trade
+                    </div>
+                    <div className="text-[10px] text-gray-500">
+                      Wholesale Portal
                     </div>
                   </div>
                 </Link>

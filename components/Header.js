@@ -12,6 +12,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
 
   const isJaba = pathname?.includes('/jaba') || pathname?.includes('/brands/jaba');
   const isBrands = pathname?.startsWith('/brands') && !pathname?.includes('/brands/jaba');
+  const isMixology = pathname?.startsWith('/mixology') || pathname?.startsWith('/mix');
   const isTrade = pathname?.startsWith('/trade');
 
   useEffect(() => {
@@ -43,16 +44,27 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            {/* Mobile Mixology Link */}
+            <Link
+              href="/mixology"
+              className={`text-[11px] font-bold transition-all px-2 py-1 rounded-lg ${
+                isMixology ? 'text-white bg-white/20' : 'text-pink-200 hover:text-white'
+              }`}
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+            >
+              Mixology
+            </Link>
+
             {/* Mobile B2B Trade Link */}
             <Link
               href="/trade"
-              className={`text-xs font-bold transition-all px-2.5 py-1 rounded-lg ${
+              className={`text-[11px] font-bold transition-all px-2 py-1 rounded-lg ${
                 isTrade ? 'text-white bg-white/20' : 'text-pink-200 hover:text-white'
               }`}
               style={{ fontFamily: 'Montserrat, sans-serif' }}
             >
-              B2B Trade
+              Trade
             </Link>
 
             <button
@@ -153,6 +165,18 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
             Brands
+          </Link>
+
+          <Link
+            href="/mixology"
+            className={`text-xs font-bold uppercase tracking-wider transition-colors pb-1 border-b-2 ${
+              isMixology
+                ? 'text-white border-white font-black'
+                : 'text-white/90 hover:text-white border-transparent hover:border-white/40'
+            }`}
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            Mixology
           </Link>
 
           <Link

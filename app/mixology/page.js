@@ -30,8 +30,9 @@ function MixologyContent() {
   const [syncedProducts, setSyncedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
+  // Filters State
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedSpirit, setSelectedSpirit] = useState('all');
   const [selectedStyle, setSelectedStyle] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
@@ -99,7 +100,18 @@ function MixologyContent() {
 
   const effectiveProducts = (cartProducts && cartProducts.length > 0) ? cartProducts : syncedProducts;
 
-  // Distinct Filter Options
+  // Distinct Brand Options with Counts
+  const brandOptions = useMemo(() => {
+    const counts = { all: recipes.length };
+    recipes.forEach((r) => {
+      const b = r.brand || 'Signature';
+      counts[b] = (counts[b] || 0) + 1;
+    });
+    const list = ['all', ...new Set(recipes.map((r) => r.brand).filter(Boolean))];
+    return { list, counts };
+  }, [recipes]);
+
+  // Distinct Spirit Base Options
   const spiritOptions = useMemo(() => {
     const counts = { all: recipes.length };
     recipes.forEach((r) => {
@@ -110,6 +122,7 @@ function MixologyContent() {
     return { list, counts };
   }, [recipes]);
 
+  // Distinct Style Options
   const styleOptions = useMemo(() => {
     return ['all', ...new Set(recipes.map((r) => r.drinkStyle).filter(Boolean))];
   }, [recipes]);
@@ -117,6 +130,7 @@ function MixologyContent() {
   // Filtered List
   const filteredRecipes = useMemo(() => {
     return recipes.filter((r) => {
+      if (selectedBrand !== 'all' && r.brand?.toLowerCase() !== selectedBrand.toLowerCase()) return false;
       if (selectedSpirit !== 'all' && r.spiritType?.toLowerCase() !== selectedSpirit.toLowerCase()) return false;
       if (selectedStyle !== 'all' && r.drinkStyle?.toLowerCase() !== selectedStyle.toLowerCase()) return false;
       if (selectedDifficulty !== 'all' && r.difficulty?.toLowerCase() !== selectedDifficulty.toLowerCase()) return false;
@@ -128,7 +142,7 @@ function MixologyContent() {
       }
       return true;
     });
-  }, [recipes, selectedSpirit, selectedStyle, selectedDifficulty, searchQuery]);
+  }, [recipes, selectedBrand, selectedSpirit, selectedStyle, selectedDifficulty, searchQuery]);
 
   const openRecipeModal = (recipe) => {
     setSelectedRecipeSlug(recipe.slug);
@@ -146,10 +160,15 @@ function MixologyContent() {
 
   const handleResetFilters = () => {
     setSearchQuery('');
+    setSelectedBrand('all');
     setSelectedSpirit('all');
     setSelectedStyle('all');
     setSelectedDifficulty('all');
   };
+
+  const hasActiveFilters = Boolean(
+    searchQuery || selectedBrand !== 'all' || selectedSpirit !== 'all' || selectedStyle !== 'all' || selectedDifficulty !== 'all'
+  );
 
   const handleOrderSuccess = (order) => {
     setShowCheckout(false);
@@ -206,9 +225,9 @@ function MixologyContent() {
           <div className="absolute bottom-0 right-1/4 -mb-16 w-60 h-60 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
         </div>
 
-        {/* Streamlined Filter & Search Suite */}
+        {/* Optimized Multi-Tier Filter & Search Suite */}
         <div className="bg-white p-4 sm:p-6 rounded-3xl border border-gray-200/90 shadow-xs space-y-4 transition-all duration-300">
-          {/* Row 1: Search & Style Dropdown */}
+          {/* Row 1: Search Bar & Dropdown Selectors */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1 group">
@@ -219,7 +238,7 @@ function MixologyContent() {
               </div>
               <input
                 type="text"
-                placeholder="Search cocktails by name, spirit (Jameson, Malfy, Olmeca), or ingredient..."
+                placeholder="Search by cocktail name, spirit, ingredient (lime, tonic, bitters)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:ring-2 focus:ring-[#840038]/20 focus:border-[#840038] bg-gray-50/60 hover:bg-white focus:bg-white transition-all duration-200 placeholder:text-gray-400 outline-hidden"
@@ -235,72 +254,129 @@ function MixologyContent() {
               )}
             </div>
 
-            {/* Drink Style Dropdown */}
-            <div className="flex items-center gap-2.5 shrink-0">
+            {/* Dropdown Filters */}
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {/* Spirit Base Selector */}
+              <select
+                value={selectedSpirit}
+                onChange={(e) => setSelectedSpirit(e.target.value)}
+                className="px-3 py-2.5 bg-gray-50/80 hover:bg-gray-100/80 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:ring-2 focus:ring-[#840038]/20 focus:border-[#840038] focus:outline-hidden cursor-pointer transition-all duration-200"
+              >
+                <option value="all">All Spirit Bases</option>
+                {spiritOptions.list.filter((s) => s !== 'all').map((sp) => (
+                  <option key={sp} value={sp}>Base: {sp}</option>
+                ))}
+              </select>
+
+              {/* Drink Style Selector */}
               <select
                 value={selectedStyle}
                 onChange={(e) => setSelectedStyle(e.target.value)}
                 className="px-3 py-2.5 bg-gray-50/80 hover:bg-gray-100/80 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:ring-2 focus:ring-[#840038]/20 focus:border-[#840038] focus:outline-hidden cursor-pointer transition-all duration-200"
               >
-                <option value="all">All Styles (Spritz, Sour, etc.)</option>
+                <option value="all">All Drink Styles</option>
                 {styleOptions.filter((s) => s !== 'all').map((st) => (
-                  <option key={st} value={st}>{st}</option>
+                  <option key={st} value={st}>Style: {st}</option>
                 ))}
               </select>
 
-              {/* Difficulty Segmented Switch */}
+              {/* Difficulty Selector */}
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
                 className="px-3 py-2.5 bg-gray-50/80 hover:bg-gray-100/80 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:ring-2 focus:ring-[#840038]/20 focus:border-[#840038] focus:outline-hidden cursor-pointer transition-all duration-200"
               >
                 <option value="all">All Difficulties</option>
-                <option value="Easy">Easy</option>
+                <option value="Easy">Easy (Beginner)</option>
                 <option value="Medium">Medium</option>
-                <option value="Expert">Expert</option>
+                <option value="Expert">Expert (Pro)</option>
               </select>
-
-              <span className="text-xs text-gray-500 font-medium whitespace-nowrap hidden lg:inline-block">
-                <strong>{filteredRecipes.length}</strong> cocktails
-              </span>
             </div>
           </div>
 
-          {/* Row 2: Spirit Base Filter Pills */}
-          <div className="pt-2 border-t border-gray-100 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-            {spiritOptions.list.map((sp) => {
-              const isSelected = selectedSpirit.toLowerCase() === sp.toLowerCase();
-              const count = spiritOptions.counts[sp] || 0;
+          {/* Row 2: Drink Brand / House Pills (Jameson, Beefeater, Malfy, Olmeca, etc.) */}
+          <div className="space-y-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold px-0.5">
+              <span className="uppercase tracking-wider font-bold text-gray-400">Filter by Brand / Spirit House</span>
+              <span>Showing <strong>{filteredRecipes.length}</strong> of {recipes.length} cocktails</span>
+            </div>
 
-              return (
-                <button
-                  key={sp}
-                  onClick={() => setSelectedSpirit(sp)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95 whitespace-nowrap flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-[#840038] text-white shadow-xs scale-102'
-                      : 'bg-gray-100/80 hover:bg-gray-200/90 text-gray-700'
-                  }`}
-                >
-                  <span className="capitalize">{sp === 'all' ? 'All Spirits' : sp}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono transition-colors ${
-                    isSelected ? 'bg-white/20 text-white' : 'text-gray-500 bg-gray-200/70'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+            {/* Wrapped Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              {brandOptions.list.map((brand) => {
+                const isSelected = selectedBrand.toLowerCase() === brand.toLowerCase();
+                const count = brandOptions.counts[brand] || 0;
 
-            {(searchQuery || selectedSpirit !== 'all' || selectedStyle !== 'all' || selectedDifficulty !== 'all') && (
+                return (
+                  <button
+                    key={brand}
+                    onClick={() => setSelectedBrand(brand)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-95 flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#840038] text-white shadow-xs font-bold'
+                        : 'bg-gray-100/90 hover:bg-gray-200/90 text-gray-700'
+                    }`}
+                  >
+                    <span>{brand === 'all' ? 'All Brands' : brand}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono transition-colors ${
+                      isSelected ? 'bg-white/20 text-white' : 'text-gray-500 bg-gray-200/80'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Active Filter Chips & Clear Bar */}
+          {hasActiveFilters && (
+            <div className="pt-2 border-t border-gray-100 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Active:</span>
+
+              {selectedBrand !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 border border-pink-200 text-[#840038] text-[11px] font-bold">
+                  Brand: {selectedBrand}
+                  <button onClick={() => setSelectedBrand('all')} className="hover:text-red-700 ml-0.5">✕</button>
+                </span>
+              )}
+
+              {selectedSpirit !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold">
+                  Base: {selectedSpirit}
+                  <button onClick={() => setSelectedSpirit('all')} className="hover:text-red-700 ml-0.5">✕</button>
+                </span>
+              )}
+
+              {selectedStyle !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 text-purple-800 text-[11px] font-bold">
+                  Style: {selectedStyle}
+                  <button onClick={() => setSelectedStyle('all')} className="hover:text-red-700 ml-0.5">✕</button>
+                </span>
+              )}
+
+              {selectedDifficulty !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
+                  Difficulty: {selectedDifficulty}
+                  <button onClick={() => setSelectedDifficulty('all')} className="hover:text-red-700 ml-0.5">✕</button>
+                </span>
+              )}
+
+              {searchQuery && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-300 text-gray-800 text-[11px] font-bold">
+                  &ldquo;{searchQuery}&rdquo;
+                  <button onClick={() => setSearchQuery('')} className="hover:text-red-700 ml-0.5">✕</button>
+                </span>
+              )}
+
               <button
                 onClick={handleResetFilters}
-                className="text-xs font-bold text-[#840038] hover:underline whitespace-nowrap ml-2 px-2 py-1 transition-all active:scale-95"
+                className="text-xs font-bold text-[#840038] hover:underline whitespace-nowrap ml-auto px-2 py-1 transition-all active:scale-95"
               >
-                Reset ✕
+                Clear All Filters ✕
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
@@ -315,7 +391,7 @@ function MixologyContent() {
             <div className="text-4xl">🍸</div>
             <h3 className="text-base font-bold text-gray-900">No cocktails matched your filters</h3>
             <p className="text-xs text-gray-500 max-w-sm mx-auto">
-              Try adjusting your search query or selecting a different spirit base.
+              Try adjusting your brand, spirit base, or search query.
             </p>
             <button
               type="button"
@@ -345,8 +421,8 @@ function MixologyContent() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                  {/* Brand Badge */}
-                  <span className="absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#840038] text-white shadow-xs">
+                  {/* Brand Badge (Clean text, no icon) */}
+                  <span className="absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#840038] text-white shadow-xs">
                     {recipe.brand}
                   </span>
 
@@ -375,8 +451,9 @@ function MixologyContent() {
 
                   {/* Ingredients Preview Tags */}
                   <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                    <div className="text-[11px] font-semibold text-gray-500">
-                      {recipe.ingredients?.length || 0} ingredients
+                    <div className="text-[11px] font-semibold text-gray-500 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#840038]" />
+                      <span>{recipe.ingredients?.length || 0} ingredients</span>
                     </div>
 
                     <span className="text-xs font-bold text-[#840038] flex items-center gap-1 group-hover:translate-x-1 transition-transform">

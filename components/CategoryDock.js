@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { CATEGORIES } from '@/lib/products';
 
 export default function CategoryDock({ activeCategory, onCategoryChange, products = [], categories: customCategories, showOutOfStock = true, className = '' }) {
@@ -175,6 +176,17 @@ export default function CategoryDock({ activeCategory, onCategoryChange, product
             {cat.label}
           </button>
         ))}
+
+        {/* Mixology Recipes Shortcut Pill */}
+        <Link
+          href="/mixology"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 md:px-4 md:py-2 rounded-full whitespace-nowrap text-[13px] md:text-[14px] transition-all active:scale-95 hover:shadow-sm flex-shrink-0 bg-pink-50 text-[#840037] border border-pink-200 hover:bg-pink-100 font-bold"
+          style={{ fontFamily: 'Montserrat, sans-serif' }}
+          title="Cocktail Recipes & Mixology Hub"
+        >
+          <span>🍹</span>
+          Mixology
+        </Link>
       </section>
 
       {/* Right Arrow Button */}
