@@ -1,0 +1,1615 @@
+[
+  {
+    "id": "amalfi-sunset-spritz",
+    "slug": "amalfi-sunset-spritz",
+    "title": "Amalfi Sunset Spritz",
+    "description": "Explore curated happy hour specials, drink deals, and nightlife moments. Make every hour a happy one.",
+    "image": "/images/mixology/amalfi-sunset-spritz.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/05-AMALFI-SUNSET-SPRITZ-1.webp",
+    "brand": "Malfy",
+    "spiritType": "Gin",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "35ML MALFY GIN ROSA",
+      "50ML SANPELLEGRINO ARANCIATA ROSSA",
+      "50ML PROSECCO"
+    ],
+    "parts": [
+      "35ML MALFY GIN ROSA",
+      "50ML SANPELLEGRINO ARANCIATA ROSSA",
+      "50ML PROSECCO",
+      "ORANGE WHEEL, THYME SPRIG & STRAWBERRY SLICES"
+    ],
+    "instructions": [
+      "Build ingredients in a glass over cubed ice and gently stir to combine. Garnish with an orange wheel, thyme sprig & strawberry slices."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/amalfi-sunset-spritz/"
+  },
+  {
+    "id": "amaretto-sour",
+    "slug": "amaretto-sour",
+    "title": "Amaretto Sour",
+    "description": "The Amaretto Sour is a popular cocktail that elegantly and effortlessly combines sweet, sour, and nutty flavors. This sour cocktail really took off in the 80s and, to be honest, it still carries that retro vibe today. Often enjoyed as a digestif, the Amaretto Sour is easy to make and distinctly delicious.",
+    "image": "/images/mixology/amaretto-sour.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/recipe_amaretto-sour_16x9_2a1c4b0b706be981710188b7b37f0349.webp",
+    "brand": "Signature",
+    "spiritType": "Cocktail",
+    "drinkStyle": "Sour",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "50 ml Amaretto",
+      "30 ml Lemon Juice",
+      "20 ml Simple Syrup",
+      "10 ml Egg White (or Aquafaba)",
+      "Ice Cubes",
+      "Fill a Boston Shaker with Ice Cubes."
+    ],
+    "parts": [
+      "50 ml Amaretto",
+      "30 ml Lemon Juice",
+      "20 ml Simple Syrup",
+      "10 ml Egg White (or Aquafaba)",
+      "1 Whole Maraschino Cherry",
+      "1 Slice Orange",
+      "Ice Cubes"
+    ],
+    "instructions": [
+      "Fill a Boston Shaker with Ice Cubes.",
+      "Cut a Lemon in half and use a Citrus Elbow to extract the juice.",
+      "Using a Jigger, measure and pour the Lemon Juice into the smaller tin of the Shaker.",
+      "Measure and pour in Egg White (or Aquafaba).",
+      "Measure and pour in Simple Syrup.",
+      "Measure and pour in Amaretto.",
+      "Separate the Boston Shaker and place a Hawthorne Strainer over the larger tin and pour the mixture directly into a Rocks Glass.",
+      "Use a knife to cut one Orange Wheel from a fresh Orange, then place it into the Glass together with one Maraschino Cherry for garnish."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/amaretto-sour/"
+  },
+  {
+    "id": "apple-pop-spritz",
+    "slug": "apple-pop-spritz",
+    "title": "Apple Pop Spritz",
+    "description": "Zippy, fresh, and light, this popping spritz drink is a low-octane whisky and apple juice cocktail that still packs a serious flavour punch.",
+    "image": "/images/mixology/apple-pop-spritz.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/ballantines-finest-apple-pop-new-aspect-ratio-16-9.webp",
+    "brand": "Ballantine's",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "25ml Ballantine’s Finest Whisky",
+      "50ml Apple Juice",
+      "10ml Lemon Juice",
+      "10ml Sugar Syrup",
+      "75ml Soda Water"
+    ],
+    "parts": [
+      "25ml Ballantine’s Finest Whisky",
+      "50ml Apple Juice",
+      "10ml Lemon Juice",
+      "10ml Sugar Syrup",
+      "75ml Soda Water",
+      "Ice",
+      "Mint Sprig, to garnish"
+    ],
+    "instructions": [
+      "Fill a highball glass with ice",
+      "Add all your ingredients",
+      "Top up with soda water and stir gently",
+      "Garnish with mint sprig"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/apple-pop-spritz/"
+  },
+  {
+    "id": "beefeater-gin-tonic",
+    "slug": "beefeater-gin-tonic",
+    "title": "Beefeater Gin & Tonic",
+    "description": "An unbeatable classic – the Beefeater Gin & Tonic. This cocktail recipe is as good as it gets. The best way to drink Beefeater London",
+    "image": "/images/mixology/beefeater-gin-tonic.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Beefeater-Gin-Tonic.webp",
+    "brand": "Beefeater",
+    "spiritType": "Gin",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "2 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "Beefeater London Dry Gin 50 ml",
+      "Tonic water of preference",
+      "125 ml",
+      "Wheel of Lemon to garnish",
+      "Wheel of Orange to garnish"
+    ],
+    "parts": [
+      "Beefeater London Dry Gin 50 ml",
+      "Tonic water of preference",
+      "125 ml",
+      "Wheel of Lemon to garnish",
+      "Wheel of Orange to garnish"
+    ],
+    "instructions": [
+      "How to a mix a Beefeater Gin & Tonic",
+      "1. Build Add Beefeater Dry Gin to a copa, over ice",
+      "2. Top with your tonic water of preference",
+      "3. Garnish and serve"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/beefeater-gin-tonic/"
+  },
+  {
+    "id": "beefeater-white-lady",
+    "slug": "beefeater-white-lady",
+    "title": "Beefeater White Lady",
+    "description": "The White Lady is a boujee little drink. This tidy balance of oranges and lemons was invented by bartenders right here in London nearly 100 years ago & enjoyed by the world ever since.",
+    "image": "/images/mixology/beefeater-white-lady.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Beefeater-White-Lady.webp",
+    "brand": "Beefeater",
+    "spiritType": "Gin",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "Lemon twist to garnish",
+    "ingredients": [
+      "Lemon twist to garnish",
+      "Spritz your drink with a lemon twist and garnish"
+    ],
+    "parts": [
+      "Beefeater London Dry Gin 50 ml",
+      "Triple Sec 25 ml",
+      "Lemon juice 25 ml",
+      "Sugar Syrup 15 ml",
+      "Egg white 1",
+      "Lemon twist to garnish"
+    ],
+    "instructions": [
+      "Combine the Beefeater London Dry Gin, Triple Sec, lemon juice, sugar syrup and your egg white in a shaker",
+      "Shake hard with ice until combined and ice cold",
+      "Pour your cocktail into a chilled glass",
+      "Spritz your drink with a lemon twist and garnish"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/beefeater-white-lady/"
+  },
+  {
+    "id": "best-in-pour",
+    "slug": "best-in-pour",
+    "title": "Best in Pour",
+    "description": "Perfectly playful and theatric, this whisky cocktail marries The Glenlivet 14 Year Old, Lillet Blanc and gold dusted popcorn to truly elevate your at-home awards season watch party.",
+    "image": "/images/mixology/best-in-pour.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Best-in-Pour.webp",
+    "brand": "The Glenlivet",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Prev Previous Turmeric Twist",
+    "ingredients": [
+      "2 Dashes",
+      "Prev Previous Turmeric Twist"
+    ],
+    "parts": [
+      "The Glenlivet 14 Year Old",
+      "1.5 Parts",
+      "Lillet Blanc",
+      "0.75 Parts",
+      "Italicus",
+      "0.5 Parts",
+      "Angostura Bitters",
+      "2 Dashes"
+    ],
+    "instructions": [
+      "Combine in glass and stir",
+      "Strain over large ice",
+      "Place popcorn on cocktail pick to garnish"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/best-in-pour/"
+  },
+  {
+    "id": "cheung-fun-old-fashioned-holly-graham-original-cocktail",
+    "slug": "cheung-fun-old-fashioned-holly-graham-original-cocktail",
+    "title": "Cheung Fun Old Fashioned – Holly Graham Original Cocktail",
+    "description": "Partnering with Jameson for International Women’s Day 2023, Holly concocted the Cheung Fun Old Fashioned. Inspired by her east Asian surroundings; umami flavours of soy and sesame, gives a Cheung Fun the perfect balance of sweet and savoury. “I’ve lived in Asia for well over a decade, having called Hong Kong home for the best […]",
+    "image": "/images/mixology/cheung-fun-old-fashioned-holly-graham-original-cocktail.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Cheung-Fun-Old-Fashioned.webp",
+    "brand": "Jameson",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Old Fashioned",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "60 ml Sesame infused Jameson",
+      "20 ml Soy caramel (5:2 caramel and light soy sauce)​",
+      "1 Dash Orange bitters​",
+      "1 Dash Angostura (aromatic) bitters​",
+      "Strain into a rocks glass over a large ice cube."
+    ],
+    "parts": [
+      "60 ml Sesame infused Jameson",
+      "20 ml Soy caramel (5:2 caramel and light soy sauce)​",
+      "1 Dash Orange bitters​",
+      "1 Dash Angostura (aromatic) bitters​",
+      "Garnish with Sesame Seeds"
+    ],
+    "instructions": [
+      "Stir all ingredients over ice in a mixing glass.",
+      "Strain into a rocks glass over a large ice cube.",
+      "Garnish with sesame seeds."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/cheung-fun-old-fashioned-holly-graham-original-cocktail/"
+  },
+  {
+    "id": "chilli-chocolate-negroni",
+    "slug": "chilli-chocolate-negroni",
+    "title": "Chilli & Chocolate Negroni",
+    "description": "This spicy take on a Negroni adds extra heat kick to the classic cocktail recipe with chilli and chocolate. Get ahead and prepare your infused aperitif and glassware in advance for the perfect party pour.",
+    "image": "/images/mixology/chilli-chocolate-negroni.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Chilli-Chocolate-Negroni.webp",
+    "brand": "Signature",
+    "spiritType": "Cocktail",
+    "drinkStyle": "Negroni",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "Chocolate Bitters 2 dashes"
+    ],
+    "parts": [
+      "Beefeater London Dry Gin 30 ml",
+      "Chilli Infused Campari 30 ml",
+      "Creme de Cacao 15 ml",
+      "Sweet Vermouth 15 ml",
+      "Chocolate Bitters 2 dashes",
+      "Melted Chocolate to garnish",
+      "Red Chilli to garnish"
+    ],
+    "instructions": [
+      "Soak your chillis with campari in a sealed container. The longer you leave it, the stronger the chilli flavour will be",
+      "2. Glass prep",
+      "Dip your glass rim onto your melted chocolate and leave to cool while you make your drink",
+      "Pour all of the ingredients in over ice in a mixing glass",
+      "Stir until perfectly chilled",
+      "Pour into your prepared glass",
+      "Finish with a chopped chilli to garnish"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/chilli-chocolate-negroni/"
+  },
+  {
+    "id": "chivas-regal-crystalgold-fashioned",
+    "slug": "chivas-regal-crystalgold-fashioned",
+    "title": "Chivas Regal Crystalgold Fashioned",
+    "description": "A fresh twist on the Old Fashioned cocktail with all the smooth, fruity flavours of the classic; now crystal clear. Heroing Chivas Regal Crystalgold, we’re letting our new innovation shine – embodying the house style the Chivas Regal brand is known for whilst bringing a creamy, refreshing finish to the serve.",
+    "image": "/images/mixology/chivas-regal-crystalgold-fashioned.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/chivas-drink.webp",
+    "brand": "Chivas Regal",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Old Fashioned",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "60 ml",
+      "Chivas Regal Crystalgold",
+      "10 ml",
+      "sugar syrup",
+      "2 drops",
+      "Angostura bitters orange zest and rosemary sprig, to garnish"
+    ],
+    "parts": [
+      "60 ml",
+      "Chivas Regal Crystalgold",
+      "10 ml",
+      "sugar syrup",
+      "2 drops",
+      "Angostura bitters orange zest and rosemary sprig, to garnish"
+    ],
+    "instructions": [
+      "Add a block of crystal-clear ice to a rocks or tumbler glass.",
+      "Pour all your ingredients into the glass.",
+      "Stir until the glass is ice-cold.",
+      "GARNISH & SERVE",
+      "Garnish with an orange zest and a rosemary sprig before serving."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/chivas-regal-crystalgold-fashioned/"
+  },
+  {
+    "id": "chivas-regal-crystalgold-spritz",
+    "slug": "chivas-regal-crystalgold-spritz",
+    "title": "Chivas Regal Crystalgold Spritz",
+    "description": "Our Global Brand Ambassador, Charles Leclerc’s signature Chivas Regal Crystalgold serve. This twist on an Italian classic combines fresh lime, elderflower, lime, Champagne and soda for a fresh cocktail that’s fit for the French Riviera, but equally perfect for a night in celebrating with your people.",
+    "image": "/images/mixology/chivas-regal-crystalgold-spritz.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Screenshot-2025-11-13-172923.webp",
+    "brand": "Chivas Regal",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "20 ml soda water mint sprig, to garnish",
+    "ingredients": [
+      "30 ml Chivas Regal Crystalgold",
+      "30 ml elderflower cordial",
+      "20 ml lime juice",
+      "40 ml Champagne or sparkling wine",
+      "20 ml soda water mint sprig, to garnish"
+    ],
+    "parts": [
+      "30 ml Chivas Regal Crystalgold",
+      "30 ml elderflower cordial",
+      "20 ml lime juice",
+      "40 ml Champagne or sparkling wine",
+      "20 ml soda water mint sprig, to garnish"
+    ],
+    "instructions": [
+      "Clap your mint before garnishing to release extra flavour.",
+      "Add a block of crystal-clear ice to a stemmed or highball glass.",
+      "Pour all your ingredients into the glass.",
+      "Stir until the glass is ice-cold.",
+      "GARNISH & SERVE",
+      "Garnish with a mint sprig and serve."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/chivas-regal-crystalgold-spritz/"
+  },
+  {
+    "id": "classic-jameson-whiskey-sour",
+    "slug": "classic-jameson-whiskey-sour",
+    "title": "Classic Jameson Whiskey Sour",
+    "description": "Sweet, sour, and everything delicious. The whiskey sour is one of the best all-time classic whiskey cocktails. If you’re looking to impress your friends with a flavoursome cocktail, learn how to make a whiskey sour; it’s a sure-fire way to keep them sweet (not sour!).",
+    "image": "/images/mixology/classic-jameson-whiskey-sour.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Classic-Jameson-Whiskey-Sour.webp",
+    "brand": "Jameson",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Sour",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "10 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "1 Lemon Twist",
+    "ingredients": [
+      "50 ml Jameson Black Barrel",
+      "25 ml Lemon Juice",
+      "25 ml Simple Syrup",
+      "3 Dashes Angostura Bitters",
+      "Ice Cubes",
+      "1 Lemon Twist"
+    ],
+    "parts": [
+      "50 ml Jameson Black Barrel",
+      "25 ml Lemon Juice",
+      "25 ml Simple Syrup",
+      "3 Dashes Angostura Bitters",
+      "1 Egg White",
+      "Ice Cubes",
+      "1 Lemon Twist",
+      "1⅔ Parts Jameson Black Barrel",
+      "⅚ Parts Lemon Juice",
+      "⅚ Parts Simple Syrup"
+    ],
+    "instructions": [
+      "Fill a shaker with ice, and then add your Jameson Black Barrel, freshly-squeezed lemon juice, sugar syrup, egg white and 3 dashes of Angostura bitters.",
+      "Shake and strain into a chilled rocks glass, before garnishing with a lemon twist."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/classic-jameson-whiskey-sour/"
+  },
+  {
+    "id": "coco-mojito",
+    "slug": "coco-mojito",
+    "title": "Coco Mojito",
+    "description": "A fresh, tropical evolution of the classic Mojito. A recipe prepared with coconut water for a fuller flavour together with Havana Club Original 3 Años. Be sure to make enough to share this sensorial experience with your friends!",
+    "image": "/images/mixology/coco-mojito.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/coco-mojito.webp",
+    "brand": "Havana Club",
+    "spiritType": "Gin",
+    "drinkStyle": "Tropical",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Muddle 2 large mint sprigs into the mixture, then add cubed ice to the top.",
+    "ingredients": [
+      "3 Ice Cubes",
+      "Muddle 2 large mint sprigs into the mixture, then add cubed ice to the top."
+    ],
+    "parts": [
+      "Coconut Syrup 10 ml",
+      "Coconut Water 60 ml",
+      "Sprigs of Mint 2",
+      "Havana Club Añejo 3 Años rum 40 ml",
+      "Lime Juice 20 ml",
+      "Soda Water 60ml",
+      "3 Ice Cubes"
+    ],
+    "instructions": [
+      "Wet the rim of a highball glass with lime, then rim with desiccated coconut flakes",
+      "Add the first 4 ingredients into the glass.",
+      "Muddle 2 large mint sprigs into the mixture, then add cubed ice to the top.",
+      "Top up with soda water, mix again, then garnish with a lime wedge and a fresh mint sprig"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/coco-mojito/"
+  },
+  {
+    "id": "cuba-libre",
+    "slug": "cuba-libre",
+    "title": "Cuba Libre",
+    "description": "Discover our Cuba Libre cocktail recipe! Not to be confused with a basic rum and cola, the authentic Cuba Libre cocktail needs a generous squeeze of lime to even out the drink’s sweetness. The double aged golden rum Havana Club Especial with its hints of vanilla and caramel takes this simple, sociable cocktail to the […]",
+    "image": "/images/mixology/cuba-libre.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/cuba-havan-n.webp",
+    "brand": "Havana Club",
+    "spiritType": "Rum",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Large Lime Wedge 1",
+    "ingredients": [
+      "Large Lime Wedge 1",
+      "Ice Cubes 3",
+      "Fill a highball glass with the ice cubes.",
+      "Top up with no more than 100ml Cola per glass."
+    ],
+    "parts": [
+      "Havana Club Especial rum 50 ml",
+      "Cola 100 ml",
+      "Large Lime Wedge 1",
+      "Ice Cubes 3"
+    ],
+    "instructions": [
+      "Fill a highball glass with the ice cubes.",
+      "Add the Havana Club Especial rum.",
+      "Top up with no more than 100ml Cola per glass.",
+      "Squeeze the juice of a lime wedge into the glass, garnish with another lime wedge and…take a sip!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/cuba-libre/"
+  },
+  {
+    "id": "espresso-martini",
+    "slug": "espresso-martini",
+    "title": "Espresso Martini",
+    "description": "The Espresso Martini is as iconic as it is sophisticated. Rich and sweet, it appeals to cocktail lovers the world over with its unmistakable coffee flavor. A sumptuous blend of espresso, vodka, and velvety coffee liqueur, an Espresso Martini is ideal for all types of occasion. Creamy and elegant, not only is an Espresso Martini […]",
+    "image": "/images/mixology/espresso-martini.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/drink_espresso-martini_16x9_maia.webp",
+    "brand": "Absolut",
+    "spiritType": "Vodka",
+    "drinkStyle": "Martini",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Coupe / Martini Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "1 Part Kahlúa",
+      "1 Part Freshly Brewed Espresso",
+      "Ice Cubes",
+      "Add Ice Cubes all the way to the top of the smaller tin of your shaker."
+    ],
+    "parts": [
+      "2 Parts Absolut Vodka",
+      "1 Part Kahlúa",
+      "1 Part Freshly Brewed Espresso",
+      "3 Whole Coffee Beans",
+      "Ice Cubes"
+    ],
+    "instructions": [
+      "Use your preferred coffee machine to produce freshly brewed Espresso.",
+      "Use a Jigger to measure and pour in the Espresso into the smaller tin of a Boston shaker.",
+      "Measure and pour in Kahlúa followed by Absolut Vodka.",
+      "Add Ice Cubes all the way to the top of the smaller tin of your shaker.",
+      "Connect the large and small tins together and shake until the tins are frosty on the outside.",
+      "Separate the tins, place a Hawthorne Strainer over the larger tin of your Boston Shaker.",
+      "Double strain the mixture by pouring it through a Fine Mesh Strainer directly into a Martini Glass.",
+      "Garnish by placing three Coffee Beans on top of the foam."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/espresso-martini/"
+  },
+  {
+    "id": "fine-a-leau",
+    "slug": "fine-a-leau",
+    "title": "Fine à l’eau",
+    "description": "Fine à l’Eau is a refreshing, balanced, and tart aperitif-style cocktail that embraces the historical mix of Martell VS cognac and still water with a modern twist. This updated version is crafted exclusively from grape-derived ingredients, staying true to its roots while offering a contemporary interpretation. Enjoy the light, revitalizing character of Fine à l’Eau, […]",
+    "image": "/images/mixology/fine-a-leau.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/PreviewLarge-Martell_Fine_a_leau_HERO.webp",
+    "brand": "Martell",
+    "spiritType": "Cognac",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "1. Add ice cubes to a wine glass"
+    ],
+    "parts": [
+      "Martell VS 35 ml",
+      "Verjus 25 ml",
+      "Simple syrup 20 ml",
+      "Sparkling water 100 ml"
+    ],
+    "instructions": [
+      "1. Add ice cubes to a wine glass",
+      "2. Pour 35 ml of Martell VS, 25 ml of Verjus, 20 ml of simple syrup, and 100 ml of water into the glass",
+      "3 . Stir gently"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/fine-a-leau/"
+  },
+  {
+    "id": "jameson-ginger-ale-lime-recipe",
+    "slug": "jameson-ginger-ale-lime-recipe",
+    "title": "Jameson, Ginger Ale & Lime Recipe",
+    "description": "How to make the perfect Whiskey & Ginger Ale – Jameson Whiskey, ginger ale, and a squeeze of lime – your go-to whiskey refresher.",
+    "image": "/images/mixology/jameson-ginger-ale-lime-recipe.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/16-9_4c68b0bb-c548-4da9-9e34-3d2af2b7c201-aspect-ratio-4-3.webp",
+    "brand": "Jameson",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 Serving",
+    "prepTime": "2 Mins",
+    "glassware": "Rocks Glass",
+    "garnish": "1 Wedge Lime",
+    "ingredients": [
+      "30 ml Jameson Original",
+      "90 ml Ginger Ale",
+      "1 Wedge Lime",
+      "1 Part Jameson Original",
+      "Take a large wedge of lime, give it a squeeze and drop it into the glass."
+    ],
+    "parts": [
+      "30 ml Jameson Original",
+      "90 ml Ginger Ale",
+      "1 Wedge Lime",
+      "1 Part Jameson Original",
+      "3 Parts Ginger Ale"
+    ],
+    "instructions": [
+      "WHAT DO YOU NEED",
+      "Ingredients",
+      "30 ml Jameson Original",
+      "90 ml Ginger Ale",
+      "1 Wedge Lime",
+      "1 Part Jameson Original",
+      "3 Parts Ginger Ale",
+      "1 Wedge Lime",
+      "About this cocktail",
+      "Always reliable, always delicious. Known the world over as the Jameson ‘signature serve’, this is really a cocktail for all occassions. However, nothing beats that night out with friends with a JGL in your hand!",
+      "Fill a high ball glass with ice and pour in a shot of Jameson.",
+      "Top up the glass with a good quality ginger ale and stir briefly to mix.",
+      "Take a large wedge of lime, give it a squeeze and drop it into the glass."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/jameson-ginger-ale-lime-recipe/"
+  },
+  {
+    "id": "jameson-irish-coffee-recipe",
+    "slug": "jameson-irish-coffee-recipe",
+    "title": "Jameson Irish Coffee Recipe",
+    "description": "When it comes to coffee drinks, there’s nothing more quintessentially Irish than adding a little drop of Jameson Irish Whiskey to add some warmth and make a cold winter’s evening more enjoyable. So, go ahead and indulge in the magic of this Irish whiskey cocktail, and let your taste buds dance with joy as they experience […]",
+    "image": "/images/mixology/jameson-irish-coffee-recipe.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Jameson-Irish-Coffee-Recipe.webp",
+    "brand": "Jameson",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Hot Drink",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "20 mins",
+    "glassware": "Irish Coffee Mug",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "35 ml Jameson Original",
+      "60 ml Lightly Whipped Cream",
+      "10 ml Demerara Sugar Syrup",
+      "90 ml Espresso"
+    ],
+    "parts": [
+      "35 ml Jameson Original",
+      "60 ml Lightly Whipped Cream",
+      "10 ml Demerara Sugar Syrup",
+      "90 ml Espresso",
+      "Grated Nutmeg",
+      "1⅙ Parts Jameson Original",
+      "2 Parts Lightly Whipped Cream",
+      "⅓ Parts Demerara Sugar Syrup",
+      "3 Parts Espresso"
+    ],
+    "instructions": [
+      "1. Add the Jameson, Demerara syrup and coffee to a pre heated tempered glass.",
+      "2. Top with lightly whipped cream.",
+      "3. Garnish with grated nutmeg.",
+      "1 .Add 500g Demerara sugar, 250ml water to a saucepan and bring to a boil. 2. Reduce heat and stir until sugar is dissolved. 3. Remove from heat, allow to cool, bottle and refrigerate."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/jameson-irish-coffee-recipe/"
+  },
+  {
+    "id": "la-dolce-vita-spritz",
+    "slug": "la-dolce-vita-spritz",
+    "title": "La Dolce Vita Spritz",
+    "description": "Explore curated happy hour specials, drink deals, and nightlife moments. Make every hour a happy one.",
+    "image": "/images/mixology/la-dolce-vita-spritz.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/15-DOCE-VITA-SPRITZ.webp",
+    "brand": "Malfy",
+    "spiritType": "Gin",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "35ML MALFY GIN CON ARANCIA",
+      "50ML SANPELLEGRINO LIMONATA",
+      "50ML PROSECCO",
+      "Build ingredients in a glass over cubed ice and gently stir to combine."
+    ],
+    "parts": [
+      "35ML MALFY GIN CON ARANCIA",
+      "50ML SANPELLEGRINO LIMONATA",
+      "50ML PROSECCO",
+      "BLACKBERRIES, PINK GRAPEFRUIT SLICE & SAGE"
+    ],
+    "instructions": [
+      "Build ingredients in a glass over cubed ice and gently stir to combine.",
+      "Garnish with blackberries, a pink grapefruit slice and sage."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/la-dolce-vita-spritz/"
+  },
+  {
+    "id": "lemon-drop-shot",
+    "slug": "lemon-drop-shot",
+    "title": "Lemon Drop Shot",
+    "description": "The Lemon Drop Shot is a vodka shot and a cousin of the Lemon Drop Martini. It’s true what they say: good things come in small packages. Lively, sweet and zesty all at once, the Lemon Drop Shot is the ultimate shot to serve on a tray at parties.",
+    "image": "/images/mixology/lemon-drop-shot.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/recipe_lemon-drop_16x9_19a773cbd071100ea56570a0ee97d280.webp",
+    "brand": "Absolut",
+    "spiritType": "Vodka",
+    "drinkStyle": "Martini",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Coupe / Martini Glass",
+    "garnish": "1 Wedge Lemon",
+    "ingredients": [
+      "20 ml Absolut Citron",
+      "20 ml Lemon Juice",
+      "10 ml Simple Syrup",
+      "1 Wedge Lemon",
+      "Ice Cubes",
+      "Rub a Lemon Wedge around the rim of a Shot Glass to coat it in Lemon Juice.",
+      "Fill the Shaker with Ice Cubes.",
+      "Garnish by placing a Lemon Wedge directly on top of the Shot Glass."
+    ],
+    "parts": [
+      "20 ml Absolut Citron",
+      "20 ml Lemon Juice",
+      "10 ml Simple Syrup",
+      "1 Wedge Lemon",
+      "Caster Sugar",
+      "Ice Cubes"
+    ],
+    "instructions": [
+      "Use a Paring Knife to cut one Lemon in half. Set one half aside for Lemon Juice and use the other half to cut Lemon Wedges.",
+      "Rub a Lemon Wedge around the rim of a Shot Glass to coat it in Lemon Juice.",
+      "Pour a generous amount of Caster Sugar onto a Small Plate. Gently dip and twist the rim of your Shot Glass into the sugar until it’s fully coated.",
+      "Use a Citrus Elbow to squeeze the Lemon Half into a Small Pouring Jug to produce Fresh Lemon Juice. Measure and pour the Fresh Lemon Juice into the Boston Shaker.",
+      "Fill the Shaker with Ice Cubes.",
+      "Shake vigorously for about 10 seconds, then separate the Boston Shaker.",
+      "Place a Hawthorne Strainer over the larger tin of the Boston Shaker. Double strain the mixture by pouring it through a Fine Mesh Strainer into the smaller tin.",
+      "Pour the mixture into a Chilled Sugar-Rimmed Shot Glass.",
+      "Garnish by placing a Lemon Wedge directly on top of the Shot Glass."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/lemon-drop-shot/"
+  },
+  {
+    "id": "malfy-x-missoni-bianco-royale-spritz",
+    "slug": "malfy-x-missoni-bianco-royale-spritz",
+    "title": "Malfy X Missoni Bianco Royale Spritz",
+    "description": "Explore curated happy hour specials, drink deals, and nightlife moments. Make every hour a happy one.",
+    "image": "/images/mixology/malfy-x-missoni-bianco-royale-spritz.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/malfy-x-missoni-bianco-royale.webp",
+    "brand": "Malfy",
+    "spiritType": "Gin",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "35ml Malfy Gin Originale",
+      "15ml Lillet Blanc",
+      "5ml Suze",
+      "15ml Monin Triple Sec syrup",
+      "50ml GH Mumm Cordon Rouge",
+      "50ml Fever Tree Mediterranean Tonic"
+    ],
+    "parts": [
+      "35ml Malfy Gin Originale",
+      "15ml Lillet Blanc",
+      "5ml Suze",
+      "15ml Monin Triple Sec syrup",
+      "50ml GH Mumm Cordon Rouge",
+      "50ml Fever Tree Mediterranean Tonic"
+    ],
+    "instructions": [
+      "Add all ingredients to a copa with ice and gently mix.",
+      "Garnish with a lemon wheel."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/malfy-x-missoni-bianco-royale-spritz/"
+  },
+  {
+    "id": "malibu-and-cola",
+    "slug": "malibu-and-cola",
+    "title": "Malibu And Cola",
+    "description": "Your favorite Malibu with a bit of sparkle. By mixing Malibu Original and Cola over ice, you’ll get a round and sweet drink with a bubbly fizz. If you’re looking for bubble, you’ve come to the right place.",
+    "image": "/images/mixology/malibu-and-cola.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Malibu-And-Cola-1x1-1-scaled-1.webp",
+    "brand": "Malibu",
+    "spiritType": "Gin",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "2 mins",
+    "glassware": "Highball Glass",
+    "garnish": "GARNISH: Lime wedges",
+    "ingredients": [
+      "50 ML Malibu Original",
+      "100 ML Cola",
+      "GARNISH: Lime wedges",
+      "1 PART Malibu Original",
+      "Garnish with lime wedges, and enjoy!"
+    ],
+    "parts": [
+      "50 ML Malibu Original",
+      "100 ML Cola",
+      "GARNISH: Lime wedges",
+      "Ice",
+      "1 PART Malibu Original",
+      "2 PARTS Cola"
+    ],
+    "instructions": [
+      "Pour Malibu and Cola into a highball glass with ice",
+      "Garnish with lime wedges, and enjoy!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/malibu-and-cola/"
+  },
+  {
+    "id": "malibu-mojito",
+    "slug": "malibu-mojito",
+    "title": "Malibu Mojito",
+    "description": "The Malibu Mojito – a tropical twist on a classic favourite Mojito. A simplified and delicious recipe with the perfect blend of cool mint, zesty lime, and the smooth, coconutty goodness of Malibu Original.",
+    "image": "/images/mixology/malibu-mojito.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Malibu-Mojito-1x1-1-scaled-1.webp",
+    "brand": "Malibu",
+    "spiritType": "Gin",
+    "drinkStyle": "Tropical",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "10 Mint Leaves",
+    "glassware": "Highball Glass",
+    "garnish": "10 Mint Leaves",
+    "ingredients": [
+      "50 ml Malibu Original",
+      "100 ml Soda Water",
+      "25 ml Lime Juice",
+      "10 Mint Leaves",
+      "Lime wedges",
+      "Add the mint leaves into a highball glass",
+      "Add in some lime wedges (Optional: gently muddle the mint and lime)"
+    ],
+    "parts": [
+      "50 ml Malibu Original",
+      "100 ml Soda Water",
+      "25 ml Lime Juice",
+      "10 Mint Leaves",
+      "Lime wedges",
+      "Garnish: Mint sprig",
+      "Crushed Ice"
+    ],
+    "instructions": [
+      "Add the mint leaves into a highball glass",
+      "Add in some lime wedges (Optional: gently muddle the mint and lime)",
+      "Fill the glass with crushed ice",
+      "Pour in the Malibu Original, lime juice and soda water",
+      "Garnish with a mint spring and enjoy!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/malibu-mojito/"
+  },
+  {
+    "id": "malibu-pineapple-juice",
+    "slug": "malibu-pineapple-juice",
+    "title": "MALIBU & PINEAPPLE JUICE",
+    "description": "The Malibu & Pineapple Juice is an easy-to-make tropical cocktail that’s more like a symphony, where the smooth, coconutty vibes of Malibu Original waltz with the sweet and tangy notes of pineapple",
+    "image": "/images/mixology/malibu-pineapple-juice.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Malibu_Pineapple.webp",
+    "brand": "Malibu",
+    "spiritType": "Gin",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "2 mins",
+    "glassware": "Highball Glass",
+    "garnish": "GARNISH: Pineapple Wedge",
+    "ingredients": [
+      "50 ML Malibu Original",
+      "100 ML Pineapple Juice",
+      "GARNISH: Pineapple Wedge",
+      "1 PART Malibu Original",
+      "Fill a highball glass with ice cubes",
+      "Garnish with a pineapple wedge"
+    ],
+    "parts": [
+      "50 ML Malibu Original",
+      "100 ML Pineapple Juice",
+      "GARNISH: Pineapple Wedge",
+      "Ice",
+      "1 PART Malibu Original",
+      "2 PARTS Pineapple Juice"
+    ],
+    "instructions": [
+      "Fill a highball glass with ice cubes",
+      "Pour in Malibu Original and pineapple juice",
+      "Garnish with a pineapple wedge"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/malibu-pineapple-juice/"
+  },
+  {
+    "id": "martelito",
+    "slug": "martelito",
+    "title": "Martelito",
+    "description": "A refreshing and elegant drink that highlights the smooth character of Martell VS cognac. This cocktail combines the richness of cognac with the tang of lime juice, the sweetness of simple syrup, and the effervescence of soda water, resulting in a balanced and invigorating beverage.",
+    "image": "/images/mixology/martelito.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Martelito.webp",
+    "brand": "Martell",
+    "spiritType": "Cognac",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "Mint leaves 5",
+    "glassware": "Highball Glass",
+    "garnish": "Mint leaves 5",
+    "ingredients": [
+      "Mint leaves 5",
+      "1. Fill the glass with ice cubes to keep the drink crisp and chilled",
+      "3. Mix in 15 ml of simple syrup and then top with 90 ml of soda water"
+    ],
+    "parts": [
+      "Martell VS 45 ml",
+      "Mint leaves 5",
+      "Lime juice 20 ml",
+      "Simple syrup 15 ml",
+      "Soda water 90 ml"
+    ],
+    "instructions": [
+      "1. Fill the glass with ice cubes to keep the drink crisp and chilled",
+      "2 . Muddle 5 mint leaves to release their aromas, then pour 45 ml of Martell VS into the glass over the ice, and add 20 ml of fresh lime juice.",
+      "3. Mix in 15 ml of simple syrup and then top with 90 ml of soda water",
+      "4. Give a quick stir to blend the ingredients smoothly",
+      "5 . Add garnish with a lime wheel"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/martelito/"
+  },
+  {
+    "id": "martell-negroni",
+    "slug": "martell-negroni",
+    "title": "Martell Negroni",
+    "description": "The Martell Negroni offers a refined twist on the classic Negroni, replacing gin with Martell. This cocktail provides a bold, bittersweet taste with a smooth and luxurious finish, perfect for those who enjoy complex flavors.",
+    "image": "/images/mixology/martell-negroni.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Martell-CLASSIC-NEGRONI-VSOP.webp",
+    "brand": "Martell",
+    "spiritType": "Gin",
+    "drinkStyle": "Negroni",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "5. Garnish with an orange twist",
+    "ingredients": [
+      "5. Garnish with an orange twist"
+    ],
+    "parts": [
+      "Martell VSOP 30 ml",
+      "Sweet Vermouth 30 ml",
+      "Italian bitter (ex: Campari) 30 ml"
+    ],
+    "instructions": [
+      "1. Add 30 ml of Martell, 30 ml of sweet vermouth, and 30 ml of Suze (or Campari) into a stirring tin (or equivalent) with ice",
+      "2 . Stir quickly for 20-30 seconds",
+      "3. Add ice to a rock glass",
+      "4. Strain into a glass",
+      "5. Garnish with an orange twist"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/martell-negroni/"
+  },
+  {
+    "id": "mojito",
+    "slug": "mojito",
+    "title": "Mojito",
+    "description": "Make an authentic Cuban Mojito rum cocktail at home by following our simple “Mix, Muddle, Mix” recipe prepared with the white rum Havana Club 3 and enjoy a true taste of Cuba! Be sure to make enough to share this sensorial experience with your friends.",
+    "image": "/images/mixology/mojito.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/havan-mojito.webp",
+    "brand": "Havana Club",
+    "spiritType": "Rum",
+    "drinkStyle": "Tropical",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "Teaspoons White Sugar 2",
+      "Ice Cubes 3",
+      "Mix the sugar and fresh lime juice with a spoon in your glass."
+    ],
+    "parts": [
+      "Teaspoons White Sugar 2",
+      "Fresh Lime juice 25 ml",
+      "Sprigs of Mint 2",
+      "Havana Club Añejo 3 Años rum 50 ml",
+      "Ice Cubes 3",
+      "Soda Water 80ml"
+    ],
+    "instructions": [
+      "Mix the sugar and fresh lime juice with a spoon in your glass.",
+      "Muddle the mint sprigs in the sugar and lime mixture.",
+      "Add the white rum and ice cubes, then mix again. Top up the glass with a splash of soda water.",
+      "Garnish with a mint sprig and…enjoy!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/mojito/"
+  },
+  {
+    "id": "ndu-by-kamsi-brown",
+    "slug": "ndu-by-kamsi-brown",
+    "title": "NDU by Kamsi Brown",
+    "description": "Pairing with Jameson for International Women’s Day 2023, Kasmi looked to Mother Earth for inspiration for her cocktail and so the NDU was cultivated. What a beautiful tribute to the woman that gives us all life. A floral cocktail, picked from nature. “ I call this cocktail “NDU” Which means “LIFE” in the Nigerian “IGBO” […]",
+    "image": "/images/mixology/ndu-by-kamsi-brown.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/NDU-by-Kamsi-Brown.webp",
+    "brand": "Jameson",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "3 Pieces Basil leaves",
+    "ingredients": [
+      "60 ml Jameson Black Barrel",
+      "15 ml Drillaud Vanilla Liqueur",
+      "50 ml Fresh squeezed pineapple juice",
+      "10 ml Simple syrup",
+      "25 ml Fresh Lemon juice",
+      "1 Bar spoon Honey",
+      "3 Pieces Basil leaves",
+      "Then add the rest of the ingredients, add ice-cubes and Shake Vigorously.",
+      "Double strain over a Rocky Ice-cubes into a Whiskey glass.​",
+      "Garnish with fresh Basil leaves and ruby grapes.",
+      "Next Turmeric Twist Next"
+    ],
+    "parts": [
+      "60 ml Jameson Black Barrel",
+      "15 ml Drillaud Vanilla Liqueur",
+      "50 ml Fresh squeezed pineapple juice",
+      "10 ml Simple syrup",
+      "25 ml Fresh Lemon juice",
+      "3 Ruby grapes",
+      "1 Bar spoon Honey",
+      "1 Tiny piece Fresh ginger fruits",
+      "3 Pieces Basil leaves"
+    ],
+    "instructions": [
+      "Add the 3 Ruby grapes and 1 part tiny fresh ginger into a Boston shaker muddle all together.",
+      "Then add the rest of the ingredients, add ice-cubes and Shake Vigorously.",
+      "Double strain over a Rocky Ice-cubes into a Whiskey glass.​",
+      "Garnish with fresh Basil leaves and ruby grapes."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/ndu-by-kamsi-brown/"
+  },
+  {
+    "id": "old-fashioned",
+    "slug": "old-fashioned",
+    "title": "Old Fashioned",
+    "description": "The Old Fashioned is a timeless cocktail, and when made with Martell Blue Swift, it becomes a rich, luxurious drink. A perfect choice for those who appreciate the classics with a premium twist.",
+    "image": "/images/mixology/old-fashioned.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/PreviewLarge-PERN0001_Martell_CLASSIC_OLD_FASHIONED.webp",
+    "brand": "Martell",
+    "spiritType": "Cognac",
+    "drinkStyle": "Old Fashioned",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "dashes Angostura Bitters 3"
+    ],
+    "parts": [
+      "Martell Blue Swift 50 ml",
+      "Sugar 15 ml",
+      "dashes Angostura Bitters 3"
+    ],
+    "instructions": [
+      "Combine all ingredients with ice in a shaker or glass.",
+      "Stir or shake well until chilled.",
+      "Strain into your glass and garnish."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/old-fashioned/"
+  },
+  {
+    "id": "olmeca-batanga",
+    "slug": "olmeca-batanga",
+    "title": "Olmeca Batanga",
+    "description": "Mysterious. Tequila with soul. The Batanga isn’t just a drink—it’s a badass ritual from Jalisco. Simple, fizzy, and magical, this will give your party a new level of epic.!",
+    "image": "/images/mixology/olmeca-batanga.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Olmeca-Batanga.webp",
+    "brand": "Olmeca",
+    "spiritType": "Tequila",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "60 ml Olmeca Silver",
+      "150 ml cola soda",
+      "15 ml lemon or lime juice"
+    ],
+    "parts": [
+      "60 ml Olmeca Silver",
+      "150 ml cola soda",
+      "15 ml lemon or lime juice",
+      "Salt for the rim",
+      "Ice",
+      "A literal knife (yes, really)",
+      "Rim glass with salt.",
+      "Add ice, then Olmeca Silver.",
+      "Toast to tradition"
+    ],
+    "instructions": [
+      "Combine all ingredients with ice in a shaker or glass.",
+      "Stir or shake well until chilled.",
+      "Strain into your glass and garnish."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/olmeca-batanga/"
+  },
+  {
+    "id": "olmeca-shot-arita",
+    "slug": "olmeca-shot-arita",
+    "title": "Olmeca SHOT-ARITA!",
+    "description": "Forget the glass, grab the shot. This is your Margarita moment: bold, full of life, and dressed to party. One round and let the party commence.",
+    "image": "/images/mixology/olmeca-shot-arita.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Olmeca-SHOT-ARITA.webp",
+    "brand": "Olmeca",
+    "spiritType": "Tequila",
+    "drinkStyle": "Shot",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Shot Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "25 ml Olmeca Silver",
+      "15 ml lime juice",
+      "10 ml blue curaçao"
+    ],
+    "parts": [
+      "25 ml Olmeca Silver",
+      "15 ml lime juice",
+      "10 ml blue curaçao"
+    ],
+    "instructions": [
+      "1. Add everything to a shaker with ice.",
+      "2. Shake it like your crush is watching",
+      "3. Pour into a shot glass and serve chilled.",
+      "Pro Tip: This one that gets the “wait—what’s in this?” reaction every time."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/olmeca-shot-arita/"
+  },
+  {
+    "id": "olmeca-skinny-margarita",
+    "slug": "olmeca-skinny-margarita",
+    "title": "Olmeca Skinny Margarita",
+    "description": "The Olmeca Skinny Margarita is your ride-or-die. It’s light, cool, and pairs with everything—tacos, birthdays, breakups. Just keep the party going.",
+    "image": "/images/mixology/olmeca-skinny-margarita.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Olmeca-Skinny-Margarita.webp",
+    "brand": "Olmeca",
+    "spiritType": "Tequila",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Orange wedge to garnish",
+    "ingredients": [
+      "60 ml Olmeca Silver",
+      "120 ml orange juice",
+      "60 ml lemon soda",
+      "Orange wedge to garnish",
+      "3 .Garnish with an orange wedge"
+    ],
+    "parts": [
+      "60 ml Olmeca Silver",
+      "120 ml orange juice",
+      "60 ml lemon soda",
+      "Ice",
+      "Orange wedge to garnish"
+    ],
+    "instructions": [
+      "1. Fill glass with ice.",
+      "2. Pour in Olmeca Silver, orange juice, and top with lemon soda.",
+      "3 .Garnish with an orange wedge"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/olmeca-skinny-margarita/"
+  },
+  {
+    "id": "orange-shot",
+    "slug": "orange-shot",
+    "title": "Orange Shot",
+    "description": "Zesty. Bold. Zero regrets. The tequila shot of the year that brings citrus-fueled chaos with a sweet twist. Starts the party, and sets the tone for everyone who gets involved.",
+    "image": "/images/mixology/orange-shot.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Orange-Shot.webp",
+    "brand": "Olmeca",
+    "spiritType": "Tequila",
+    "drinkStyle": "Shot",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "30 ml Olmeca Silver",
+      "30 ml orange juice",
+      "15 ml lime soda"
+    ],
+    "parts": [
+      "30 ml Olmeca Silver",
+      "30 ml orange juice",
+      "15 ml lime soda"
+    ],
+    "instructions": [
+      "Build right in the shot glass: Olmeca first, then OJ, finish with lime soda.",
+      "No shaking required",
+      "Pro Tip: Serve with fresh lime for that extra."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/orange-shot/"
+  },
+  {
+    "id": "originale-hugo-spritz",
+    "slug": "originale-hugo-spritz",
+    "title": "Originale Hugo Spritz",
+    "description": "Explore curated happy hour specials, drink deals, and nightlife moments. Make every hour a happy one.",
+    "image": "/images/mixology/originale-hugo-spritz.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/231003-PR-Originale-HugoSpritz_0405_RTv1_noshad-e1697700623318.webp",
+    "brand": "Malfy",
+    "spiritType": "Gin",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "MINT LEAVES",
+    "ingredients": [
+      "40ML MALFY ORIGINALE",
+      "10ML ELDERFLOWER SYRUP",
+      "50ML PROSECCO",
+      "75ML SODA",
+      "MINT LEAVES"
+    ],
+    "parts": [
+      "40ML MALFY ORIGINALE",
+      "10ML ELDERFLOWER SYRUP",
+      "50ML PROSECCO",
+      "75ML SODA",
+      "MINT LEAVES"
+    ],
+    "instructions": [
+      "Build ingredients in a glass over cubed ice and gently stir to combine. Garnish with mint leaves."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/originale-hugo-spritz/"
+  },
+  {
+    "id": "pina-colada-2",
+    "slug": "pina-colada-2",
+    "title": "Piña Colada",
+    "description": "The Piña Colada is the ultimate tropical cocktail. It perfectly balances rich cream of coconut, sweet tangy pineapple juice and smooth Malibu Original for a refreshing and indulgent taste, where every sip takes you to sunny paradise.",
+    "image": "/images/mixology/pina-colada-2.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Malibu-Pina-Colada.webp",
+    "brand": "Malibu",
+    "spiritType": "Gin",
+    "drinkStyle": "Tropical",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "50 ML Malibu Original",
+      "50 ML Pineapple Juice",
+      "25 ML Cream of Coconut",
+      "12.5 ML Lime Juice (optional)",
+      "1 PART Malibu Original",
+      "1 PART Pineapple Juice",
+      "Fill a shaker with ice cubes"
+    ],
+    "parts": [
+      "50 ML Malibu Original",
+      "50 ML Pineapple Juice",
+      "25 ML Cream of Coconut",
+      "12.5 ML Lime Juice (optional)",
+      "GARNISH: Pineapple Slice",
+      "Ice",
+      "1 PART Malibu Original",
+      "1 PART Pineapple Juice",
+      "0.5 PARTS Cream of Coconut",
+      "0.25 PARTS Lime Juice (optional)"
+    ],
+    "instructions": [
+      "Fill a shaker with ice cubes",
+      "Pour in Malibu Original, pineapple juice, cream of coconut and lime juice (optional)",
+      "Shake for 8-12 seconds and strain into a hurricane glass with ice",
+      "Garnish with a pineapple slice and enjoy!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/pina-colada-2/"
+  },
+  {
+    "id": "pina-colada",
+    "slug": "pina-colada",
+    "title": "Piña Colada",
+    "description": "Find out how to prepare a Pina Colada cocktail with our white rum! A tropical classic for a little taste of paradise! What would you drink on a desert island? Coconut juice, pineapple and Havana Club 3 rum. Sip and dream…",
+    "image": "/images/mixology/pina-colada.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/pina-colada.webp",
+    "brand": "Havana Club",
+    "spiritType": "Rum",
+    "drinkStyle": "Tropical",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "Havana Club Añejo 3 Años rum 60 ml",
+      "Fresh Pineapple Juice 100 ml",
+      "Coconut Milk 30 ml",
+      "Lime Juice (optional) 5 ml",
+      "Crushed Ice 1 cup"
+    ],
+    "parts": [
+      "Havana Club Añejo 3 Años rum 60 ml",
+      "Fresh Pineapple Juice 100 ml",
+      "Coconut Milk 30 ml",
+      "Lime Juice (optional) 5 ml",
+      "Crushed Ice 1 cup"
+    ],
+    "instructions": [
+      "Fill a large jar with the ice.",
+      "Add the white rum, pineapple juice, coconut milk, then stir.",
+      "Close the lid and shake it like you mean it for 30 seconds.",
+      "Serve in a hurricane glass filled with ice and… enjoy!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/pina-colada/"
+  },
+  {
+    "id": "pornstar-martini",
+    "slug": "pornstar-martini",
+    "title": "Pornstar Martini",
+    "description": "The Pornstar Martini – if the name doesn’t grab your attention, its tropical flavors and truly one of a kind presentation will. When you see the name ‘Martini’, you might think of a classic martini made with gin, vermouth, garnished with an olive and/or lemon twist. But the Pornstar Martini belongs to the group of […]",
+    "image": "/images/mixology/pornstar-martini.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/recipe_pornstar-martini_16x9_0ddd749abce6cbd9e9fecbf2b556006a.webp",
+    "brand": "Absolut",
+    "spiritType": "Gin",
+    "drinkStyle": "Martini",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Coupe / Martini Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "45 ml Absolut Vanilia",
+      "25 ml Passion Fruit Purée",
+      "15 ml Vanilla Syrup",
+      "Ice Cubes",
+      "Add Ice Cubes to the Shaker."
+    ],
+    "parts": [
+      "45 ml Absolut Vanilia",
+      "25 ml Passion Fruit Purée",
+      "15 ml Vanilla Syrup",
+      "1 Slice Pineapple",
+      "1 Half Passion Fruit",
+      "Champagne (or Prosecco)",
+      "Ice Cubes"
+    ],
+    "instructions": [
+      "Using a Paring Knife, cut a medium-thick Pineapple Slice.",
+      "Grab a Cocktail Shaker and add the Pineapple Slice.",
+      "Use a Muddler to mash up the Pineapple.",
+      "Use a Jigger (or measuring instrument) to pour Absolut Vanilia, Passion Fruit Pulp, Vanilla Syrup, and Passion Fruit Purée into the Shaker.",
+      "Add Ice Cubes to the Shaker.",
+      "Give everything a vigorous shake.",
+      "Grab a Hawthorne Strainer together with a Fine Strainer and double strain the mix into a chilled Cocktail Glass.",
+      "Using a Paring Knife, cut one Passion Fruit in half.",
+      "Top off your cocktail with a floating half of Passion Fruit.",
+      "Serve alongside a shot of ice-cold Champagne (or Prosecco) and enjoy!"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/pornstar-martini/"
+  },
+  {
+    "id": "raspberry-peach-collins",
+    "slug": "raspberry-peach-collins",
+    "title": "Raspberry Peach Collins",
+    "description": "Pitcher perfect. Multiply these specs for the dreamiest party-ready summer serve: bright raspberries, sharp citrus and peachy finish add a zingy and fresh balance to the Beefeater London Dry Gin for the best summer cup.",
+    "image": "/images/mixology/raspberry-peach-collins.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Raspberry-Peach-Collins.webp",
+    "brand": "Beefeater",
+    "spiritType": "Gin",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "Beefeater London Dry Gin 50 ml",
+      "Lemon Juice 20 ml",
+      "Raspberry Syrup 15 ml",
+      "Sparkling Peach 50 ml",
+      "Peach & Raspberry",
+      "to garnish"
+    ],
+    "parts": [
+      "Beefeater London Dry Gin 50 ml",
+      "Lemon Juice 20 ml",
+      "Raspberry Syrup 15 ml",
+      "Sparkling Peach 50 ml",
+      "Peach & Raspberry",
+      "to garnish"
+    ],
+    "instructions": [
+      "Prepare your raspberry syrup if making at home: Bring equal parts sugar and water to the boil, reduce to simmer until sugar is dissolved. Remove from heat, add Raspberries and mash. Leave to steep for 1 hour. Strain out all the raspberries and leave to chill in fridge",
+      "Pour your Beefeater London Dry Gin, lemon juice and raspberry syrup into a mixing glass or pitcher over ice",
+      "Stir to combine",
+      "Pour into your glass",
+      "Finish with the peach soda",
+      "Granish with a slice of peach and a couple of raspberries"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/raspberry-peach-collins/"
+  },
+  {
+    "id": "scottish-spring-matcha",
+    "slug": "scottish-spring-matcha",
+    "title": "Scottish Spring Matcha",
+    "description": "This serve offers a new twist perfect for spring. With a beautiful matcha-green color, sun-soaked flavors of coconut and lime, and an edible flower garnish. A whisky matcha cocktail that will have you dreaming of sunny days ahead (all while reminding that scotch is meant to be drank in every season).",
+    "image": "/images/mixology/scottish-spring-matcha.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Scottish-Spring-Matcha.webp",
+    "brand": "Signature",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "The Glenlivet Founder’s Reserve",
+      "2 Parts",
+      "Cream of coconut",
+      "Matcha",
+      "0.25 Parts",
+      "Lime Juice",
+      "0.5 Parts"
+    ],
+    "parts": [
+      "The Glenlivet Founder’s Reserve",
+      "2 Parts",
+      "Cream of coconut",
+      "Matcha",
+      "0.25 Parts",
+      "Lime Juice",
+      "0.5 Parts"
+    ],
+    "instructions": [
+      "Combine ingredients in shaker",
+      "Shake and strain",
+      "Garnish top with matcha dusting and with edible flowers"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/scottish-spring-matcha/"
+  },
+  {
+    "id": "spicy-mango-martini",
+    "slug": "spicy-mango-martini",
+    "title": "Spicy Mango Martini",
+    "description": "Made by our friends at My Cocktail Bible, this spicy margarita inspired sip is the perfect tropic gin twist on a martini. Watch the heat level rise with every added slice of chili – if you want something milder then make sure you’ve deseeded it and even reduce the number of slices you add to […]",
+    "image": "/images/mixology/spicy-mango-martini.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Spicy-Mango-Martini.webp",
+    "brand": "Signature",
+    "spiritType": "Gin",
+    "drinkStyle": "Martini",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Coupe / Martini Glass",
+    "garnish": "Garnish with a wedge of chili on your glass",
+    "ingredients": [
+      "Garnish with a wedge of chili on your glass"
+    ],
+    "parts": [
+      "Beefeater London Dry Gin 45 ml",
+      "Lillet Blanc 15 ml",
+      "Lime Juice 20 ml",
+      "Sugar Syrup 15 ml",
+      "Fresh Mango",
+      "Red Chilli 2 slices",
+      "Tajin"
+    ],
+    "instructions": [
+      "Prepare your mango and chili by slicing them up and put them into a cocktail shaker",
+      "Pour in your sugar syrup",
+      "Squash up your mango, chili and syrup mixture",
+      "Add in your Beefeater London Dry Gin, Lillet Blanc and lime juice",
+      "Shake hard with ice until well combined",
+      "Prepare your glass with a tajin rim",
+      "Strain your drink into your glass. Use an extra strainer to keep the drink smooth.",
+      "Garnish with a wedge of chili on your glass"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/spicy-mango-martini/"
+  },
+  {
+    "id": "swift-and-spicy",
+    "slug": "swift-and-spicy",
+    "title": "Swift and Spicy",
+    "description": "Swift and Spicy is a refreshing, balanced cocktail that combines the boldness of Martell Blue Swift with tropical and spicy notes, offering a playful twist on the classic spicy margarita. Infused with vibrant Latin American flavors, this cocktail brings a unique depth and richness to the experience.",
+    "image": "/images/mixology/swift-and-spicy.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Swift-and-Spicy.webp",
+    "brand": "Martell",
+    "spiritType": "Tequila",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "Martell Blue Swift 45 ml",
+      "Ancho Reyes 20 ml",
+      "Lime juice 15 ml",
+      "Pineapple juice 30 ml",
+      "Agave nectar 10 ml"
+    ],
+    "parts": [
+      "Martell Blue Swift 45 ml",
+      "Ancho Reyes 20 ml",
+      "Lime juice 15 ml",
+      "Pineapple juice 30 ml",
+      "Agave nectar 10 ml"
+    ],
+    "instructions": [
+      "1. Add 45 ml of Martell Blue Swift, 20 ml of Ancho Reyes, 15 ml of lime juice, 30 ml of pineapple juice, and 10 ml of agave nectar into a shaker with ice",
+      "2. Shake for 20-30 seconds",
+      "3. Double strain into a glass",
+      "4. Garnish and serve."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/swift-and-spicy/"
+  },
+  {
+    "id": "tequila-soda",
+    "slug": "tequila-soda",
+    "title": "Tequila Soda",
+    "description": "No plan? No problem, take the mineral water and tequila out of the fridge! It’s always a good time for a Tequila Soda.",
+    "image": "/images/mixology/tequila-soda.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/Tequila-Soda.webp",
+    "brand": "Olmeca",
+    "spiritType": "Tequila",
+    "drinkStyle": "Highball",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Highball Glass",
+    "garnish": "Citrus Twist",
+    "ingredients": [
+      "2 oz. Olmeca Silver",
+      "6 oz. Agua Mineral"
+    ],
+    "parts": [
+      "2 oz. Olmeca Silver",
+      "6 oz. Agua Mineral"
+    ],
+    "instructions": [
+      "Combine all ingredients with ice in a shaker or glass.",
+      "Stir or shake well until chilled.",
+      "Strain into your glass and garnish."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/tequila-soda/"
+  },
+  {
+    "id": "the-godfather",
+    "slug": "the-godfather",
+    "title": "The Godfather",
+    "description": "The Godfather is a drink you can’t refuse. With just two ingredients, it’s a simple recipe. But it’s one that’s packs a punch in flavour. Sweet, almond flavoured Amaretto combines with spiced, nutty notes of scotch to create a sophisticated serve. Mix the two together and – badda-bing – you’re in business.",
+    "image": "/images/mixology/the-godfather.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/The-GLENLIVET_The-Godfather.webp",
+    "brand": "Signature",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Cocktail",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Rocks Glass",
+    "garnish": "Fresh Citrus Twist / Herbs",
+    "ingredients": [
+      "Add all ingredients to a Mixing Vessel over Cubed Ice.",
+      "Strain into a Rocks Glass over Cubed Ice."
+    ],
+    "parts": [
+      "The Glenlivet 15 Year Old",
+      "45 ml",
+      "Amaretto",
+      "15 ml",
+      "Zest of Orange, Maraschino Cherry for Garnish"
+    ],
+    "instructions": [
+      "Add all ingredients to a Mixing Vessel over Cubed Ice.",
+      "Stir for 10-15 seconds.",
+      "Strain into a Rocks Glass over Cubed Ice.",
+      "Garnish with a Zest of Orange and a Maraschino Cherry."
+    ],
+    "url": "https://myhappyhour.co.ke/mix/the-godfather/"
+  },
+  {
+    "id": "turmeric-twist",
+    "slug": "turmeric-twist",
+    "title": "Turmeric Twist",
+    "description": "Turmeric has infused its way into our teas and tonics and with its beautiful, bold hue we thought why not The Glenlivet? This scotch spritz will challenge everything you’ve thought about scotch and spritzes as you toast to long summer days with this sparkling drink.",
+    "image": "/images/mixology/turmeric-twist.webp",
+    "originalImageUrl": "https://myhappyhour.co.ke/wp-content/uploads/2025/11/turmeric-twist.webp",
+    "brand": "The Glenlivet",
+    "spiritType": "Whiskey",
+    "drinkStyle": "Spritz",
+    "difficulty": "Easy",
+    "servings": "1 serving",
+    "prepTime": "5 mins",
+    "glassware": "Wine / Spritz Glass",
+    "garnish": "Turmeric Twist - My Happy Hour",
+    "ingredients": [
+      "Turmeric Twist - My Happy Hour",
+      "Turmeric Twist",
+      "Top with sparkling wine using a spoon to create a layer on pink"
+    ],
+    "parts": [
+      "The Glenlivet 12 Year Old",
+      "1.5 Parts",
+      "Turmeric Honey Syrup",
+      "0.75 Parts",
+      "Lemon Juice",
+      "Mumm Napa Brut Rose Sparkling Wine",
+      "2 Parts"
+    ],
+    "instructions": [
+      "Combine all ingredients, except sparkling wine, into shaker",
+      "Strain into wine glass over fresh ice",
+      "Top with sparkling wine using a spoon to create a layer on pink"
+    ],
+    "url": "https://myhappyhour.co.ke/mix/turmeric-twist/"
+  }
+]
