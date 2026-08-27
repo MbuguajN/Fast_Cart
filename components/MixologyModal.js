@@ -6,39 +6,106 @@ export default function MixologyModal({ recipe, onClose, onAddToCart, products =
   const [unitMode, setUnitMode] = useState('metric'); // 'metric' or 'parts'
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [copied, setCopied] = useState(false);
+  const [added, setAdded] = useState(false);
 
   if (!recipe) return null;
 
-  // Find matching product in store
+  // Comprehensive Spirit & Product Matcher
   const findMatchingProduct = () => {
-    if (!products.length) return null;
-    const searchTerms = [
-      recipe.brand,
-      recipe.title,
-      ...(recipe.ingredients || []),
-    ].filter(Boolean);
+    if (!products || products.length === 0) return null;
 
-    for (const term of searchTerms) {
-      const t = term.toLowerCase();
-      const match = products.find((p) => {
-        const pName = (p.name || '').toLowerCase();
-        if (t.includes('black barrel') && pName.includes('black barrel')) return true;
-        if (t.includes('jameson') && pName.includes('jameson')) return true;
-        if (t.includes('malfy') && pName.includes('malfy')) return true;
-        if (t.includes('chivas') && pName.includes('chivas')) return true;
-        if (t.includes('beefeater') && pName.includes('beefeater')) return true;
-        if (t.includes('olmeca') && pName.includes('olmeca')) return true;
-        if (t.includes('martell') && pName.includes('martell')) return true;
-        if (t.includes('malibu') && pName.includes('malibu')) return true;
-        if (t.includes('absolut') && pName.includes('absolut')) return true;
-        if (t.includes('glenlivet') && pName.includes('glenlivet')) return true;
-        if (t.includes('kahlua') && pName.includes('kahlua')) return true;
-        if (t.includes('jaba') && pName.includes('jaba')) return true;
-        return false;
-      });
-      if (match) return match;
+    const brand = (recipe.brand || '').toLowerCase();
+    const title = (recipe.title || '').toLowerCase();
+    const spirit = (recipe.spiritType || '').toLowerCase();
+    const allText = `${title} ${brand} ${spirit} ${(recipe.ingredients || []).join(' ')}`.toLowerCase();
+
+    const findP = (predicate) => products.find((p) => predicate(p));
+
+    // 1. Jameson
+    if (allText.includes('jameson')) {
+      if (allText.includes('black barrel')) {
+        return findP((p) => p.name.toLowerCase().includes('black barrel')) || findP((p) => p.name.toLowerCase().includes('jameson'));
+      }
+      return findP((p) => p.name.toLowerCase().includes('jameson') && !p.name.toLowerCase().includes('cradle')) || findP((p) => p.name.toLowerCase().includes('jameson'));
     }
-    return null;
+
+    // 2. Malfy
+    if (allText.includes('malfy')) {
+      if (allText.includes('rosa')) return findP((p) => p.name.toLowerCase().includes('con rosa')) || findP((p) => p.name.toLowerCase().includes('malfy'));
+      if (allText.includes('limone') || allText.includes('lemon')) return findP((p) => p.name.toLowerCase().includes('con limone')) || findP((p) => p.name.toLowerCase().includes('malfy'));
+      return findP((p) => p.name.toLowerCase().includes('malfy originale')) || findP((p) => p.name.toLowerCase().includes('malfy'));
+    }
+
+    // 3. Chivas Regal
+    if (allText.includes('chivas')) {
+      return findP((p) => p.name.toLowerCase().includes('chivas 12 yo 750ml')) || findP((p) => p.name.toLowerCase().includes('chivas'));
+    }
+
+    // 4. Beefeater
+    if (allText.includes('beefeater')) {
+      if (allText.includes('blood orange') || allText.includes('orange')) return findP((p) => p.name.toLowerCase().includes('blood orange')) || findP((p) => p.name.toLowerCase().includes('beefeater'));
+      if (allText.includes('pink')) return findP((p) => p.name.toLowerCase().includes('pink gin')) || findP((p) => p.name.toLowerCase().includes('beefeater'));
+      return findP((p) => p.name.toLowerCase().includes('beefeater gin 750ml')) || findP((p) => p.name.toLowerCase().includes('beefeater'));
+    }
+
+    // 5. Olmeca / Tequila / Margaritas
+    if (allText.includes('olmeca') || allText.includes('tequila') || allText.includes('margarita') || allText.includes('batanga')) {
+      if (allText.includes('choco')) return findP((p) => p.name.toLowerCase().includes('fusion choco')) || findP((p) => p.name.toLowerCase().includes('olmeca'));
+      if (allText.includes('gold')) return findP((p) => p.name.toLowerCase().includes('olmeca gold') || p.name.toLowerCase().includes('tequila gold')) || findP((p) => p.name.toLowerCase().includes('olmeca'));
+      return findP((p) => p.name.toLowerCase().includes('olmeca silver 700ml') || p.name.toLowerCase().includes('olmeca silver 1l')) || findP((p) => p.name.toLowerCase().includes('olmeca'));
+    }
+
+    // 6. Martell / Cognac / Brandy
+    if (allText.includes('martell') || allText.includes('cognac') || allText.includes('martelito') || allText.includes('fine à l')) {
+      if (allText.includes('blue swift')) return findP((p) => p.name.toLowerCase().includes('blue swift')) || findP((p) => p.name.toLowerCase().includes('martell'));
+      if (allText.includes('vsop')) return findP((p) => p.name.toLowerCase().includes('martell vsop 700ml')) || findP((p) => p.name.toLowerCase().includes('martell'));
+      return findP((p) => p.name.toLowerCase().includes('martell vs 700ml')) || findP((p) => p.name.toLowerCase().includes('martell'));
+    }
+
+    // 7. Malibu / Coconut Rum
+    if (allText.includes('malibu') || (allText.includes('colada') && !allText.includes('havana'))) {
+      return findP((p) => p.name.toLowerCase().includes('malibu'));
+    }
+
+    // 8. Havana Club / Spiced Rum / Bumbu
+    if (allText.includes('havana') || allText.includes('cuba libre') || allText.includes('mojito') || spirit === 'rum') {
+      if (allText.includes('7')) return findP((p) => p.name.toLowerCase().includes('havana club rum 7')) || findP((p) => p.name.toLowerCase().includes('havana'));
+      return findP((p) => p.name.toLowerCase().includes('havana club') || p.name.toLowerCase().includes('bumbu') || p.name.toLowerCase().includes('malibu'));
+    }
+
+    // 9. The Glenlivet / Single Malt Scotch
+    if (allText.includes('glenlivet') || allText.includes('matcha') || allText.includes('turmeric') || allText.includes('best in pour') || allText.includes('apple pop') || allText.includes('ndu by')) {
+      return findP((p) => p.name.toLowerCase().includes('founders reserve 750ml') || p.name.toLowerCase().includes('the glenlivet 12 yo 750 ml') || p.name.toLowerCase().includes('glenlivet'));
+    }
+
+    // 10. Ballantine's / Blended Scotch
+    if (allText.includes('ballantine') || allText.includes('old fashioned') || allText.includes('the godfather')) {
+      return findP((p) => p.name.toLowerCase().includes("ballantine's whisky 10 yo") || p.name.toLowerCase().includes('ballantines finest whisky 750ml') || p.name.toLowerCase().includes('ballantine'));
+    }
+
+    // 11. Absolut / Vodka / Coffee Liqueur
+    if (allText.includes('absolut') || allText.includes('vodka') || allText.includes('martini') || allText.includes('lemon drop') || allText.includes('orange shot') || spirit === 'vodka') {
+      if (allText.includes('espresso') || allText.includes('coffee') || allText.includes('kahlua')) {
+        return findP((p) => p.name.toLowerCase().includes('kahlua')) || findP((p) => p.name.toLowerCase().includes('absolut'));
+      }
+      if (allText.includes('citron') || allText.includes('lemon')) return findP((p) => p.name.toLowerCase().includes('citron')) || findP((p) => p.name.toLowerCase().includes('absolut'));
+      if (allText.includes('mango')) return findP((p) => p.name.toLowerCase().includes('mango')) || findP((p) => p.name.toLowerCase().includes('absolut'));
+      if (allText.includes('vanilla') || allText.includes('pornstar')) return findP((p) => p.name.toLowerCase().includes('vanilla')) || findP((p) => p.name.toLowerCase().includes('absolut'));
+      return findP((p) => p.name.toLowerCase().includes('absolut vodka 750ml')) || findP((p) => p.name.toLowerCase().includes('absolut'));
+    }
+
+    // 12. Gin general fallback
+    if (spirit === 'gin' || allText.includes('gin') || allText.includes('spritz') || allText.includes('tonic') || allText.includes('collins')) {
+      return findP((p) => p.name.toLowerCase().includes('beefeater gin 750ml')) || findP((p) => p.name.toLowerCase().includes('malfy'));
+    }
+
+    // 13. Whiskey general fallback
+    if (spirit === 'whiskey' || allText.includes('whiskey') || allText.includes('whisky') || allText.includes('sour')) {
+      return findP((p) => p.name.toLowerCase().includes('jameson whiskey 750 ml')) || findP((p) => p.name.toLowerCase().includes('chivas 12 yo 750ml'));
+    }
+
+    // 14. Fallback to any matching spirit
+    return products[0] || null;
   };
 
   const matchedProduct = findMatchingProduct();
@@ -65,6 +132,13 @@ export default function MixologyModal({ recipe, onClose, onAddToCart, products =
     }
   };
 
+  const handleAddToCart = () => {
+    if (!matchedProduct || !onAddToCart) return;
+    onAddToCart(matchedProduct.id);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
+  };
+
   const ingredientsList = unitMode === 'metric' || !recipe.parts?.length ? recipe.ingredients : recipe.parts;
 
   const difficultyColors = {
@@ -83,7 +157,7 @@ export default function MixologyModal({ recipe, onClose, onAddToCart, products =
         className="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-slide-up sm:animate-scale-in text-gray-900 transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sticky Header Image & Close with smooth entrance */}
+        {/* Sticky Header Image & Close */}
         <div className="relative h-64 sm:h-72 w-full shrink-0 bg-gray-900 overflow-hidden">
           <img
             src={recipe.image || recipe.originalImageUrl}
@@ -169,7 +243,7 @@ export default function MixologyModal({ recipe, onClose, onAddToCart, products =
                 </span>
               </div>
 
-              {/* Metric vs Parts Toggle with smooth transition */}
+              {/* Metric vs Parts Toggle */}
               {recipe.parts?.length > 0 && (
                 <div className="flex items-center bg-gray-100 p-0.5 rounded-xl text-xs font-semibold">
                   <button
@@ -244,32 +318,44 @@ export default function MixologyModal({ recipe, onClose, onAddToCart, products =
           </div>
 
           {/* Shop The Spirit / Add to Cart Section */}
-          {matchedProduct && onAddToCart && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-300 shadow-2xs">
+          {matchedProduct && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50/40 border border-pink-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-300 shadow-2xs">
               <div className="flex items-center gap-3">
                 {matchedProduct.image && (
                   <img
                     src={matchedProduct.image}
                     alt={matchedProduct.name}
-                    className="w-12 h-12 rounded-xl object-cover bg-white p-1 shadow-2xs shrink-0"
+                    className="w-14 h-14 rounded-xl object-contain bg-white p-1 border border-pink-100 shadow-2xs shrink-0"
                   />
                 )}
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-[#840038] block">Featured Spirit in Stock</span>
-                  <h4 className="text-xs font-bold text-gray-900">{matchedProduct.name}</h4>
-                  <span className="text-xs font-black text-gray-900">KSh {Number(matchedProduct.price || 0).toLocaleString()}</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#840038] block">
+                    Featured Spirit in Stock
+                  </span>
+                  <h4 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug">
+                    {matchedProduct.name}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs font-black text-gray-900 font-mono">
+                      KSh {Number(matchedProduct.price || 0).toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.2 rounded-full">
+                      In Stock
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={() => {
-                  onAddToCart(matchedProduct.id);
-                  onClose();
-                }}
-                className="px-4 py-2.5 bg-[#840038] hover:bg-[#6b002c] active:scale-95 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                onClick={handleAddToCart}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-95 ${
+                  added
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-[#840038] hover:bg-[#6b002c] text-white'
+                }`}
               >
-                <span>🛒 Add Spirit to Cart</span>
+                <span>{added ? '✓ Added to Cart!' : '🛒 Add Spirit to Cart'}</span>
               </button>
             </div>
           )}
@@ -292,4 +378,3 @@ export default function MixologyModal({ recipe, onClose, onAddToCart, products =
     </div>
   );
 }
-

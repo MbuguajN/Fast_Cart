@@ -5,17 +5,29 @@ import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
+import FloatingCheckout from '@/components/FloatingCheckout';
 import MixologyModal from '@/components/MixologyModal';
 import CheckoutModal from '@/components/CheckoutModal';
+import OrderSuccess from '@/components/OrderSuccess';
 import AccountModal from '@/components/AccountModal';
+import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 
 function MixologyContent() {
   const searchParams = useSearchParams();
-  const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
+  const { user, completeProfileAtCheckout, lookupPhone, updateProfile, updateEmail } = useAuth();
+  const {
+    cart,
+    setCart,
+    addToCart,
+    removeItem,
+    clearCart,
+    products: cartProducts,
+    setProducts: setCartProducts,
+  } = useCart();
 
   const [recipes, setRecipes] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [syncedProducts, setSyncedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -24,18 +36,18 @@ function MixologyContent() {
   const [selectedStyle, setSelectedStyle] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
 
-  // Selected recipe state & URL deep linking
+  // Modal & Checkout State
   const [selectedRecipeSlug, setSelectedRecipeSlug] = useState(null);
-  const urlRecipeSlug = searchParams.get('recipe');
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(null);
 
+  const urlRecipeSlug = searchParams.get('recipe');
   const activeRecipe = useMemo(() => {
     const slug = selectedRecipeSlug ?? urlRecipeSlug;
     if (!slug) return null;
     return recipes.find((r) => r.slug === slug || r.id === slug) || null;
   }, [selectedRecipeSlug, urlRecipeSlug, recipes]);
-
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
 
   // Load recipes and products
   useEffect(() => {
@@ -47,13 +59,45 @@ function MixologyContent() {
         if (mixData.success) {
           setRecipes(mixData.recipes || []);
         }
-        if (prodData.products) {
-          setProducts(prodData.products);
+        if (prodData.products && prodData.products.length > 0) {
+          const normalized = prodData.products.map((p) => {
+            const isInstock = p.stockStatus === 'instock' && (
+              p.stockQuantity === null ||
+              p.stockQuantity === undefined ||
+              p.stockQuantity === '' ||
+              Number(p.stockQuantity) > 0 ||
+              p.type === 'variable'
+            );
+            return {
+              id: Number(p.wcId || p.id),
+              name: p.name,
+              slug: p.slug,
+              type: p.type || 'simple',
+              price: parseFloat(p.price) || 0,
+              originalPrice: parseFloat(p.regularPrice) || parseFloat(p.price) || 0,
+              image: p.image,
+              images: p.images || [],
+              brand: p.brandName || '',
+              brandId: p.brandId || null,
+              category: p.categoryName || '',
+              inStock: isInstock,
+              stockQty: p.stockQuantity ?? (isInstock ? 99 : 0),
+              sku: p.sku || '',
+              upsellIds: p.upsellIds || [],
+            };
+          });
+
+          setSyncedProducts(normalized);
+          if (setCartProducts) {
+            setCartProducts(normalized);
+          }
         }
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setCartProducts]);
+
+  const effectiveProducts = (cartProducts && cartProducts.length > 0) ? cartProducts : syncedProducts;
 
   // Distinct Filter Options
   const spiritOptions = useMemo(() => {
@@ -107,6 +151,12 @@ function MixologyContent() {
     setSelectedDifficulty('all');
   };
 
+  const handleOrderSuccess = (order) => {
+    setShowCheckout(false);
+    setOrderSuccess(order);
+    clearCart();
+  };
+
   const cartTotalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
   const difficultyBadge = (diff) => {
@@ -127,12 +177,12 @@ function MixologyContent() {
     <div className="min-h-screen bg-[#fafafa] flex flex-col font-sans text-gray-900 pb-20 md:pb-0">
       <Header
         cartCount={cartTotalItems}
-        onOpenCart={() => setCheckoutOpen(true)}
-        onOpenAccount={() => setAccountOpen(true)}
+        onOpenCart={() => setShowCheckout(true)}
+        onOpenAccount={() => setShowAccountModal(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 animate-page-enter">
-        {/* Hero Header Banner with entrance animation */}
+        {/* Hero Header Banner */}
         <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#4a001e] via-[#840037] to-[#1c1917] p-6 sm:p-10 text-white shadow-xl animate-card-rise">
           <div className="relative z-10 max-w-2xl space-y-3">
             <div className="flex items-center gap-2">
@@ -156,7 +206,7 @@ function MixologyContent() {
           <div className="absolute bottom-0 right-1/4 -mb-16 w-60 h-60 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
         </div>
 
-        {/* Streamlined Filter & Search Suite with smooth transitions */}
+        {/* Streamlined Filter & Search Suite */}
         <div className="bg-white p-4 sm:p-6 rounded-3xl border border-gray-200/90 shadow-xs space-y-4 transition-all duration-300">
           {/* Row 1: Search & Style Dropdown */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -216,7 +266,7 @@ function MixologyContent() {
             </div>
           </div>
 
-          {/* Row 2: Spirit Base Filter Pills with smooth hover & active animations */}
+          {/* Row 2: Spirit Base Filter Pills */}
           <div className="pt-2 border-t border-gray-100 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
             {spiritOptions.list.map((sp) => {
               const isSelected = selectedSpirit.toLowerCase() === sp.toLowerCase();
@@ -276,7 +326,7 @@ function MixologyContent() {
             </button>
           </div>
         ) : (
-          /* Recipe Cards Grid with Staggered Entrance Animations */
+          /* Recipe Cards Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filteredRecipes.map((recipe, idx) => (
               <div
@@ -341,10 +391,20 @@ function MixologyContent() {
       </main>
 
       <Footer />
+
+      {/* Floating Checkout Pill */}
+      <FloatingCheckout
+        cart={cart}
+        products={effectiveProducts}
+        onCheckout={() => setShowCheckout(true)}
+        hidden={showCheckout}
+      />
+
+      {/* Bottom Navigation */}
       <BottomNav
         cartCount={cartTotalItems}
-        onOpenCart={() => setCheckoutOpen(true)}
-        onOpenAccount={() => setAccountOpen(true)}
+        onOpenCart={() => setShowCheckout(true)}
+        onOpenAccount={() => setShowAccountModal(true)}
       />
 
       {/* Interactive Mixology Modal */}
@@ -352,33 +412,45 @@ function MixologyContent() {
         <MixologyModal
           recipe={activeRecipe}
           onClose={closeRecipeModal}
-          products={products}
+          products={effectiveProducts}
           onAddToCart={(productId) => {
-            const prod = products.find((p) => p.id === productId);
-            if (prod) {
-              addToCart(prod, 1);
-            }
+            addToCart(Number(productId));
           }}
         />
       )}
 
       {/* Checkout Modal */}
-      {checkoutOpen && (
+      {showCheckout && (
         <CheckoutModal
-          isOpen={checkoutOpen}
-          onClose={() => setCheckoutOpen(false)}
           cart={cart}
-          onUpdateQuantity={updateQuantity}
-          onRemoveItem={removeFromCart}
-          products={products}
+          products={effectiveProducts}
+          user={user}
+          locationData={{ text: user?.landmark || 'Nairobi' }}
+          onClose={() => setShowCheckout(false)}
+          onOrderSuccess={handleOrderSuccess}
+          onRemoveItem={removeItem}
+          onCompleteProfile={completeProfileAtCheckout}
+          onLookupPhone={lookupPhone}
+          onUpdateLocation={async (updates) => {
+            await updateProfile(updates);
+          }}
+        />
+      )}
+
+      {/* Order Success Popup */}
+      {orderSuccess && (
+        <OrderSuccess
+          order={orderSuccess}
+          onNewOrder={() => setOrderSuccess(null)}
+          onUpdateEmail={updateEmail}
         />
       )}
 
       {/* Account Modal */}
-      {accountOpen && (
+      {showAccountModal && (
         <AccountModal
-          isOpen={accountOpen}
-          onClose={() => setAccountOpen(false)}
+          isOpen={showAccountModal}
+          onClose={() => setShowAccountModal(false)}
         />
       )}
     </div>
@@ -396,4 +468,3 @@ export default function MixologyPage() {
     </Suspense>
   );
 }
-
