@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useCart } from '@/lib/cart-context';
 import { reverseGeocodeViaProxy } from '@/lib/geo-client';
 import { haptic } from '@/lib/haptic';
 
@@ -56,6 +57,12 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const [gpsAddress, setGpsAddress] = useState('');
   const [gpsMatch, setGpsMatch] = useState(null);
   const [locationMismatch, setLocationMismatch] = useState(false);
+  // KRA PIN is only needed for a VAT receipt, which most customers do not
+  // want. A permanently visible tax field on a liquor delivery checkout
+  // reads as bureaucratic and costs conversions.
+  const [wantsVatReceipt, setWantsVatReceipt] = useState(false);
+
+  const { cartNotice, dismissCartNotice } = useCart();
   const hasRestoredRef = useRef(false);
 
   // Load zones
@@ -261,11 +268,22 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
           customerNote: '',
           email: user?.email || '',
           deliveryFee,
-          kraPin: kraPin.trim(),
+          kraPin: wantsVatReceipt ? kraPin.trim() : '',
         }),
       });
 
       const data = await res.json();
+
+      // 409 means stock moved while the customer was checking out. The
+      // response names each affected product; show that rather than a
+      // generic failure they cannot act on.
+      if (res.status === 409) {
+        setError(data.message || data.error || 'Some items are no longer available');
+        setStep('confirm');
+        setLoading(false);
+        return;
+      }
+
       if (!res.ok) throw new Error(data.error || `Order failed (${res.status})`);
 
       if (data.authorization_url) {
@@ -515,22 +533,47 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
                     />
                   </div>
 
-                  {/* KRA PIN (Optional) */}
+                  {/* VAT receipt — opt in, so the tax field is off the default path */}
                   <div>
-                    <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>KRA PIN (Optional)</label>
-                    <input
-                      type="text"
-                      value={kraPin}
-                      onChange={(e) => { setKraPin(e.target.value.toUpperCase()); setError(''); }}
-                      placeholder="e.g. A123456789B"
-                      className="w-full bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm uppercase"
-                      style={inputStyle}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setWantsVatReceipt((v) => !v)}
+                      className="text-[11px] font-semibold underline underline-offset-2"
+                      style={{ color: '#840037', fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      {wantsVatReceipt ? 'Skip VAT receipt' : 'Need a VAT receipt?'}
+                    </button>
                   </div>
+
+                  {wantsVatReceipt && (
+                    <div>
+                      <label className="block text-[11px] font-semibold mb-1" style={{ color: '#191c1d', fontFamily: 'Montserrat, sans-serif' }}>KRA PIN</label>
+                      <input
+                        type="text"
+                        value={kraPin}
+                        onChange={(e) => { setKraPin(e.target.value.toUpperCase()); setError(''); }}
+                        placeholder="e.g. A123456789B"
+                        className="w-full bg-white border-none focus:ring-0 focus:outline-none outline-none text-sm uppercase"
+                        style={inputStyle}
+                      />
+                    </div>
+                  )}
                 </div>
 
               </div>
             </div>
+
+            {cartNotice && (
+              <div className="mb-3 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.35)', color: '#92400e', fontFamily: 'Montserrat, sans-serif' }}>
+                {cartNotice.removed.map((r) => (
+                  <div key={`r-${r.id}`}>{r.name} sold out and was removed from your cart.</div>
+                ))}
+                {cartNotice.capped.map((c) => (
+                  <div key={`c-${c.id}`}>Only {c.quantity} of {c.name} left — we adjusted your cart.</div>
+                ))}
+                <button type="button" onClick={dismissCartNotice} className="mt-1 font-bold underline underline-offset-2">Got it</button>
+              </div>
+            )}
 
             {error && (
               <div className="mb-3 rounded-xl px-3 py-2 text-xs" style={{ backgroundColor: 'rgba(186,26,26,0.08)', border: '1px solid rgba(186,26,26,0.2)', color: '#ba1a1a', fontFamily: 'Montserrat, sans-serif' }}>{error}</div>
