@@ -63,7 +63,7 @@ export default function OrderSuccess({ order, onNewOrder, onUpdateEmail }) {
     >
       <div
         className="rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center"
-        style={{ backgroundColor: '#f5f5dc', border: '1px solid #E9ECEF' }}
+        style={{ backgroundColor: '#ffffff', border: '1px solid #E9ECEF' }}
       >
         <svg
           className="w-16 h-16 mx-auto mb-4"

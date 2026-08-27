@@ -306,7 +306,7 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/60 backdrop-blur-xs">
       <div
         className="w-full max-w-md md:max-w-3xl lg:max-w-4xl p-5 md:p-6 shadow-2xl animate-slide-up overflow-hidden max-h-[90dvh] md:max-h-[85dvh] flex flex-col rounded-t-[1.5rem] md:rounded-2xl"
-        style={{ backgroundColor: '#f5f5dc', border: '1px solid #E9ECEF' }}
+        style={{ backgroundColor: '#ffffff', border: '1px solid #E9ECEF' }}
       >
 
         {step === 'processing' ? (

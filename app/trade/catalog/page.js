@@ -119,94 +119,85 @@ export default function TradeCatalogPage() {
         </div>
       </div>
 
-      {/* Spacious, Multi-Tiered Search & Filter Suite */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gray-200/90 shadow-sm space-y-5">
-        {/* Row 1: Search Input & Sort Selector */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      {/* Streamlined Search & Category Filters */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Input */}
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-
             <input
               type="text"
-              placeholder="Search by bottle name (e.g. Jameson, Glenlivet, Jaba) or SKU..."
+              placeholder="Search bottles (Jameson, Glenlivet, Jaba) or SKU..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 rounded-2xl border border-gray-200 text-xs font-semibold focus:ring-2 focus:ring-[#840038] focus:border-transparent bg-gray-50/50 hover:bg-white transition-all shadow-2xs placeholder:text-gray-400 placeholder:font-normal"
+              className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:ring-1 focus:ring-[#840038] focus:border-[#840038] bg-gray-50/50 hover:bg-white transition-all placeholder:text-gray-400"
             />
-
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-700 text-xs"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-700 text-xs"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-3.5 py-2.5 rounded-2xl text-xs">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-xs font-bold text-gray-800 border-none focus:outline-hidden cursor-pointer"
-              >
-                <option value="default">Featured / Recommended</option>
-                <option value="name_asc">Name (A — Z)</option>
-                <option value="price_asc">Price (Lowest first)</option>
-                <option value="price_desc">Price (Highest first)</option>
-              </select>
-            </div>
+          {/* Sort & Count */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-hidden cursor-pointer"
+            >
+              <option value="default">Featured</option>
+              <option value="name_asc">Name (A — Z)</option>
+              <option value="price_asc">Price (Low → High)</option>
+              <option value="price_desc">Price (High → Low)</option>
+            </select>
 
-            <span className="hidden lg:inline-block text-xs font-bold text-gray-500 bg-gray-100 px-3 py-2.5 rounded-2xl">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
+            <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
+              <strong>{filteredProducts.length}</strong> items
             </span>
           </div>
         </div>
 
-        {/* Row 2: Category Filter Pills */}
-        <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex flex-wrap items-center gap-2">
-            {categories.map((cat) => {
-              const isSelected = selectedCategory === cat;
-              const count = categoryStats[cat] || 0;
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+          {categories.map((cat) => {
+            const isSelected = selectedCategory === cat;
+            const count = categoryStats[cat] || 0;
 
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                    isSelected
-                      ? 'bg-[#840038] text-white shadow-md'
-                      : 'bg-gray-100/80 hover:bg-gray-200/80 text-gray-700'
-                  }`}
-                >
-                  <span className="uppercase tracking-wider">{cat === 'all' ? 'All Products' : cat}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                  isSelected
+                    ? 'bg-[#840038] text-white shadow-2xs'
+                    : 'bg-gray-100/80 hover:bg-gray-200/80 text-gray-700'
+                }`}
+              >
+                <span>{cat === 'all' ? 'All' : cat}</span>
+                <span className={`text-[10px] px-1 py-0.2 rounded-full font-mono ${
+                  isSelected ? 'bg-white/20 text-white' : 'text-gray-500'
+                }`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
 
           {(searchQuery || selectedCategory !== 'all' || sortBy !== 'default') && (
             <button
               onClick={handleClearFilters}
-              className="text-xs font-bold text-[#840038] hover:underline flex items-center gap-1 px-2 py-1"
+              className="text-xs font-bold text-[#840038] hover:underline whitespace-nowrap ml-2 px-1 py-1"
             >
-              <span>Reset Filters</span>
-              <span>✕</span>
+              Reset ✕
             </button>
           )}
         </div>

@@ -12,7 +12,7 @@ export default function ActionBar({ cart, products, onCheckout }) {
   return (
     <div
       className="fixed bottom-0 left-0 w-full z-[60] p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between max-w-7xl mx-auto md:left-1/2 md:-translate-x-1/2 ambient-shadow-lg"
-      style={{ backgroundColor: '#f5f5dc', borderRadius: '0.75rem 0.75rem 0 0' }}
+      style={{ backgroundColor: '#ffffff', borderRadius: '0.75rem 0.75rem 0 0' }}
     >
       <div className="flex justify-between items-center md:flex-col md:items-start md:gap-0">
         <div className="flex flex-col">
