@@ -74,4 +74,34 @@ test('the WooCommerce-owned field list is explicit', () => {
   assert.ok(!WOOCOMMERCE_OWNED_FIELDS.includes('overrides'));
 });
 
+
+test('a partial update does not blank fields it omits', () => {
+  process.chdir(scratch);
+  try {
+    upsertProduct({
+      wcId: 9,
+      name: 'Gilbeys',
+      slug: 'gilbeys-gin',
+      image: 'https://example.test/g.jpg',
+      brandName: 'Gilbeys',
+      categoryName: 'Gin',
+      price: '1500',
+      stockStatus: 'instock',
+    });
+
+    // A webhook stock delta carries only a handful of fields.
+    upsertProduct({ wcId: 9, name: 'Gilbeys', price: '1600', stockStatus: 'outofstock', stockQuantity: 0 });
+
+    const p = getProducts().find((x) => x.wcId === 9);
+    assert.equal(p.stockStatus, 'outofstock', 'the delta applied');
+    assert.equal(p.price, '1600', 'the delta applied');
+    assert.equal(p.slug, 'gilbeys-gin', 'slug survived a partial update');
+    assert.equal(p.image, 'https://example.test/g.jpg', 'image survived');
+    assert.equal(p.brandName, 'Gilbeys', 'brand survived');
+    assert.equal(p.categoryName, 'Gin', 'category survived');
+  } finally {
+    process.chdir(originalCwd);
+  }
+});
+
 test.after(() => fs.rmSync(scratch, { recursive: true, force: true }));

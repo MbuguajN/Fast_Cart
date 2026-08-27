@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { rateLimitRequest } from '@/lib/rate-limit';
+import { rateLimitRequest, rateLimitIdentity } from '@/lib/rate-limit';
+import { createCustomerSession, setSessionCookie, normalizePhone } from '@/lib/session';
 import { cocartLogin } from '@/lib/cocart';
 import { findCustomerByPhone } from '@/lib/customer';
 
@@ -12,7 +13,7 @@ import { findCustomerByPhone } from '@/lib/customer';
  * This keeps WC credentials server-side (BFF pattern).
  */
 export async function POST(request) {
-  const rl = rateLimitRequest(request, { maxRequests: 15, windowMs: 300000 });
+  const rl = await rateLimitRequest(request, { maxRequests: 15, windowMs: 300000 });
   if (!rl.allowed) {
     return NextResponse.json({ error: 'Too many requests. Please wait.' }, { status: 429 });
   }
@@ -25,6 +26,20 @@ export async function POST(request) {
     }
     if (!password || typeof password !== 'string' || password.length < 1) {
       return NextResponse.json({ error: 'Password is required' }, { status: 400 });
+    }
+
+    // Throttle per account as well as per IP, so rotating IPs cannot brute
+    // force one customer's password.
+    const identityLimit = await rateLimitIdentity(normalizePhone(phone), {
+      scope: 'cocart-login',
+      maxRequests: 8,
+      windowMs: 900000,
+    });
+    if (!identityLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many sign-in attempts for this number. Please try again later.' },
+        { status: 429 }
+      );
     }
 
     // Attempt CoCart login with phone + password
@@ -61,7 +76,13 @@ export async function POST(request) {
       authMethod: 'cocart_password',
     };
 
-    return NextResponse.json({ success: true, session });
+    const token = await createCustomerSession({
+      customerId: session.customerId,
+      phone,
+      authMethod: 'password',
+    });
+
+    return setSessionCookie(NextResponse.json({ success: true, session }), token);
   } catch (error) {
     // Avoid logging credentials
     console.error('CoCart login proxy error:', error.message);

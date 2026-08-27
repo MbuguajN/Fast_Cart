@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
-import { getBrands, updateBrand, readStore, writeStore } from '@/lib/data-store';
+import { getBrands, updateBrand, mutateStore } from '@/lib/data-store';
+import { adminGuard } from '@/lib/api-guard';
 
-export async function GET() {
+export async function GET(request) {
+  const denied = await adminGuard(request);
+  if (denied) return denied;
+
   const brands = getBrands();
   return NextResponse.json(brands);
 }
 
 export async function PUT(request) {
+  const denied = await adminGuard(request);
+  if (denied) return denied;
+
   try {
     const data = await request.json();
     const { id, ...updates } = data;
@@ -23,6 +30,9 @@ export async function PUT(request) {
 }
 
 export async function DELETE(request) {
+  const denied = await adminGuard(request);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -31,9 +41,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'Brand id is required' }, { status: 400 });
     }
 
-    const store = readStore();
-    store.brands = store.brands.filter((b) => b.id !== id && b.wcId !== id);
-    writeStore(store);
+    await mutateStore((store) => {
+      store.brands = store.brands.filter((b) => b.id !== id && b.wcId !== id);
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

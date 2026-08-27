@@ -1,42 +1,57 @@
 import { NextResponse } from 'next/server';
-import { wcUrl } from '@/lib/wc-config';
 import { verifyPayment } from '@/lib/paystack';
+import { settleOrderFromPayment } from '@/lib/order-payment';
+
+/**
+ * GET /api/paystack/callback
+ *
+ * Where Paystack returns the customer's browser after checkout. It races the
+ * server-to-server webhook; settlement is idempotent and amount-checked in
+ * lib/order-payment.js, so whichever arrives first wins and the other is a
+ * no-op.
+ *
+ * Redirect targets are built from the configured site URL rather than from
+ * `request.url`, so a spoofed Host header cannot turn this into an open
+ * redirect.
+ */
+
+function siteUrl(path) {
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  return new URL(path, origin);
+}
 
 export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const reference = searchParams.get('reference') || searchParams.get('trxref');
+
+  if (!reference) {
+    return NextResponse.redirect(siteUrl('/?payment=failed'));
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const reference = searchParams.get('reference');
-    const trxref = searchParams.get('trxref');
+    const paystackData = await verifyPayment(reference);
+    const result = await settleOrderFromPayment(paystackData);
 
-    if (!reference && !trxref) {
-      return NextResponse.redirect(new URL('/?payment=failed', request.url));
+    if (!result.settled) {
+      console.error(`Callback could not settle order ${result.orderId ?? '?'}: ${result.reason}`);
+
+      // The money may well have left the customer's account — send them
+      // somewhere that says "we're checking", not "failed".
+      if (result.reason === 'amount_short' || result.reason === 'wc_update_failed') {
+        return NextResponse.redirect(
+          siteUrl(`/?payment=review&order=${encodeURIComponent(result.orderId ?? '')}`)
+        );
+      }
+      return NextResponse.redirect(siteUrl('/?payment=failed'));
     }
 
-    const ref = reference || trxref;
-    const paystackData = await verifyPayment(ref);
-    const orderId = paystackData.metadata?.order_id;
-
-    if (paystackData.status === 'success' && orderId) {
-      const url = wcUrl(`orders/${orderId}`);
-      await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'processing',
-          set_paid: true,
-          transaction_id: String(paystackData.id),
-          meta_data: [
-            { key: 'paystack_reference', value: ref },
-            { key: 'paystack_transaction_id', value: String(paystackData.id) },
-            { key: 'paystack_amount', value: String(paystackData.amount / 100) },
-          ],
-        }),
-      });
-    }
-
-    return NextResponse.redirect(new URL(`/?payment=success&order=${orderId || ''}&ref=${ref}`, request.url));
+    const params = new URLSearchParams({
+      payment: 'success',
+      order: String(result.orderId ?? ''),
+    });
+    return NextResponse.redirect(siteUrl(`/?${params.toString()}`));
   } catch (error) {
-    console.error('Paystack callback failed');
-    return NextResponse.redirect(new URL('/?payment=failed', request.url));
+    console.error('Paystack callback failed:', error.message);
+    return NextResponse.redirect(siteUrl('/?payment=failed'));
   }
 }

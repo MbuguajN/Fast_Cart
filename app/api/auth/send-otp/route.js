@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
-import { rateLimitRequest } from '@/lib/rate-limit';
+import { rateLimitRequest, rateLimitIdentity } from '@/lib/rate-limit';
 import { createOtp } from '@/lib/otp-store';
 import { findCustomerByPhone } from '@/lib/customer';
 import { sendOtpEmail } from '@/lib/email';
+import { normalizePhone } from '@/lib/session';
 
+/**
+ * POST /api/auth/send-otp
+ *
+ * Limited on two axes: by client IP, and by the phone number itself — a
+ * rotating-IP caller would otherwise walk straight past an IP-only limit and
+ * pump codes at one victim's inbox.
+ */
 export async function POST(request) {
-  const rl = rateLimitRequest(request, { maxRequests: 10, windowMs: 300000 });
+  const rl = await rateLimitRequest(request, { maxRequests: 10, windowMs: 300000 });
   if (!rl.allowed) {
     return NextResponse.json({ error: 'Too many requests. Please wait.' }, { status: 429 });
   }
@@ -17,13 +25,25 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Valid phone number required' }, { status: 400 });
     }
 
-    // Generate OTP
-    const result = createOtp(phone);
+    const identity = normalizePhone(phone);
+
+    const identityLimit = await rateLimitIdentity(identity, {
+      scope: 'send-otp',
+      maxRequests: 5,
+      windowMs: 600000,
+    });
+    if (!identityLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many codes requested for this number. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
+    const result = await createOtp(phone);
     if (result.error) {
       return NextResponse.json({ sent: false, error: result.error, cooldown: result.cooldown }, { status: 429 });
     }
 
-    // Look up customer to find their email
     const customer = await findCustomerByPhone(phone);
     let emailSent = false;
     let hasAccount = false;
@@ -33,27 +53,21 @@ export async function POST(request) {
       hasAccount = true;
       const email = customer.email;
 
-      // Only send email if it's a real email (not our generated placeholder)
+      // Placeholder addresses generated at checkout can't receive anything.
       if (email && !email.endsWith('@liquordash.local') && !email.endsWith('@liquordash.com')) {
         try {
           await sendOtpEmail({ to: email, code: result.code });
           emailSent = true;
-          // Mask email for privacy: ch***@5dm.africa
           const [local, domain] = email.split('@');
-          maskedEmail = local.slice(0, 2) + '***@' + domain;
+          maskedEmail = `${local.slice(0, 2)}***@${domain}`;
         } catch (err) {
-          console.error('Failed to send OTP email:', err);
+          console.error('Failed to send OTP email:', err.message);
         }
       }
     }
 
-    // For new users (no account) or users without a valid email,
-    // we still generate the OTP but can't deliver it via email.
-    // In dev mode, log it. In production, you'd need SMS fallback.
-    if (!emailSent) {
-      if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-        console.log(`[DEV] OTP for ${phone}: ${result.code}`);
-      }
+    if (!emailSent && process.env.NODE_ENV !== 'production') {
+      console.log(`[DEV] OTP for ${phone}: ${result.code}`);
     }
 
     return NextResponse.json({
@@ -61,11 +75,11 @@ export async function POST(request) {
       hasAccount,
       emailSent,
       maskedEmail,
-      // Never expose the code in the response in production
+      // The code is never returned outside development.
       ...(process.env.NODE_ENV === 'development' ? { devCode: result.code } : {}),
     });
   } catch (error) {
-    console.error('Send OTP error:', error);
+    console.error('Send OTP error:', error.message);
     return NextResponse.json({ error: 'Failed to send verification code' }, { status: 500 });
   }
 }

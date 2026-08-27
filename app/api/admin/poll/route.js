@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getProducts, getSyncStatus, updateStore, upsertProduct } from '@/lib/data-store';
-import { wcUrl, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
+import { wcFetch, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
+import { adminGuard } from '@/lib/api-guard';
 
-export async function GET() {
+export async function GET(request) {
+  const denied = await adminGuard(request);
+  if (denied) return denied;
+
   const status = getSyncStatus();
   const products = getProducts();
 
@@ -26,15 +30,18 @@ export async function GET() {
 
   try {
     const productIds = products.map((p) => p.wcId).filter(Boolean);
-    const idParam = productIds.join(',');
-    const url = `${WC_URL}/wp-json/wc/v3/products?include=${idParam}&per_page=100&consumer_key=${WC_KEY}&consumer_secret=${WC_SECRET}`;
-    const res = await fetch(url);
 
-    if (!res.ok) {
+    // Credentials go in the Authorization header, not the query string.
+    let wcProducts;
+    try {
+      ({ data: wcProducts } = await wcFetch('products', {
+        include: productIds.join(','),
+        per_page: '100',
+      }));
+    } catch (err) {
+      console.error('Poll: WooCommerce API error:', err.message);
       return NextResponse.json({ error: 'WooCommerce API error' }, { status: 502 });
     }
-
-    const wcProducts = await res.json();
     let updated = 0;
 
     for (const p of wcProducts) {
