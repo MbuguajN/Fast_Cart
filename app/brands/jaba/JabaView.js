@@ -54,7 +54,7 @@ export default function JabaView({ jabaProducts = [], relatedProducts = [] }) {
     <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Header cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} user={user} />
 
-      <main className="flex-1 w-full pt-[115px] md:pt-[80px] pb-16 space-y-12 md:space-y-16 overflow-x-hidden">
+      <main className="flex-1 w-full pb-16 space-y-12 md:space-y-16 overflow-x-hidden">
         {/* 1. HERO SECTION (Dark Nightlife Banner with Lineup Blown Out Past Seam) */}
         <section
           className="relative w-full bg-cover bg-center pt-8 sm:pt-12 md:pt-16 pb-12 sm:pb-16 md:pb-24 px-4 md:px-12"

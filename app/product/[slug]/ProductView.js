@@ -81,8 +81,7 @@ export default function ProductView({ product, brand, relatedProducts = [] }) {
         onOpenCart={() => setShowCheckout(true)}
         user={user}
       />
-
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 pt-[110px] md:pt-[90px] pb-16">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 pt-4 md:pt-6 pb-16">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs text-gray-500 mb-6 flex-wrap">
           <Link href="/" className="hover:text-[#840037] font-semibold transition-colors">

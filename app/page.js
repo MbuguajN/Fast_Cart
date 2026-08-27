@@ -245,7 +245,7 @@ function AppShell() {
         onOpenAccount={() => setShowAccountModal(true)}
         user={user}
       />
-      <main className="flex-1 px-4 md:px-8 max-w-7xl mx-auto space-y-3 pt-[115px] md:pt-[84px] w-full">
+      <main className="flex-1 px-4 md:px-8 max-w-7xl mx-auto space-y-3 pt-3 md:pt-4 w-full">
         {/* Featured Slides Carousel */}
         <FeaturedCarousel products={PRODUCTS} onAddToCart={(id) => addToCart(id)} />
 

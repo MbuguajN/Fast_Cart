@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     pollingInterval: 30,
-    webhookSecret: '',
     autoSync: false,
     showOutOfStock: true,
     logo: null,
@@ -194,17 +193,12 @@ export default function SettingsPage() {
 
       {/* Webhooks */}
       <Section title="Webhooks" desc="Configure WooCommerce webhook integration">
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">Webhook Secret</label>
-          <input
-            type="password"
-            value={settings.webhookSecret}
-            onChange={(e) => setSettings({ ...settings, webhookSecret: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl text-sm bg-white border border-gray-200 outline-none focus:border-[#840037]/40"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-            placeholder="Optional webhook secret for signature verification"
-          />
-        </div>
+        <p className="text-xs text-gray-600 leading-relaxed">
+          Webhook signing secrets are read from the server environment
+          (<code className="px-1 rounded bg-gray-100">WOOCOMMERCE_WEBHOOK_SECRET</code> and{' '}
+          <code className="px-1 rounded bg-gray-100">PAYSTACK_WEBHOOK_SECRET</code>) and are never
+          stored in the admin database. Update them on the server and redeploy to rotate.
+        </p>
       </Section>
 
       {/* Save */}

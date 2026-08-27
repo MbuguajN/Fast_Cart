@@ -23,7 +23,6 @@ export default function LocationModal({ currentLocation, onConfirm, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
       <div
-        className="bg-white rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl border border-gray-100 space-y-5"
         style={{ fontFamily: 'Montserrat, sans-serif' }}
       >
         <div className="flex items-start justify-between">

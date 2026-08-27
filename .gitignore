@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local data stores (contain live business + B2B account data)
+/data/trade-store.json

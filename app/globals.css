@@ -48,7 +48,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Modern Cross-Document & Same-Document View Transitions */
@@ -59,10 +59,14 @@ body {
 ::view-transition-old(root) {
   animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out;
 }
-
 ::view-transition-new(root) {
-  animation: 260ms cubic-bezier(0, 0, 0.2, 1) both fade-and-rise;
+  animation: 250ms cubic-bezier(0.16, 1, 0.3, 1) both fade-in;
 }
+
+::view-transition-old(header) { animation: none; }
+::view-transition-new(header) { animation: none; }
+::view-transition-old(nav) { animation: none; }
+::view-transition-new(nav) { animation: none; }
 
 @keyframes fade-out {
   from { opacity: 1; transform: scale(1); }
@@ -78,11 +82,9 @@ body {
 @keyframes page-enter {
   0% {
     opacity: 0;
-    transform: translateY(8px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

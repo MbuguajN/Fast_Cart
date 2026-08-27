@@ -15,6 +15,13 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
+  // Changing the email address requires confirming a code sent to the NEW
+  // address — it is the OTP delivery channel, so an unverified change would
+  // redirect future login codes.
+  const [emailCodeSentTo, setEmailCodeSentTo] = useState('');
+  const [emailCodeInput, setEmailCodeInput] = useState('');
+  const [profileError, setProfileError] = useState('');
+  const [profileNotice, setProfileNotice] = useState('');
 
   // OTP state
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
@@ -59,18 +66,15 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
   }, [user]);
 
   // Load orders when modal is open and user is logged in
+  // The server identifies the customer from the session cookie; passing a
+  // customer or phone in the query no longer does anything (and used to let
+  // anyone read anyone's order history).
   const fetchOrders = useCallback(async () => {
-    const custId = user?.customerId;
-    const ph = user?.phone || authPhone;
-    if (!custId && !ph) return;
+    if (!user) return;
 
     setLoadingOrders(true);
     try {
-      const params = new URLSearchParams();
-      if (custId) params.set('customer', custId);
-      if (ph) params.set('phone', ph);
-
-      const res = await fetch(`/api/orders?${params.toString()}`);
+      const res = await fetch('/api/orders', { credentials: 'same-origin' });
       const data = await res.json();
       setOrders(data.orders || []);
     } catch {
@@ -78,7 +82,7 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
     } finally {
       setLoadingOrders(false);
     }
-  }, [user, authPhone]);
+  }, [user]);
 
   useEffect(() => {
     if (isOpen && user) {
@@ -192,6 +196,9 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+    setProfileError('');
+    setProfileNotice('');
+
     try {
       if (nameInput.trim() || landmarkInput.trim()) {
         await completeProfileAtCheckout({
@@ -200,12 +207,25 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
           zone: user?.zone || '',
         });
       }
-      if (emailInput.trim() && emailInput.trim() !== user?.email) {
-        await updateEmail(emailInput.trim());
+
+      const wantsEmailChange = emailInput.trim() && emailInput.trim() !== user?.email;
+
+      if (wantsEmailChange) {
+        const result = await updateEmail(emailInput.trim(), emailCodeInput.trim() || undefined);
+
+        if (result?.verificationSent) {
+          setEmailCodeSentTo(result.email);
+          setProfileNotice(`We sent a 6-digit code to ${result.email}. Enter it below to confirm the change.`);
+          return; // stay in edit mode until the code is confirmed
+        }
+
+        setEmailCodeSentTo('');
+        setEmailCodeInput('');
       }
+
       setEditingProfile(false);
-    } catch {
-      alert('Failed to update profile');
+    } catch (err) {
+      setProfileError(err?.message || 'Failed to update profile');
     }
   };
 
@@ -630,7 +650,35 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
                           placeholder="james@example.com"
                           className="w-full px-3 py-2 border rounded-xl text-xs bg-white"
                         />
+                        <p className="mt-1 text-[10px] text-gray-500">
+                          Your sign-in codes are sent here, so a new address has to be confirmed.
+                        </p>
                       </div>
+
+                      {emailCodeSentTo && (
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                            Confirmation code
+                          </label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            maxLength={6}
+                            value={emailCodeInput}
+                            onChange={(e) => setEmailCodeInput(e.target.value.replace(/\D/g, ''))}
+                            placeholder="123456"
+                            className="w-full px-3 py-2 border rounded-xl text-xs bg-white tracking-[0.3em]"
+                          />
+                        </div>
+                      )}
+
+                      {profileNotice && (
+                        <p className="text-[11px] font-semibold text-emerald-700">{profileNotice}</p>
+                      )}
+                      {profileError && (
+                        <p className="text-[11px] font-semibold text-red-600">{profileError}</p>
+                      )}
 
                       <div>
                         <label className="block text-xs font-bold text-gray-700 mb-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>
@@ -648,7 +696,13 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
                       <div className="flex gap-2 pt-2">
                         <button
                           type="button"
-                          onClick={() => setEditingProfile(false)}
+                          onClick={() => {
+                            setEditingProfile(false);
+                            setEmailCodeSentTo('');
+                            setEmailCodeInput('');
+                            setProfileError('');
+                            setProfileNotice('');
+                          }}
                           className="flex-1 py-2 text-xs font-bold rounded-xl bg-gray-200 text-gray-700"
                         >
                           Cancel
@@ -657,7 +711,7 @@ export default function AccountModal({ isOpen, onClose, onReorder }) {
                           type="submit"
                           className="flex-1 py-2 text-xs font-extrabold rounded-xl bg-[#840037] text-white"
                         >
-                          Save Changes
+                          {emailCodeSentTo ? 'Confirm Email' : 'Save Changes'}
                         </button>
                       </div>
                     </form>

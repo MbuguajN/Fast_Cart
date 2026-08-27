@@ -40,7 +40,7 @@ export default function BrandView({ brand, initialProducts = [] }) {
     <div className="min-h-screen bg-white flex flex-col justify-between" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Header cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} user={user} />
       
-      <main className="flex-1 px-4 md:px-8 max-w-7xl mx-auto space-y-6 pt-[115px] md:pt-[84px] w-full pb-12">
+      <main className="flex-1 px-4 md:px-8 max-w-7xl mx-auto space-y-6 pt-4 md:pt-6 w-full pb-12">
         {/* Navigation Breadcrumb */}
         <div className="mb-4 flex items-center gap-4">
           <Link href="/brands" className="text-[#840037] text-xs md:text-sm hover:underline font-bold flex items-center gap-1.5 transition-colors">

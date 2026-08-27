@@ -12,6 +12,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
 
   const isJaba = pathname?.includes('/jaba') || pathname?.includes('/brands/jaba');
   const isBrands = pathname?.startsWith('/brands') && !pathname?.includes('/brands/jaba');
+  const isTrade = pathname?.startsWith('/trade');
 
   useEffect(() => {
     fetch('/api/settings')
@@ -26,7 +27,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
   }, []);
 
   return (
-    <header className="fixed top-0 w-full z-50 shadow-md" style={{ backgroundColor: 'rgba(132, 0, 55, 0.95)', backdropFilter: 'blur(12px)' }}>
+    <header className="sticky top-0 w-full z-50 shadow-md" style={{ backgroundColor: 'rgba(132, 0, 55, 0.95)', backdropFilter: 'blur(12px)' }}>
       {/* Mobile Layout (< md) */}
       <div className="md:hidden">
         <div className="flex justify-between items-center px-4 h-14 w-full pt-4 pb-1">
@@ -43,6 +44,17 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Mobile B2B Trade Link */}
+            <Link
+              href="/trade"
+              className={`text-xs font-bold transition-all px-2.5 py-1 rounded-lg ${
+                isTrade ? 'text-white bg-white/20' : 'text-pink-200 hover:text-white'
+              }`}
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+            >
+              B2B Trade
+            </Link>
+
             <button
               type="button"
               className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20 active:scale-95 px-2.5 py-1 rounded-full transition-all text-left"
@@ -102,8 +114,8 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
         </div>
       </div>
 
-      {/* Desktop Layout (≥ md): Logo -> Jaba & Brands Links -> Search Bar -> Delivery Address -> User Account -> Cart */}
-      <div className="hidden md:flex justify-between items-center px-8 h-20 max-w-7xl mx-auto w-full gap-5">
+      {/* Desktop Layout (≥ md): Logo -> Clean Nav Links -> Search Bar -> Delivery Address -> User Account -> Cart */}
+      <div className="hidden md:flex justify-between items-center px-8 h-20 max-w-7xl mx-auto w-full gap-6">
         {/* 1. Left: Brand Logo */}
         <div className="flex items-center flex-shrink-0">
           <Link href="/" className="flex items-center hover:opacity-95 transition-opacity" title="Happy Hour / LiquorDash Home">
@@ -117,47 +129,44 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
           </Link>
         </div>
 
-        {/* 2. Standout Page Navigation Links (Jaba & Brands - Before Search & Delivery Address) */}
-        <div className="flex items-center gap-2.5 flex-shrink-0">
-          {/* Jaba Brand Link - High-Impact Amber/Gold Glow */}
+        {/* 2. Clean, Refined Navigation Links */}
+        <nav className="flex items-center gap-6 flex-shrink-0">
           <Link
             href="/brands/jaba"
-            className={`text-xs font-black transition-all flex items-center gap-2 px-4 py-2.5 rounded-full active:scale-95 shadow-sm group ${
+            className={`text-xs font-bold uppercase tracking-wider transition-colors pb-1 border-b-2 ${
               isJaba
-                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-gray-950 ring-2 ring-amber-300/80 shadow-amber-500/20 shadow-md scale-105'
-                : 'bg-gradient-to-r from-amber-400/30 to-amber-500/20 text-amber-200 border border-amber-300/50 hover:bg-amber-400/40 hover:text-white hover:border-amber-300 hover:scale-105'
+                ? 'text-amber-300 border-amber-300'
+                : 'text-white/90 hover:text-white border-transparent hover:border-white/40'
             }`}
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
-            <div className="relative flex items-center justify-center">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping absolute opacity-75" />
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-            </div>
-            <span className="tracking-wide">JABA</span>
-            <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-md bg-black/20 text-amber-100 group-hover:bg-black/30 transition-colors font-extrabold">
-              HOT
-            </span>
+            Jaba
           </Link>
 
-          {/* Brands Directory Link - Frosted Glass Luxury Badge */}
           <Link
             href="/brands"
-            className={`text-xs font-bold transition-all flex items-center gap-2 px-4 py-2.5 rounded-full active:scale-95 shadow-sm ${
+            className={`text-xs font-bold uppercase tracking-wider transition-colors pb-1 border-b-2 ${
               isBrands
-                ? 'bg-white text-[#840037] ring-2 ring-white/60 shadow-md scale-105'
-                : 'bg-white/15 text-white border border-white/25 hover:bg-white/25 hover:border-white/40 hover:scale-105'
+                ? 'text-white border-white'
+                : 'text-white/90 hover:text-white border-transparent hover:border-white/40'
             }`}
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
-              <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
-              <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" fillOpacity={isBrands ? '0.9' : '0.4'} />
-            </svg>
-            <span className="tracking-wide">BRANDS</span>
+            Brands
           </Link>
-        </div>
+
+          <Link
+            href="/trade"
+            className={`text-xs font-bold uppercase tracking-wider transition-colors pb-1 border-b-2 ${
+              isTrade
+                ? 'text-pink-200 border-pink-300'
+                : 'text-white/90 hover:text-pink-200 border-transparent hover:border-pink-300/60'
+            }`}
+            style={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
+            B2B Trade
+          </Link>
+        </nav>
 
         {/* 3. Center Search Bar */}
         <div className="flex-1 max-w-md">
