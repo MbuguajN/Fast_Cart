@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
-import { upsertProduct, readStore, writeStore, updateStore } from '@/lib/data-store';
-import { wcUrl, WC_WEBHOOK_SECRET } from '@/lib/wc-config';
+import { upsertProduct, mutateStore, updateStore } from '@/lib/data-store';
+import { wcFetch, WC_WEBHOOK_SECRET } from '@/lib/wc-config';
+import { extractStockDelta, isDeletion } from '@/lib/catalog-delta';
+import { recordEvent, EVENT_KINDS, OUTCOMES } from '@/lib/event-log';
 import crypto from 'crypto';
 
-function verifyWebhook(request, body) {
+/**
+ * Verify a WooCommerce webhook signature over the RAW request body.
+ *
+ * WooCommerce sends base64-encoded HMAC-SHA256 of the exact bytes it posted.
+ * Hashing a re-serialised `JSON.stringify(parsedBody)` changes those bytes —
+ * whitespace, unicode escaping and numeric formatting all shift — so valid
+ * deliveries were being rejected.
+ */
+function verifyWebhook(request, rawBody) {
   if (!WC_WEBHOOK_SECRET) {
     console.error('WC webhook secret not configured — rejecting request');
     return false;
@@ -12,34 +22,54 @@ function verifyWebhook(request, body) {
   const signature = request.headers.get('x-wc-webhook-signature');
   if (!signature) return false;
 
-  // WooCommerce sends base64-encoded HMAC-SHA256 of the raw body
-  const rawBody = JSON.stringify(body);
-  const hash = crypto.createHmac('sha256', WC_WEBHOOK_SECRET).update(rawBody).digest('base64');
+  const expected = crypto
+    .createHmac('sha256', WC_WEBHOOK_SECRET)
+    .update(rawBody, 'utf8')
+    .digest('base64');
+
+  // Check length before timingSafeEqual, which throws on a mismatch.
+  if (expected.length !== signature.length) return false;
 
   try {
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(hash));
+    return crypto.timingSafeEqual(Buffer.from(expected, 'utf8'), Buffer.from(signature, 'utf8'));
   } catch {
     return false;
   }
 }
 
 async function fetchProduct(productId) {
-  const url = wcUrl(`products/${productId}`);
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const { data } = await wcFetch(`products/${productId}`);
+    return data;
+  } catch (err) {
+    console.error(`Webhook product fetch failed for ${productId}:`, err.message);
+    return null;
+  }
 }
 
 export async function POST(request) {
-  let body;
+  // Raw bytes first — the signature is computed over exactly what was sent.
+  let rawBody;
   try {
-    body = await request.json();
+    rawBody = await request.text();
   } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
   }
 
-  if (!verifyWebhook(request, body)) {
+  if (!verifyWebhook(request, rawBody)) {
+    recordEvent({
+      kind: EVENT_KINDS.WEBHOOK,
+      outcome: OUTCOMES.FAIL,
+      detail: 'signature verification failed',
+    });
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
+  let body;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
   try {
@@ -51,8 +81,36 @@ export async function POST(request) {
         return NextResponse.json({ received: true });
       }
 
+      if (isDeletion(topic)) {
+        await mutateStore((store) => {
+          store.products = (store.products || []).filter((p) => p.wcId !== productId);
+        });
+        recordEvent({ kind: EVENT_KINDS.WEBHOOK, outcome: OUTCOMES.OK, detail: `product ${productId} deleted` });
+        return NextResponse.json({ received: true });
+      }
+
+      // The webhook payload already carries price and stock, so a stock
+      // change lands in the cache without a round trip back to the origin.
+      // Only fall back to fetching when the payload is too thin to use.
+      const delta = extractStockDelta(body);
+      if (delta && delta.stockStatus) {
+        upsertProduct(delta);
+        recordEvent({
+          kind: EVENT_KINDS.WEBHOOK,
+          outcome: OUTCOMES.OK,
+          detail: `product ${productId} -> ${delta.stockStatus}`,
+        });
+        updateStore({ lastSync: new Date().toISOString() });
+        return NextResponse.json({ received: true });
+      }
+
       const wcProduct = await fetchProduct(productId);
       if (!wcProduct) {
+        recordEvent({
+          kind: EVENT_KINDS.WEBHOOK,
+          outcome: OUTCOMES.FAIL,
+          detail: `product ${productId} refetch failed`,
+        });
         return NextResponse.json({ received: true });
       }
 
@@ -83,14 +141,15 @@ export async function POST(request) {
         weight: wcProduct.weight || '',
       });
 
+      recordEvent({ kind: EVENT_KINDS.WEBHOOK, outcome: OUTCOMES.OK, detail: `product ${productId} refetched` });
       updateStore({ lastSync: new Date().toISOString() });
     }
 
-    if (topic.startsWith('order.')) {
-      if (topic === 'order.created' || topic === 'order.completed') {
-        const store = readStore();
-        const lineItems = body.line_items || [];
-        for (const item of lineItems) {
+    if (topic === 'order.created' || topic === 'order.completed') {
+      // Under the store lock: two concurrent orders would otherwise each read
+      // the same starting quantity and one decrement would be lost.
+      await mutateStore((store) => {
+        for (const item of body.line_items || []) {
           const prod = store.products.find((p) => p.wcId === item.product_id);
           if (prod && prod.stockQuantity !== null) {
             prod.stockQuantity = Math.max(0, (prod.stockQuantity || 0) - (item.quantity || 1));
@@ -99,9 +158,8 @@ export async function POST(request) {
             }
           }
         }
-        writeStore(store);
-        updateStore({ lastSync: new Date().toISOString() });
-      }
+      });
+      updateStore({ lastSync: new Date().toISOString() });
     }
 
     return NextResponse.json({ received: true });
