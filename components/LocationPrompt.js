@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { reverseGeocodeViaProxy } from '@/lib/geo-client';
 
 export default function LocationPrompt({ onDismiss, onUpdate }) {
   const { user } = useAuth();
@@ -19,11 +20,11 @@ export default function LocationPrompt({ onDismiss, onUpdate }) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
-          headers: { 'User-Agent': 'LiquorDash/1.0' },
-        })
-          .then((r) => r.json())
+        reverseGeocodeViaProxy(latitude, longitude)
           .then(async (data) => {
+            // Null means the geocoder was unreachable — hand off to the
+            // existing catch, which falls back to manual zone selection.
+            if (!data?.address) throw new Error('geocode unavailable');
             const addr = data.address;
             const parts = [];
             if (addr.road) parts.push(addr.road);

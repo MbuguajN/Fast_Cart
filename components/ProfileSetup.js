@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { reverseGeocodeViaProxy } from '@/lib/geo-client';
 
 function normalizeAddress(text) {
   return text
@@ -112,12 +113,12 @@ export default function ProfileSetup({ initialName, onSubmit, onCancel }) {
         clearTimeout(timeout);
         const { latitude, longitude } = position.coords;
 
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
-          headers: { 'User-Agent': 'LiquorDash/1.0' },
-        })
-          .then((r) => r.json())
+        reverseGeocodeViaProxy(latitude, longitude)
           .then((data) => {
             if (!active) return;
+            // Null means the geocoder was unreachable — hand off to the
+            // existing catch, which falls back to manual zone selection.
+            if (!data?.address) throw new Error('geocode unavailable');
             const addr = data.address;
             const parts = [];
 

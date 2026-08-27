@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { reverseGeocodeViaProxy } from '@/lib/geo-client';
 import { haptic } from '@/lib/haptic';
 
 function matchZoneByKeywords(text, zones) {
@@ -21,16 +22,16 @@ function matchZoneByKeywords(text, zones) {
 }
 
 function reverseGeocode(lat, lon) {
-  return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
-    headers: { 'User-Agent': 'LiquorDash/1.0' },
-  }).then(r => r.json()).then(data => {
-    const addr = data.address || {};
+  return reverseGeocodeViaProxy(lat, lon).then(data => {
+    // The proxy resolves to null when the geocoder is unreachable; GPS is
+    // an assist, so fall through to an empty address rather than failing.
+    const addr = data?.address || {};
     const parts = [];
     if (addr.road) parts.push(addr.road);
     if (addr.neighbourhood && !addr.suburb?.toLowerCase().includes(addr.neighbourhood.toLowerCase())) parts.push(addr.neighbourhood);
     if (addr.suburb && addr.suburb !== addr.neighbourhood) parts.push(addr.suburb);
     if (addr.city && !parts.some(p => p.toLowerCase() === addr.city.toLowerCase())) parts.push(addr.city);
-    const text = parts.length > 0 ? parts.join(', ') : (data.display_name || '').split(',').slice(0, 5).map(s => s.trim()).filter(Boolean).join(', ');
+    const text = parts.length > 0 ? parts.join(', ') : (data?.display_name || '').split(',').slice(0, 5).map(s => s.trim()).filter(Boolean).join(', ');
     return { text, raw: addr };
   });
 }
@@ -284,9 +285,11 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const inputStyle = { borderRadius: '10px', border: '2px solid #debfc3', padding: '10px 12px', fontFamily: 'Montserrat, sans-serif', color: '#191c1d' };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6" style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-      <div className="w-full max-w-md md:max-w-3xl lg:max-w-4xl p-5 md:p-6 shadow-2xl animate-slide-up overflow-hidden max-h-[90vh] md:max-h-[85vh] flex flex-col rounded-t-[1.5rem] md:rounded-2xl"
-        style={{ backgroundColor: '#f5f5dc', border: '1px solid #E9ECEF' }}>
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/60 backdrop-blur-xs">
+      <div
+        className="w-full max-w-md md:max-w-3xl lg:max-w-4xl p-5 md:p-6 shadow-2xl animate-slide-up overflow-hidden max-h-[90dvh] md:max-h-[85dvh] flex flex-col rounded-t-[1.5rem] md:rounded-2xl"
+        style={{ backgroundColor: '#f5f5dc', border: '1px solid #E9ECEF' }}
+      >
 
         {step === 'processing' ? (
           <div className="text-center py-12">
