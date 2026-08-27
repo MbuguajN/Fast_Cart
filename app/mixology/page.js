@@ -10,6 +10,7 @@ import MixologyModal from '@/components/MixologyModal';
 import CheckoutModal from '@/components/CheckoutModal';
 import OrderSuccess from '@/components/OrderSuccess';
 import AccountModal from '@/components/AccountModal';
+import AIBartenderModal from '@/components/AIBartenderModal';
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 
@@ -41,6 +42,7 @@ function MixologyContent() {
   const [selectedRecipeSlug, setSelectedRecipeSlug] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [showAIBartender, setShowAIBartender] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
 
   const urlRecipeSlug = searchParams.get('recipe');
@@ -218,6 +220,19 @@ function MixologyContent() {
             <p className="text-xs sm:text-sm text-pink-100/80 max-w-lg leading-relaxed">
               Explore step-by-step master cocktail recipes with precise measurements, barware specs, and single-click spirit purchasing.
             </p>
+
+            {/* AI Mixologist CTA */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAIBartender(true)}
+                className="px-4 py-2.5 rounded-2xl bg-white text-[#840038] hover:bg-pink-50 font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-lg flex items-center gap-2"
+              >
+                <span>✨</span>
+                <span>Ask Tipsy (AI Bartender &amp; Sommelier)</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </button>
+            </div>
           </div>
 
           {/* Decorative ambient gradients */}
@@ -530,6 +545,27 @@ function MixologyContent() {
           onClose={() => setShowAccountModal(false)}
         />
       )}
+
+      {/* Floating AI Bartender Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setShowAIBartender(true)}
+        className="fixed bottom-20 md:bottom-8 left-5 z-40 bg-gradient-to-r from-[#840038] to-[#4a001e] hover:from-[#6b002c] hover:to-[#380016] text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs hover:scale-105 active:scale-95 transition-all border border-pink-400/30 backdrop-blur-md cursor-pointer"
+        title="Ask Tipsy AI Bartender"
+      >
+        <span className="text-base">🍸</span>
+        <span className="hidden sm:inline">Ask AI Bartender</span>
+        <span className="sm:hidden">Tipsy AI</span>
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+      </button>
+
+      {/* AI Bartender Modal */}
+      <AIBartenderModal
+        isOpen={showAIBartender}
+        onClose={() => setShowAIBartender(false)}
+        onOpenRecipe={(recipe) => openRecipeModal(recipe)}
+        onAddToCart={(productId) => addToCart(Number(productId))}
+      />
     </div>
   );
 }

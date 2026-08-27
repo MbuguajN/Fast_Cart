@@ -16,6 +16,7 @@ import AccountModal from '@/components/AccountModal';
 import LocationModal from '@/components/LocationModal';
 import LocationPrompt from '@/components/LocationPrompt';
 import UpsellPopup from '@/components/UpsellPopup';
+import AIBartenderModal from '@/components/AIBartenderModal';
 import Footer from '@/components/Footer';
 
 function AppShell() {
@@ -26,6 +27,7 @@ function AppShell() {
   const { cart, setCart, addToCart, incrementItem, decrementItem, removeItem, clearCart, getQuantity, setProducts, upsellPopup, setUpsellPopup } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [showAIBartender, setShowAIBartender] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [syncedProducts, setSyncedProducts] = useState([]);
   const [syncedBrands, setSyncedBrands] = useState([]);
@@ -41,8 +43,10 @@ function AppShell() {
     const paymentStatus = params.get('payment');
     const orderId = params.get('order');
     if (paymentStatus === 'success' && orderId) {
-      setOrderSuccess({ id: orderId, status: 'processing' });
-      setCart([]);
+      queueMicrotask(() => {
+        setOrderSuccess({ id: orderId, status: 'processing' });
+        setCart([]);
+      });
       window.history.replaceState({}, '', '/');
     } else if (paymentStatus === 'failed') {
       window.history.replaceState({}, '', '/');
@@ -116,7 +120,7 @@ function AppShell() {
 
   useEffect(() => {
     if (phase === 'authenticated' && user?.zone) {
-      setShowLocationPrompt(true);
+      queueMicrotask(() => setShowLocationPrompt(true));
     }
   }, [phase, user?.zone]);
 
@@ -361,6 +365,31 @@ function AppShell() {
           }}
         />
       )}
+
+      {/* Floating AI Bartender Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setShowAIBartender(true)}
+        className="fixed bottom-20 md:bottom-8 left-5 z-40 bg-gradient-to-r from-[#840038] to-[#4a001e] hover:from-[#6b002c] hover:to-[#380016] text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs hover:scale-105 active:scale-95 transition-all border border-pink-400/30 backdrop-blur-md cursor-pointer"
+        title="Ask Tipsy AI Bartender"
+      >
+        <span className="text-base">🍸</span>
+        <span className="hidden sm:inline">Ask AI Bartender</span>
+        <span className="sm:hidden">Tipsy AI</span>
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+      </button>
+
+      {/* AI Bartender Modal */}
+      <AIBartenderModal
+        isOpen={showAIBartender}
+        onClose={() => setShowAIBartender(false)}
+        onOpenRecipe={(recipe) => {
+          if (typeof window !== 'undefined') {
+            window.location.href = `/mixology?recipe=${recipe.slug}`;
+          }
+        }}
+        onAddToCart={(productId) => addToCart(Number(productId))}
+      />
     </div>
   );
 }
