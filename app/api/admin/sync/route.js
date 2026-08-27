@@ -9,8 +9,10 @@ import {
   extractBrandsFromProducts,
   updateProductVariations,
 } from '@/lib/data-store';
-import { wcFetch, wcUrl, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
+import { wcFetch, wcFetchAll, wcUrl, wcAuthHeaders, WC_URL, WC_KEY, WC_SECRET } from '@/lib/wc-config';
+import { recordEvent, timed, EVENT_KINDS, OUTCOMES } from '@/lib/event-log';
 import { ZONE_MAP } from '@/lib/zone-map';
+import { adminGuard } from '@/lib/api-guard';
 
 async function syncZones() {
   try {
@@ -22,7 +24,7 @@ async function syncZones() {
 
       try {
         const methodsUrl = wcUrl(`shipping/zones/${zone.id}/methods`);
-        const methodsRes = await fetch(methodsUrl);
+        const methodsRes = await fetch(methodsUrl, { headers: wcAuthHeaders() });
         if (!methodsRes.ok) continue;
         const methods = await methodsRes.json();
 
@@ -56,7 +58,10 @@ async function syncZones() {
   }
 }
 
-export async function POST() {
+export async function POST(request) {
+  const denied = await adminGuard(request);
+  if (denied) return denied;
+
   const status = getSyncStatus();
   if (status.syncStatus === 'syncing') {
     return NextResponse.json({ error: 'Sync already in progress' }, { status: 409 });
@@ -69,17 +74,30 @@ export async function POST() {
   updateStore({ syncStatus: 'syncing' });
 
   try {
+    // wcFetchAll pages until the server says there are no more. wcFetch
+    // returns only the first page, which silently capped the catalogue at
+    // 100 products — the cache was already at 106.
     const [wcProducts, wcCategories, wcBrands] = await Promise.all([
-      wcFetch('products', { per_page: '100', status: 'publish' })
-        .then((r) => r.data)
-        .catch(() => []),
-      wcFetch('products/categories', { per_page: '100' })
-        .then((r) => r.data)
-        .catch(() => []),
-      wcFetch('products/brands', { per_page: '100' })
-        .then((r) => r.data)
-        .catch(() => []),
+      timed(EVENT_KINDS.SYNC, () => wcFetchAll('products', { status: 'publish' }), 'products').catch(() => []),
+      timed(EVENT_KINDS.SYNC, () => wcFetchAll('products/categories'), 'categories').catch(() => []),
+      timed(EVENT_KINDS.SYNC, () => wcFetchAll('products/brands'), 'brands').catch(() => []),
     ]);
+
+    // A firewalled REST API answers with an error, which the catch above
+    // turns into an empty array. Without this guard that reads as a
+    // successful sync and quietly empties the shop.
+    if (wcProducts.length === 0) {
+      recordEvent({
+        kind: EVENT_KINDS.SYNC,
+        outcome: OUTCOMES.FAIL,
+        detail: 'sync returned zero products — cache left untouched',
+      });
+      updateStore({ syncStatus: 'idle', syncError: 'WooCommerce returned no products' });
+      return NextResponse.json(
+        { error: 'WooCommerce returned no products. Check REST API access and try again.' },
+        { status: 502 }
+      );
+    }
 
     const productCount = wcProducts.length;
     const categoryCount = wcCategories.length;
@@ -157,7 +175,7 @@ export async function POST() {
       if (productType === 'variable') {
         try {
           const varsUrl = wcUrl(`products/${p.id}/variations`, { per_page: '100' });
-          const varsRes = await fetch(varsUrl);
+          const varsRes = await fetch(varsUrl, { headers: wcAuthHeaders() });
           if (varsRes.ok) {
             const wcVariations = await varsRes.json();
             const variations = wcVariations.map((v) => ({
@@ -190,6 +208,12 @@ export async function POST() {
     updateStore({
       lastSync: new Date().toISOString(),
       syncStatus: 'idle',
+    });
+
+    recordEvent({
+      kind: EVENT_KINDS.SYNC,
+      outcome: OUTCOMES.OK,
+      detail: `${productCount} products, ${categoryCount} categories, ${brandCount} brands, ${zoneCount} zones`,
     });
 
     return NextResponse.json({
