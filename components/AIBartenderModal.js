@@ -167,19 +167,12 @@ export default function AIBartenderModal({
         {/* Header */}
         <div className="px-5 py-4 bg-gradient-to-r from-[#5a0025] via-[#840038] to-[#2b0012] text-white flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-xl shadow-inner relative">
-              🍸
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#840038]" />
+            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-xl shadow-inner">
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-sm sm:text-base font-black tracking-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                  Tipsy AI Bartender
-                </h3>
-                <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                  Live Sommelier
-                </span>
-              </div>
+              <h3 className="text-sm sm:text-base font-black tracking-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Tipsy AI Bartender
+              </h3>
               <p className="text-[11px] text-pink-100/80">
                 All-knowing drinks, mixes, party math &amp; live prices
               </p>
@@ -187,9 +180,6 @@ export default function AIBartenderModal({
           </div>
 
           <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white text-xs font-bold transition-all"
             aria-label="Close Bartender AI"
           >
             ✕
@@ -200,7 +190,6 @@ export default function AIBartenderModal({
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30">
           {messages.map((msg) => (
             <div
-              key={msg.id}
               className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-2`}
             >
               {/* Message Bubble */}
@@ -308,53 +297,35 @@ export default function AIBartenderModal({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Dynamic Follow-Up Prompts */}
-        {messages[messages.length - 1]?.followUps && messages[messages.length - 1].followUps.length > 0 && !loading && (
-          <div className="px-4 py-2 bg-gray-50/80 border-t border-gray-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 shrink-0">
-              💡 Suggestions:
-            </span>
-            {messages[messages.length - 1].followUps.map((prompt, pIdx) => (
-              <button
-                key={pIdx}
-                type="button"
-                onClick={() => handleSendMessage(prompt)}
-                className="px-2.5 py-1 rounded-full bg-white hover:bg-pink-50 border border-gray-200 hover:border-pink-300 text-[11px] font-medium text-gray-700 hover:text-[#840038] transition-all active:scale-95 shrink-0 shadow-2xs"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Dynamic Follow-Up Prompts (Wrapping & Scrollable) */}
+        {messages[messages.length - 1]?.followUps &&
+          messages[messages.length - 1].followUps.length > 0 &&
+          !loading && (
+            <div className="px-4 py-2.5 bg-gray-50/95 border-t border-gray-100 space-y-1.5 animate-fade-in max-h-32 overflow-y-auto">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 block px-0.5">
+                💡 Suggestions:
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {messages[messages.length - 1].followUps.map((prompt, pIdx) => (
+                  <button
+                    key={pIdx}
+                    type="button"
+                    style={{ animationDelay: `${pIdx * 50}ms` }}
+                    onClick={() => handleSendMessage(prompt)}
+                    className="px-3 py-1.5 rounded-full bg-white hover:bg-pink-50 border border-gray-200 hover:border-pink-300 text-[11px] font-medium text-gray-700 hover:text-[#840038] transition-all active:scale-95 shadow-2xs cursor-pointer text-left animate-stagger-card"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
         {/* Input Bar */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
-          }}
-          className="p-3 sm:p-4 bg-white border-t border-gray-200 flex items-center gap-2"
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Ask Tipsy (e.g. 'What can I make with Jameson?', 'Drink pairing for steak', 'Party for 10')..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:ring-2 focus:ring-[#840038]/20 focus:border-[#840038] outline-hidden transition-all bg-gray-50 focus:bg-white placeholder:text-gray-400"
-          />
-
-          <button
-            type="submit"
-            disabled={!inputValue.trim() || loading}
-            className="px-4 py-2.5 rounded-xl bg-[#840038] hover:bg-[#6b002c] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm transition-all active:scale-95 shadow-xs flex items-center gap-1 shrink-0"
-          >
-            <span>Ask</span>
-            <span>⚡</span>
-          </button>
-        </form>
-      </div>
     </div>
   );
 }

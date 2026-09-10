@@ -226,14 +226,11 @@ function MixologyContent() {
               <button
                 type="button"
                 onClick={() => setShowAIBartender(true)}
-                className="px-4 py-2.5 rounded-2xl bg-white text-[#840038] hover:bg-pink-50 font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-lg flex items-center gap-2"
-              >
+                className="px-4 py-2.5 rounded-2xl bg-white text-[#840038] hover:bg-pink-50 font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-lg flex items-center gap-2 cursor-pointer"
                 <span>✨</span>
-                <span>Ask Tipsy (AI Bartender &amp; Sommelier)</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Ask Tipsy (AI Bartender)</span>
               </button>
             </div>
-          </div>
 
           {/* Decorative ambient gradients */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-pink-500/20 blur-3xl pointer-events-none" />
@@ -556,7 +553,6 @@ function MixologyContent() {
         <span className="text-base">🍸</span>
         <span className="hidden sm:inline">Ask AI Bartender</span>
         <span className="sm:hidden">Tipsy AI</span>
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
 
       {/* AI Bartender Modal */}

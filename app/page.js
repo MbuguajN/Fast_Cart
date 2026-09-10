@@ -376,7 +376,6 @@ function AppShell() {
         <span className="text-base">🍸</span>
         <span className="hidden sm:inline">Ask AI Bartender</span>
         <span className="sm:hidden">Tipsy AI</span>
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
 
       {/* AI Bartender Modal */}

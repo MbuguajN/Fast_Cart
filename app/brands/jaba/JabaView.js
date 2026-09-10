@@ -196,7 +196,7 @@ export default function JabaView({ jabaProducts = [], relatedProducts = [] }) {
               </div>
             </div>
             <p className="text-white text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest drop-shadow-md">
-              Share Your Energy • Tag @my.happyhour
+              Share Your Energy • Tag @myhappyhour254
             </p>
           </div>
         </section>

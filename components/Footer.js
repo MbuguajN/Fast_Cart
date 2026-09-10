@@ -169,7 +169,7 @@ export default function Footer() {
 
       {/* Bottom Copyright Banner */}
       <div className="bg-[#840037] text-white py-3 px-6 text-center text-xs font-medium pb-24 md:pb-3">
-        <p>Copyright Happy Hour 2026. Designed for Fast Cart.</p>
+        <p>Copyright Happy Hour 2026.</p>
       </div>
     </footer>
   );
