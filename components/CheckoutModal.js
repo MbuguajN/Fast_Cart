@@ -3,24 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { reverseGeocodeViaProxy } from '@/lib/geo-client';
+import { matchZoneByKeywords } from '@/lib/zone-match-client';
 import { haptic } from '@/lib/haptic';
-
-function matchZoneByKeywords(text, zones) {
-  const normalized = text.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-  let bestZone = null;
-  let bestLocation = null;
-  let bestScore = 0;
-  for (const zone of zones) {
-    for (const loc of zone.locations || []) {
-      let score = 0;
-      for (const kw of loc.keywords) {
-        if (normalized.includes(kw)) score += kw.length;
-      }
-      if (score > bestScore) { bestScore = score; bestZone = zone; bestLocation = loc; }
-    }
-  }
-  return bestScore >= 2 ? { zone: bestZone, location: bestLocation, address: text } : null;
-}
 
 function reverseGeocode(lat, lon) {
   return reverseGeocodeViaProxy(lat, lon).then(data => {
@@ -41,13 +25,13 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState('confirm');
-  const [buildingName, setBuildingName] = useState('');
+  const [buildingName, setBuildingName] = useState(locationData?.building || user?.building || '');
   const [kraPin, setKraPin] = useState('');
   const [userName, setUserName] = useState(user?.name || '');
   const [userPhone, setUserPhone] = useState(user?.phone || '');
   const [phoneLookupDone, setPhoneLookupDone] = useState(!!user?.phone);
   const [looking, setLooking] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState(user?.landmark || locationData?.text || '');
+  const [deliveryAddress, setDeliveryAddress] = useState(locationData?.text || user?.landmark || '');
   const [selectedZone, setSelectedZone] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [zones, setZones] = useState([]);
@@ -69,32 +53,6 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
   useEffect(() => {
     fetch('/api/zones').then(r => r.json()).then(d => setZones(d.zones || [])).catch(() => {});
   }, []);
-
-  // Restore saved zone from session
-  useEffect(() => {
-    if (hasRestoredRef.current) return;
-    if (zones.length === 0) return;
-    if (!user?.zone && !user?.landmark) {
-      fireGps();
-      hasRestoredRef.current = true;
-      return;
-    }
-    if (user?.zone) {
-      const match = zones.find(z => z.name === user.zone);
-      if (match) {
-        setSelectedZone(match);
-        if (user.landmark) {
-          setDeliveryAddress(user.landmark);
-          const landmarkLower = user.landmark.toLowerCase();
-          const matchedLoc = match.locations?.find(loc =>
-            loc.keywords?.some(kw => landmarkLower.includes(kw))
-          );
-          setSelectedLocation(matchedLoc || null);
-        }
-      }
-    }
-    hasRestoredRef.current = true;
-  }, [zones, user?.zone, user?.landmark]);
 
   const fireGps = () => {
     if (!('geolocation' in navigator)) return;
@@ -130,6 +88,42 @@ export default function CheckoutModal({ cart, products, user, locationData, onCl
       { timeout: 8000 }
     );
   };
+
+  // Restore a zone already resolved before checkout — preferring whatever
+  // was just picked in the delivery-location modal this session (passed in
+  // as `locationData`) over the signed-in user's saved profile. The two are
+  // usually the same value, but a profile update can lag a session refresh
+  // by a request or two; the location the customer just explicitly chose is
+  // always the more current one, and must win.
+  useEffect(() => {
+    if (hasRestoredRef.current) return;
+    if (zones.length === 0) return;
+
+    const zoneName = locationData?.zone || user?.zone;
+    const landmark = locationData?.text || user?.landmark;
+
+    if (!zoneName && !landmark) {
+      fireGps();
+      hasRestoredRef.current = true;
+      return;
+    }
+    if (zoneName) {
+      const match = zones.find(z => z.name === zoneName);
+      if (match) {
+        setSelectedZone(match);
+        if (landmark) {
+          setDeliveryAddress(landmark);
+          const landmarkLower = landmark.toLowerCase();
+          const matchedLoc = match.locations?.find(loc =>
+            loc.keywords?.some(kw => landmarkLower.includes(kw))
+          );
+          setSelectedLocation(matchedLoc || null);
+        }
+      }
+    }
+    hasRestoredRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zones, user?.zone, user?.landmark, locationData?.zone, locationData?.text]);
 
   const handlePhoneLookup = async () => {
     if (!userPhone || userPhone.length < 10) return;
