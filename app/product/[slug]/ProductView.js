@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import { useAuth } from '@/lib/auth-context';
 import { haptic } from '@/lib/haptic';
-import Header from '@/components/Header';
+import HeaderWithLocation from '@/components/HeaderWithLocation';
 import Footer from '@/components/Footer';
 import BottomNav from '@/components/BottomNav';
 import FloatingCheckout from '@/components/FloatingCheckout';
@@ -76,10 +76,9 @@ export default function ProductView({ product, brand, relatedProducts = [] }) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-between" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-      <Header
+      <HeaderWithLocation
         cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
         onOpenCart={() => setShowCheckout(true)}
-        user={user}
       />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 pt-4 md:pt-6 pb-16">
         {/* Breadcrumb Navigation */}

@@ -32,14 +32,14 @@ const nextConfig = {
         { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         { key: 'X-XSS-Protection', value: '0' },
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), browsing-topics=()' },
         {
           key: 'Content-Security-Policy',
           value: [
             "default-src 'self'",
             "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://player.vimeo.com",
             "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://myhappyhour.co.ke https://logo.clearbit.com https://i.vimeocdn.com https://f.vimeocdn.com",
+            "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://myhappyhour.co.ke https://logo.clearbit.com https://i.vimeocdn.com https://f.vimeocdn.com https://*.tile.openstreetmap.org",
             "font-src 'self' https://fonts.gstatic.com",
             "connect-src 'self' https://api.paystack.co https://vimeo.com https://*.vimeo.com https://*.vimeocdn.com",
             "frame-src 'self' https://checkout.paystack.com https://player.vimeo.com https://vimeo.com",

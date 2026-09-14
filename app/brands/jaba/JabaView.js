@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { useAuth } from '@/lib/auth-context';
-import Header from '@/components/Header';
+import HeaderWithLocation from '@/components/HeaderWithLocation';
 import Footer from '@/components/Footer';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
@@ -52,7 +52,7 @@ export default function JabaView({ jabaProducts = [], relatedProducts = [] }) {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-      <Header cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} user={user} />
+      <HeaderWithLocation cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} />
 
       <main className="flex-1 w-full pb-16 space-y-12 md:space-y-16 overflow-x-hidden">
         {/* 1. HERO SECTION (Dark Nightlife Banner with Lineup Blown Out Past Seam) */}

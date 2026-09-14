@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import { useAuth } from '@/lib/auth-context';
-import Header from '@/components/Header';
+import HeaderWithLocation from '@/components/HeaderWithLocation';
 import Footer from '@/components/Footer';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
@@ -38,7 +38,7 @@ export default function BrandView({ brand, initialProducts = [] }) {
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-      <Header cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} user={user} />
+      <HeaderWithLocation cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} onOpenCart={() => setShowCheckout(true)} />
       
       <main className="flex-1 px-4 md:px-8 max-w-7xl mx-auto space-y-6 pt-4 md:pt-6 w-full pb-12">
         {/* Navigation Breadcrumb */}

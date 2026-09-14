@@ -18,10 +18,14 @@ import LocationPrompt from '@/components/LocationPrompt';
 import UpsellPopup from '@/components/UpsellPopup';
 import AIBartenderModal from '@/components/AIBartenderModal';
 import Footer from '@/components/Footer';
+import { readGuestLocation, writeGuestLocation } from '@/lib/guest-location';
 
 function AppShell() {
   const { user, phase, lookupPhone, completeProfileAtCheckout, updateProfile, updateEmail } = useAuth();
-  const [location, setLocation] = useState(null);
+  // A guest's picked location has nowhere server-side to live, so it would
+  // otherwise reset on every page navigation — restore it from localStorage
+  // on first render.
+  const [location, setLocation] = useState(() => readGuestLocation());
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState('fast6');
   const { cart, setCart, addToCart, incrementItem, decrementItem, removeItem, clearCart, getQuantity, setProducts, upsellPopup, setUpsellPopup } = useCart();
@@ -228,7 +232,9 @@ function AppShell() {
     setShowCheckout(true);
   }, [PRODUCTS, addToCart]);
 
-  const effectiveLocation = location || (user?.landmark ? { text: user.landmark, lat: null, lng: null } : null);
+  const effectiveLocation = location || (user?.landmark
+    ? { text: user.landmark, lat: null, lng: null, zone: user.zone, zonePrice: user.zonePrice, building: user.building }
+    : null);
 
   if (phase === 'loading' || !appLoaded) {
     return (
@@ -350,7 +356,23 @@ function AppShell() {
           onConfirm={async (newLoc) => {
             setLocation(newLoc);
             if (user) {
-              await updateProfile({ landmark: newLoc.text });
+              // Persisted, not just held in memory: a signed-in customer's
+              // profile is what checkout restores from on their next visit
+              // (see lib/customer.js#findOrCreateCustomer). Writing it
+              // straight to local `user` state only lasted until the next
+              // session refresh silently reverted it to whatever old
+              // address WooCommerce still had on file.
+              const persisted = await completeProfileAtCheckout({
+                name: user.name,
+                landmark: newLoc.text,
+                zone: newLoc.zone,
+                zonePrice: newLoc.zonePrice,
+              });
+              if (!persisted) {
+                await updateProfile({ landmark: newLoc.text, zone: newLoc.zone, zonePrice: newLoc.zonePrice, building: newLoc.building });
+              }
+            } else {
+              writeGuestLocation(newLoc);
             }
           }}
           onClose={() => setShowLocationModal(false)}
