@@ -240,7 +240,7 @@ test('an unknown address still carries the standard delivery fee', async () => {
 test('a known address resolves to its zone price', async () => {
   const { resolveDeliveryFee } = await import('../lib/shipping.js');
 
-  const result = resolveDeliveryFee({ zoneName: '', address: 'Karen Hardy shopping centre' });
+  const result = resolveDeliveryFee({ zoneName: '', address: 'Kileleshwa area' });
 
   assert.equal(result.matched, true);
   assert.ok(result.fee > 0);
@@ -252,8 +252,8 @@ test('the delivery fee ignores any amount supplied by the caller', async () => {
 
   // Whatever a client sends, only zoneName and address are read.
   const result = resolveDeliveryFee({
-    zoneName: 'Karen',
-    address: 'Karen',
+    zoneName: 'Ngong Road',
+    address: 'Hurlingham',
     fee: 0,
     deliveryFee: 0,
     price: -9999,
