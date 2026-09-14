@@ -53,14 +53,26 @@ export async function generateMetadata({ params }) {
   };
 }
 
+// Store records only ever carry `wcId` — the cart, checkout, and the rest of
+// the client-side catalogue all key products by `id`. app/page.js normalizes
+// this the same way when it loads /api/products; this page fetches straight
+// from the store instead, so it has to normalize it too. Skipping this is
+// exactly why the buttons below silently did nothing: addToCart(undefined)
+// fails the `Number.isFinite` guard in lib/cart-storage.js#addLine and bails
+// out with no error and no state change.
+function withId(p) {
+  return { ...p, id: p.wcId || p.id };
+}
+
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const rawProduct = getProductBySlug(slug);
 
-  if (!product) {
+  if (!rawProduct) {
     notFound();
   }
 
+  const product = withId(rawProduct);
   const allProducts = getProducts();
   const brands = getBrands();
 
@@ -83,7 +95,8 @@ export default async function ProductDetailPage({ params }) {
         ((product.categoryId && p.categoryId === product.categoryId) ||
           (product.brandName && p.brandName && p.brandName.toLowerCase() === product.brandName.toLowerCase()))
     )
-    .slice(0, 6);
+    .slice(0, 6)
+    .map(withId);
 
   return (
     <ProductView
