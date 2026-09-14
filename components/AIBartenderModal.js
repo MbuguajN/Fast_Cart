@@ -139,23 +139,31 @@ export default function AIBartenderModal({
       const parts = line.split(/(\*\*.*?\*\*)/g);
       const formattedLine = parts.map((part, pIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={pIdx} className="font-extrabold text-gray-900">{part.slice(2, -2)}</strong>;
+          return (
+            <strong key={`bold-${idx}-${pIdx}`} className="font-extrabold text-gray-900">
+              {part.slice(2, -2)}
+            </strong>
+          );
         }
-        return part;
+        return <span key={`txt-${idx}-${pIdx}`}>{part}</span>;
       });
 
       if (line.trim() === '') {
-        return <div key={idx} className="h-2" />;
+        return <div key={`empty-${idx}`} className="h-2" />;
       }
       if (line.startsWith('• ') || line.startsWith('- ')) {
         return (
-          <div key={idx} className="flex items-start gap-1.5 pl-1 my-0.5">
+          <div key={`bullet-${idx}`} className="flex items-start gap-1.5 pl-1 my-0.5">
             <span className="text-[#840038] font-bold">•</span>
             <span className="flex-1">{formattedLine.slice(1)}</span>
           </div>
         );
       }
-      return <p key={idx} className="my-0.5 leading-relaxed">{formattedLine}</p>;
+      return (
+        <p key={`p-${idx}`} className="my-0.5 leading-relaxed">
+          {formattedLine}
+        </p>
+      );
     });
   };
 
@@ -168,6 +176,7 @@ export default function AIBartenderModal({
         <div className="px-5 py-4 bg-gradient-to-r from-[#5a0025] via-[#840038] to-[#2b0012] text-white flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-xl shadow-inner">
+              🍸
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-black tracking-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
@@ -180,6 +189,9 @@ export default function AIBartenderModal({
           </div>
 
           <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white text-xs font-bold transition-all cursor-pointer"
             aria-label="Close Bartender AI"
           >
             ✕
@@ -190,7 +202,8 @@ export default function AIBartenderModal({
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30">
           {messages.map((msg) => (
             <div
-              className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-2`}
+              key={msg.id}
+              className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-2 animate-message-enter`}
             >
               {/* Message Bubble */}
               <div
