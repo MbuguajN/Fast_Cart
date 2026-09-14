@@ -69,6 +69,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
               Trade
             </Link>
 
+          <div className="flex items-center gap-2">
             <button
               type="button"
               className="flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20 active:scale-95 px-2.5 py-1 rounded-full transition-all text-left"
@@ -83,6 +84,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
                   Deliver to
                 </span>
                 <span className="text-[11px] text-white font-bold truncate max-w-[100px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                <span className="text-[11px] text-white font-bold truncate max-w-[120px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                   {location?.text ? location.text.split(',')[0] : 'Set Location'}
                 </span>
               </div>
