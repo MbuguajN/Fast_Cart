@@ -71,30 +71,33 @@ export async function POST(request) {
 
     // Strategy 2: .env credentials.
     //
-    // Development only, and now actually enforced — this was previously
-    // labelled "dev only" in a comment with no NODE_ENV check, so setting
-    // ADMIN_EMAIL/ADMIN_PASSWORD in production created a live login that
-    // bypassed the WordPress role check entirely.
+    // Allows authoritative login using ADMIN_EMAIL and ADMIN_PASSWORD configured in
+    // environment variables. Matches either the full email or username prefix (e.g. "admin").
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
-    const fallbackAllowed = process.env.NODE_ENV !== 'production';
 
-    if (
-      fallbackAllowed &&
-      adminEmail &&
-      adminPassword &&
-      timingSafeEquals(email, adminEmail) &&
-      timingSafeEquals(password, adminPassword)
-    ) {
-      const token = await signToken({ email, name: 'Admin', role: 'admin' });
+    if (adminEmail && adminPassword) {
+      const inputIdentifier = String(email).trim().toLowerCase();
+      const targetEmail = String(adminEmail).trim().toLowerCase();
+      const targetUsername = targetEmail.split('@')[0];
 
-      const response = NextResponse.json({ success: true, name: 'Admin' });
-      response.cookies.set(ADMIN_COOKIE, token, adminCookieOptions());
-      return response;
+      const identifierMatches =
+        timingSafeEquals(inputIdentifier, targetEmail) ||
+        timingSafeEquals(inputIdentifier, targetUsername);
+      const passwordMatches = timingSafeEquals(password, adminPassword);
+
+      if (identifierMatches && passwordMatches) {
+        const token = await signToken({ email: adminEmail, name: 'Admin', role: 'admin' });
+
+        const response = NextResponse.json({ success: true, name: 'Admin' });
+        response.cookies.set(ADMIN_COOKIE, token, adminCookieOptions());
+        return response;
+      }
     }
 
     return NextResponse.json({ error: 'Invalid credentials or insufficient permissions' }, { status: 401 });
-  } catch {
+  } catch (err) {
+    console.error('Admin auth error:', err);
     return NextResponse.json({ error: 'Auth failed' }, { status: 500 });
   }
 }

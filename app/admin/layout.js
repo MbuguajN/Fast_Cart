@@ -67,26 +67,28 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname === '/admin/login') {
-      setAuthenticated(true);
-      return;
-    }
-
+    let ignore = false;
     fetch('/api/admin/auth/check')
       .then((r) => r.json())
       .then((data) => {
-        setAuthenticated(data.authenticated);
-        if (data.name) setAdminInfo({ name: data.name, avatar: data.avatar || null });
+        if (!ignore) {
+          setAuthenticated(Boolean(data.authenticated));
+          if (data.name) setAdminInfo({ name: data.name, avatar: data.avatar || null });
+        }
       })
-      .catch(() => setAuthenticated(false));
+      .catch(() => {
+        if (!ignore) setAuthenticated(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [pathname]);
 
   const handleLogout = async () => {
     await fetch('/api/admin/auth', { method: 'DELETE' });
-    window.location.href = '/admin/login';
+    setAuthenticated(false);
+    window.location.href = '/admin';
   };
-
-  if (pathname === '/admin/login') return <>{children}</>;
 
   if (authenticated === null) {
     return (
