@@ -44,30 +44,6 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             </Link>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {/* Mobile Mixology Link */}
-            <Link
-              href="/mixology"
-              className={`text-[11px] font-bold transition-all px-2 py-1 rounded-lg ${
-                isMixology ? 'text-white bg-white/20' : 'text-pink-200 hover:text-white'
-              }`}
-              style={{ fontFamily: 'Montserrat, sans-serif' }}
-            >
-              Mixology
-            </Link>
-
-            {/* Mobile B2B Trade Link */}
-            <Link
-              href="/trade"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-[11px] font-bold transition-all px-2 py-1 rounded-lg ${
-                isTrade ? 'text-white bg-white/20' : 'text-pink-200 hover:text-white'
-              }`}
-              style={{ fontFamily: 'Montserrat, sans-serif' }}
-            >
-              Trade
-            </Link>
 
           <div className="flex items-center gap-2">
             <button
@@ -83,7 +59,6 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
                 <span className="text-[8px] uppercase tracking-wider text-white/70 font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                   Deliver to
                 </span>
-                <span className="text-[11px] text-white font-bold truncate max-w-[100px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                 <span className="text-[11px] text-white font-bold truncate max-w-[120px]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                   {location?.text ? location.text.split(',')[0] : 'Set Location'}
                 </span>
