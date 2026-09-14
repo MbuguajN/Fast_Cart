@@ -1,69 +1,110 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+function CocktailIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16l-7 8.5v6.5" />
+      <path d="M9 19h6" />
+      <path d="M12 12.5 5.5 4.5" />
+    </svg>
+  );
+}
+
+function OfficeIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="3" width="10" height="18" />
+      <rect x="14" y="9" width="6" height="12" />
+      <path d="M7.5 7h1M11 7h1M7.5 11h1M11 11h1M7.5 15h1M11 15h1M16.5 12.5h1M16.5 16h1" />
+    </svg>
+  );
+}
+
+function EventIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01" />
+    </svg>
+  );
+}
+
+function StoreIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 9V4h16v5" />
+      <path d="M3 9h18l-1 3a3 3 0 0 1-5.5 1.7A3 3 0 0 1 12 15a3 3 0 0 1-2.5-1.3A3 3 0 0 1 4 12l-1-3Z" />
+      <path d="M5 13v8h14v-8" />
+      <path d="M10 21v-5h4v5" />
+    </svg>
+  );
+}
+
+function HomeIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v10h12V10" />
+      <path d="M10 20v-6h4v6" />
+    </svg>
+  );
+}
 
 export default function TradeLandingPage() {
   const segments = [
     {
       title: 'HORECA & Bars',
       desc: 'Hotels, cocktail lounges, and rooftop venues enjoying Tier 3 volume rates, scheduled receiving dock drops, and monthly credit settlement.',
-      icon: '🍸',
+      Icon: CocktailIcon,
       badge: 'Hotels & Nightlife',
     },
     {
       title: 'Corporate Offices',
       desc: 'Friday happy hours, boardroom entertainment, client gifting, and celebration restocks with itemized KRA VAT invoices for tax deductions.',
-      icon: '🏢',
+      Icon: OfficeIcon,
       badge: 'Enterprises',
     },
     {
       title: 'Events & Caterers',
       desc: 'High-volume festival and wedding procurement with pre-event consignment terms, chilled delivery vans, and 1-click quote approvals.',
-      icon: '🎪',
+      Icon: EventIcon,
       badge: 'Festivals & Catering',
     },
     {
       title: 'Retail & Stockists',
       desc: 'Liquor stores, high-end grocers, and specialty merchants sourcing authentic Pernod Ricard spirits and artisanal Jaba elixirs.',
-      icon: '🏪',
+      Icon: StoreIcon,
       badge: 'Stockists',
     },
     {
       title: 'Private Residences',
       desc: 'Embassy residences, country estates, and collector cellars receiving discreet temperature-controlled private deliveries.',
-      icon: '🏡',
+      Icon: HomeIcon,
       badge: 'Diplomatic & Estates',
     },
   ];
-
-  const [logo, setLogo] = React.useState(null);
-
-  React.useEffect(() => {
-    fetch('/api/settings')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.logo) setLogo(data.logo);
-      })
-      .catch(() => {});
-  }, []);
 
   return (
     <div className="space-y-16 py-8 sm:py-12 text-[#231F20]">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#1c1917] rounded-3xl p-8 sm:p-16 text-white text-center sm:text-left relative overflow-hidden shadow-2xl border border-white/10">
-          <div className="max-w-2xl space-y-6 relative z-10">
-            <div className="flex flex-wrap items-center gap-3">
-              {logo && (
-                <img src={logo} alt="Happy Hour Logo" className="max-h-10 w-auto object-contain" />
-              )}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#840038] text-white text-xs font-black uppercase tracking-widest border border-pink-400/30">
-                <span>★ Pernod Ricard Wholesale Partner · Nairobi</span>
-              </div>
+        <div
+          className="rounded-3xl p-6 sm:p-10 text-white text-center sm:text-left relative overflow-hidden shadow-2xl border border-white/10 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(28,25,23,0.82), rgba(28,25,23,0.82)), url('https://myhappyhour.co.ke/wp-content/uploads/2026/09/b2bHomePage-01-1.webp')",
+            backgroundColor: '#1c1917',
+          }}
+        >
+          <div className="max-w-2xl space-y-4 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#840038] text-white text-xs font-black uppercase tracking-widest border border-pink-400/30">
+              <span>★ Pernod Ricard Wholesale Partner · Nairobi</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-tight font-sans">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-tight font-sans">
               Direct Wholesale Spirits &amp; Craft Juices for Kenyan Trade
             </h1>
 
@@ -71,7 +112,7 @@ export default function TradeLandingPage() {
               Serving hotels, restaurants, bars, enterprises, and caterers across Nairobi Metro and regional Kenya. Transparent quantity tiers, Net 14 credit terms, gapless KRA VAT invoices, and rapid delivery.
             </p>
 
-            <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
               <Link
                 href="/trade/apply"
                 className="w-full sm:w-auto px-8 py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 text-center"
@@ -107,7 +148,9 @@ export default function TradeLandingPage() {
               className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-4 hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-center">
-                <span className="text-2xl">{seg.icon}</span>
+                <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center">
+                  <seg.Icon className="w-5 h-5" />
+                </div>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-50 text-[#840038]">
                   {seg.badge}
                 </span>

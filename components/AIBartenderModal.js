@@ -326,6 +326,29 @@ export default function AIBartenderModal({
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
+          }}
+          className="p-3 sm:p-4 bg-white border-t border-gray-200 flex items-center gap-2"
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Ask Tipsy (e.g. 'What can I make with Jameson?', 'Drink pairing for steak', 'Party for 10')..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:ring-2 focus:ring-[#840038]/20 focus:border-[#840038] outline-hidden transition-all bg-gray-50 focus:bg-white placeholder:text-gray-400"
+          />
+
+          <button
+            type="submit"
+            disabled={!inputValue.trim() || loading}
+            className="px-4 py-2.5 rounded-xl bg-[#840038] hover:bg-[#6b002c] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm transition-all active:scale-95 shadow-xs flex items-center gap-1 shrink-0"
+          >
+            <span>Ask</span>
+            <span>⚡</span>
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

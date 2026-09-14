@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/Header';
+import HeaderWithLocation from '@/components/HeaderWithLocation';
 import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 import FloatingCheckout from '@/components/FloatingCheckout';
@@ -196,7 +196,7 @@ function MixologyContent() {
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col font-sans text-gray-900 pb-20 md:pb-0">
-      <Header
+      <HeaderWithLocation
         cartCount={cartTotalItems}
         onOpenCart={() => setShowCheckout(true)}
         onOpenAccount={() => setShowAccountModal(true)}
@@ -227,10 +227,12 @@ function MixologyContent() {
                 type="button"
                 onClick={() => setShowAIBartender(true)}
                 className="px-4 py-2.5 rounded-2xl bg-white text-[#840038] hover:bg-pink-50 font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-lg flex items-center gap-2 cursor-pointer"
+              >
                 <span>✨</span>
                 <span>Ask Tipsy (AI Bartender)</span>
               </button>
             </div>
+          </div>
 
           {/* Decorative ambient gradients */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-pink-500/20 blur-3xl pointer-events-none" />

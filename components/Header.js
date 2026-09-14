@@ -59,6 +59,8 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
             {/* Mobile B2B Trade Link */}
             <Link
               href="/trade"
+              target="_blank"
+              rel="noopener noreferrer"
               className={`text-[11px] font-bold transition-all px-2 py-1 rounded-lg ${
                 isTrade ? 'text-white bg-white/20' : 'text-pink-200 hover:text-white'
               }`}
@@ -181,6 +183,8 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
 
           <Link
             href="/trade"
+            target="_blank"
+            rel="noopener noreferrer"
             className={`text-xs font-bold uppercase tracking-wider transition-colors pb-1 border-b-2 ${
               isTrade
                 ? 'text-pink-200 border-pink-300'

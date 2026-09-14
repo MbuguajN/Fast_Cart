@@ -172,6 +172,13 @@ function TradePortalShell({ children }) {
               >
                 Trade Sign In →
               </Link>
+              <Link
+                href="/"
+                className="hidden sm:flex items-center gap-1 text-gray-400 hover:text-white transition-colors text-[11px] font-medium border-l border-white/10 pl-4"
+                title="Back to the main Happy Hour website"
+              >
+                <span>← Back to Main Site</span>
+              </Link>
             </div>
           </div>
         </header>

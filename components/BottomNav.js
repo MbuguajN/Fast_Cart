@@ -265,6 +265,8 @@ export default function BottomNav({ cartCount = 0, onOpenCart, onOpenAccount, us
 
                 <Link
                   href="/trade"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-3 p-3.5 rounded-xl border border-rose-200 bg-rose-50/30 hover:bg-rose-100/50 transition-all group"
                 >
                   <div className="w-9 h-9 rounded-lg bg-rose-200 text-[#840037] flex items-center justify-center text-lg">
