@@ -15,6 +15,7 @@ import {
   clearPriceOverride,
 } from '../lib/trade/trade-costing.js';
 import { ensureTradeDb, query } from '../lib/trade/trade-pg.js';
+import { recordStockReceipt } from '../lib/trade/trade-costing.js';
 
 test('computeWeightedAverageCost blends existing and new stock by value', () => {
   // 60 @ 2,900 + 240 @ 2,985 -> 2,968 (the worked example from the design spec)
@@ -153,4 +154,48 @@ test('setPriceOverride rejects a price below landed cost', async () => {
     () => setPriceOverride({ productId: id, tierKey: 'T1', priceLine: 'spirits', price: 0.01, updatedBy: 'test' }),
     /below landed cost/i
   );
+});
+
+test('recordStockReceipt updates stock, landed cost, and writes an inventory log', async () => {
+  await ensureTradeDb();
+  const prod = await query(`SELECT id, sku, stock_quantity, prk_cost_inc_vat FROM trade_products LIMIT 1`);
+  if (prod.rows.length === 0) return;
+  const before = prod.rows[0];
+  const beforeQty = Number(before.stock_quantity);
+  const beforeCost = Number(before.prk_cost_inc_vat) || 0;
+
+  const receipt = await recordStockReceipt({
+    supplierName: 'Test Distributor Ltd',
+    reference: 'INV-TEST-001',
+    freightCost: 1000,
+    clearingCost: 500,
+    handlingCost: 0,
+    notes: 'Automated test receipt',
+    lines: [{ sku: before.sku, cases: 2, unitProductCost: 3000 }],
+    createdBy: 'test',
+  });
+
+  assert.ok(receipt.receiptNumber.startsWith('SR-'));
+  assert.equal(receipt.lines[0].bottles, 24); // 2 cases * default case_size 12
+  assert.ok(receipt.lines[0].landedUnitCost > 3000); // product cost + allocated logistics
+
+  const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [before.id]);
+  assert.equal(Number(after.rows[0].stock_quantity), beforeQty + 24);
+  // new landed cost is the weighted average, strictly between the two batch costs
+  // when there was prior stock, or exactly the new batch's landed cost when there wasn't
+  const newCost = Number(after.rows[0].prk_cost_inc_vat);
+  if (beforeQty > 0 && beforeCost > 0) {
+    const lo = Math.min(beforeCost, receipt.lines[0].landedUnitCost);
+    const hi = Math.max(beforeCost, receipt.lines[0].landedUnitCost);
+    assert.ok(newCost >= lo - 0.01 && newCost <= hi + 0.01);
+  } else {
+    assert.equal(newCost, receipt.lines[0].landedUnitCost);
+  }
+
+  const log = await query(
+    `SELECT * FROM inventory_logs WHERE reference_id = $1 AND reason = 'stock_receipt'`,
+    [receipt.id]
+  );
+  assert.equal(log.rows.length, 1);
+  assert.equal(Number(log.rows[0].change_qty), 24);
 });
