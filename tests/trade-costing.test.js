@@ -199,3 +199,44 @@ test('recordStockReceipt updates stock, landed cost, and writes an inventory log
   assert.equal(log.rows.length, 1);
   assert.equal(Number(log.rows[0].change_qty), 24);
 });
+
+test('recordStockReceipt rejects an invalid unitProductCost before writing anything', async () => {
+  await ensureTradeDb();
+  const prod = await query(`SELECT id, sku, stock_quantity, prk_cost_inc_vat FROM trade_products LIMIT 1`);
+  if (prod.rows.length === 0) return;
+  const before = prod.rows[0];
+  const beforeQty = Number(before.stock_quantity);
+  const beforeCost = Number(before.prk_cost_inc_vat);
+
+  // Negative cost
+  await assert.rejects(
+    () => recordStockReceipt({
+      supplierName: 'Test Distributor Ltd',
+      reference: 'INV-TEST-BAD-1',
+      freightCost: 1000,
+      clearingCost: 500,
+      handlingCost: 0,
+      lines: [{ sku: before.sku, cases: 2, unitProductCost: -100 }],
+      createdBy: 'test',
+    }),
+    /positive product cost/i
+  );
+
+  // Missing / NaN cost
+  await assert.rejects(
+    () => recordStockReceipt({
+      supplierName: 'Test Distributor Ltd',
+      reference: 'INV-TEST-BAD-2',
+      freightCost: 1000,
+      clearingCost: 500,
+      handlingCost: 0,
+      lines: [{ sku: before.sku, cases: 2 }], // unitProductCost missing -> NaN
+      createdBy: 'test',
+    }),
+    /positive product cost/i
+  );
+
+  const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [before.id]);
+  assert.equal(Number(after.rows[0].stock_quantity), beforeQty);
+  assert.equal(Number(after.rows[0].prk_cost_inc_vat), beforeCost);
+});
