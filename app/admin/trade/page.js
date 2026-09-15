@@ -56,6 +56,14 @@ export default function AdminTradePage() {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [receiptForm, setReceiptForm] = useState({ supplierName: '', reference: '', freightCost: 0, clearingCost: 0, handlingCost: 0, notes: '', lines: [] });
 
+  // Bulk Import Modal
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importMeta, setImportMeta] = useState({ supplierName: '', reference: '', freightCost: 0, clearingCost: 0, handlingCost: 0, notes: '' });
+  const [importPreview, setImportPreview] = useState(null); // dry-run result
+  const [importError, setImportError] = useState(null);
+  const [importing, setImporting] = useState(false);
+
   // Products / Trade Catalogue & Live Stock
   const [products, setProducts] = useState([]);
   const [productCounts, setProductCounts] = useState({ total: 0, spirits: 0, jaba: 0, missingCost: 0, lowStock: 0, outOfStock: 0 });
@@ -190,6 +198,55 @@ export default function AdminTradePage() {
     }
   };
 
+  const handleExport = (priceLine = 'all') => {
+    const qs = priceLine !== 'all' ? `?priceLine=${priceLine}` : '';
+    window.open(`/api/admin/trade/stock/export${qs}`, '_blank');
+  };
+
+  const handleImportPreview = async () => {
+    if (!importFile) { setImportError('Please select a CSV file'); return; }
+    setImportError(null);
+    setImportPreview(null);
+    setImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', importFile);
+      fd.append('dryRun', 'true');
+      Object.entries(importMeta).forEach(([k, v]) => fd.append(k, String(v)));
+      const res = await fetch('/api/admin/trade/stock/import', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Preview failed');
+      setImportPreview(data);
+    } catch (err) {
+      setImportError(err.message);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleImportCommit = async () => {
+    if (!importFile || !importPreview) return;
+    setImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', importFile);
+      fd.append('dryRun', 'false');
+      Object.entries(importMeta).forEach(([k, v]) => fd.append(k, String(v)));
+      const res = await fetch('/api/admin/trade/stock/import', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Import failed');
+      showToast(`Receipt ${data.receipt.receiptNumber} created — ${data.receipt.lines.length} products updated!`);
+      setShowImportModal(false);
+      setImportFile(null);
+      setImportPreview(null);
+      setImportMeta({ supplierName: '', reference: '', freightCost: 0, clearingCost: 0, handlingCost: 0, notes: '' });
+      loadAllAdminData();
+    } catch (err) {
+      setImportError(err.message);
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const handleSaveStock = async (sku) => {
     const qty = parseInt(editingStockValue, 10);
@@ -1200,13 +1257,36 @@ export default function AdminTradePage() {
                 <input type="checkbox" checked={missingCostOnly} onChange={(e) => setMissingCostOnly(e.target.checked)} />
                 Missing cost only
               </label>
-              <button
-                type="button"
-                onClick={() => setShowReceiptModal(true)}
-                className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs shrink-0"
-              >
-                + Receive Stock
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="relative group">
+                  <button
+                    type="button"
+                    className="px-3 py-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center gap-1.5"
+                  >
+                    ↓ Export CSV
+                    <svg className="w-3 h-3 opacity-60" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8L6 8z"/></svg>
+                  </button>
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-20 min-w-[150px] hidden group-hover:block">
+                    <button type="button" onClick={() => handleExport('all')} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 font-medium text-gray-700">All products</button>
+                    <button type="button" onClick={() => handleExport('spirits')} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 font-medium text-pink-700">Spirits only</button>
+                    <button type="button" onClick={() => handleExport('jaba')} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 font-medium text-blue-700">Jaba only</button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowImportModal(true); setImportPreview(null); setImportError(null); setImportFile(null); }}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+                >
+                  ↑ Import CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReceiptModal(true)}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+                >
+                  + Receive Stock
+                </button>
+              </div>
             </div>
             <span className="text-xs text-gray-500 font-medium shrink-0">
               Showing <strong>{filteredProducts.length}</strong> of {productCounts.total} · {productCounts.missingCost} spirits without a cost on file
@@ -2090,6 +2170,127 @@ export default function AdminTradePage() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Bulk Stock Import</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Upload a CSV to record a goods-received batch. Required columns: <code className="bg-gray-100 px-1 rounded">sku</code>, <code className="bg-gray-100 px-1 rounded">cases</code>, <code className="bg-gray-100 px-1 rounded">unit_product_cost_inc_vat</code>.
+                  Extra columns (e.g. from the export) are ignored.{' '}
+                  <a href="/api/admin/trade/stock/import/template" className="text-[#840038] font-semibold underline" target="_blank" rel="noreferrer">
+                    Download blank template ↓
+                  </a>
+                </p>
+              </div>
+              <button type="button" onClick={() => { setShowImportModal(false); setImportPreview(null); setImportError(null); }} className="text-gray-400 hover:text-gray-700 text-xl leading-none ml-4">✕</button>
+            </div>
+
+            {/* File Drop Zone */}
+            <label className={`block border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${importFile ? 'border-emerald-400 bg-emerald-50' : 'border-gray-300 hover:border-[#840038] bg-gray-50'}`}>
+              <input type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => {
+                const f = e.target.files?.[0] || null;
+                setImportFile(f);
+                setImportPreview(null);
+                setImportError(null);
+              }} />
+              {importFile ? (
+                <div>
+                  <div className="text-2xl mb-1">📄</div>
+                  <div className="text-xs font-bold text-emerald-700">{importFile.name}</div>
+                  <div className="text-[10px] text-gray-400">{(importFile.size / 1024).toFixed(1)} KB — click to change</div>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-2xl mb-1">📁</div>
+                  <div className="text-xs font-semibold text-gray-600">Click to select CSV file</div>
+                  <div className="text-[10px] text-gray-400 mt-0.5">or drag &amp; drop — .csv files only</div>
+                </div>
+              )}
+            </label>
+
+            {/* Logistics metadata */}
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Supplier name" value={importMeta.supplierName}
+                onChange={(e) => setImportMeta({ ...importMeta, supplierName: e.target.value })}
+                className="col-span-2 px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input placeholder="Reference / invoice #" value={importMeta.reference}
+                onChange={(e) => setImportMeta({ ...importMeta, reference: e.target.value })}
+                className="col-span-2 px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input type="number" min="0" placeholder="Freight (KES)" value={importMeta.freightCost || ''}
+                onChange={(e) => setImportMeta({ ...importMeta, freightCost: Number(e.target.value) })}
+                className="px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input type="number" min="0" placeholder="Clearing (KES)" value={importMeta.clearingCost || ''}
+                onChange={(e) => setImportMeta({ ...importMeta, clearingCost: Number(e.target.value) })}
+                className="px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input type="number" min="0" placeholder="Handling (KES)" value={importMeta.handlingCost || ''}
+                onChange={(e) => setImportMeta({ ...importMeta, handlingCost: Number(e.target.value) })}
+                className="col-span-2 px-3 py-2 rounded-xl text-xs border border-gray-200" />
+            </div>
+
+            {/* Error */}
+            {importError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold px-4 py-3 rounded-xl">
+                ⚠ {importError}
+              </div>
+            )}
+
+            {/* Dry-run preview */}
+            {importPreview && (
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-700">Preview — {importPreview.rowCount} product(s) · {importPreview.totalBottles} bottles</span>
+                  {importPreview.totalLogistics > 0 && (
+                    <span className="text-[10px] text-gray-500 font-medium">Logistics: KES {importPreview.totalLogistics.toLocaleString()} to allocate</span>
+                  )}
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="text-[10px] uppercase text-gray-500 border-b border-gray-200">
+                        <th className="pb-2">SKU</th>
+                        <th className="pb-2 text-right">Cases</th>
+                        <th className="pb-2 text-right">Bottles</th>
+                        <th className="pb-2 text-right">Cost/btl</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 font-mono">
+                      {importPreview.parsed.map((row, i) => (
+                        <tr key={i}>
+                          <td className="py-1.5 font-bold text-gray-800 font-sans">{row.sku}</td>
+                          <td className="py-1.5 text-right">{row.cases}</td>
+                          <td className="py-1.5 text-right">{row.bottles}</td>
+                          <td className="py-1.5 text-right">KES {row.unitProductCost.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-[10px] text-gray-400">✓ Validated — all SKUs found. Click &quot;Commit Import&quot; to record the receipt and update landed costs.</p>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              <button type="button" onClick={() => { setShowImportModal(false); setImportPreview(null); setImportError(null); }}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-700">
+                Cancel
+              </button>
+              {!importPreview ? (
+                <button type="button" onClick={handleImportPreview} disabled={importing || !importFile}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-900 text-white disabled:opacity-50">
+                  {importing ? 'Validating…' : '🔍 Preview & Validate'}
+                </button>
+              ) : (
+                <button type="button" onClick={handleImportCommit} disabled={importing}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#840038] hover:bg-[#6b002c] text-white disabled:opacity-50">
+                  {importing ? 'Recording…' : '✓ Commit Import'}
+                </button>
+              )}
             </div>
           </div>
         </div>
