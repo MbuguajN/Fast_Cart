@@ -7,7 +7,7 @@ import {
   getMarginFloorConfig,
 } from '../lib/trade/trade-costing.js';
 import { readTradeStore, updateTradeConfig } from '../lib/trade/trade-store.js';
-import { calculateTradeOrderPricing } from '../lib/trade/pricing-engine.js';
+import { calculateTradeOrderPricing, jabaExVatToIncVat, roundCent } from '../lib/trade/pricing-engine.js';
 import {
   attachPriceOverrides,
   calculateTradeOrderPricingWithOverrides,
@@ -16,6 +16,40 @@ import {
 } from '../lib/trade/trade-costing.js';
 import { ensureTradeDb, query } from '../lib/trade/trade-pg.js';
 import { recordStockReceipt } from '../lib/trade/trade-costing.js';
+
+/**
+ * Creates a disposable trade_products row so receipt/override tests can
+ * mutate stock and cost without touching real seeded data (Finding 3b of
+ * the 2026-09-15 final review: a prior version of this suite ran
+ * `SELECT ... LIMIT 1` with no ORDER BY against whatever product happened
+ * to be first, and permanently ratcheted its stock/cost on every run).
+ */
+let fixtureCounter = 0;
+async function createTestProduct({ priceLine = 'spirits', prkCostIncVat = 3000, stockQuantity = 50 } = {}) {
+  fixtureCounter += 1;
+  const suffix = `${Date.now()}-${process.pid}-${fixtureCounter}`;
+  const id = `test_fixture_${suffix}`;
+  const sku = `TEST-FIXTURE-${suffix}`;
+  await query(
+    `INSERT INTO trade_products (id, sku, name, slug, price_line, prk_cost_inc_vat, stock_quantity)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [id, sku, 'Test Fixture Product', sku.toLowerCase(), priceLine, prkCostIncVat, stockQuantity]
+  );
+  return { id, sku };
+}
+
+/**
+ * Deletes a fixture product and anything a test wrote that references it.
+ * trade_stock_receipt_lines.product_id has no ON DELETE CASCADE, but
+ * deleting the receipt header first cascades its lines, so receipts must
+ * be deleted before the product they reference.
+ */
+async function deleteTestProduct(productId, { receiptIds = [] } = {}) {
+  for (const receiptId of receiptIds) {
+    await query('DELETE FROM trade_stock_receipts WHERE id = $1', [receiptId]);
+  }
+  await query('DELETE FROM trade_products WHERE id = $1', [productId]);
+}
 
 test('computeWeightedAverageCost blends existing and new stock by value', () => {
   // 60 @ 2,900 + 240 @ 2,985 -> 2,968 (the worked example from the design spec)
@@ -65,27 +99,55 @@ test('classifyMarginStatus: at or above floor is ok', () => {
 });
 
 test('getMarginFloorConfig returns config.marginFloor when set', async () => {
-  await updateTradeConfig({ marginFloor: { spirits: 3.5, jaba: 9 } });
-  const floor = getMarginFloorConfig();
-  assert.deepEqual(floor, { spirits: 3.5, jaba: 9 });
-  // restore for other tests in this file
-  await updateTradeConfig({ marginFloor: undefined });
+  const original = readTradeStore().config?.marginFloor;
+  try {
+    await updateTradeConfig({ marginFloor: { spirits: 3.5, jaba: 9 } });
+    const floor = getMarginFloorConfig();
+    assert.deepEqual(floor, { spirits: 3.5, jaba: 9 });
+  } finally {
+    // Restore the *exact* original value (not `undefined`) inside a
+    // finally, so a failed assertion above can never leave
+    // data/trade-store.json's real config permanently mutated (Finding 3a
+    // of the 2026-09-15 final review). Merging `{ marginFloor: undefined }`
+    // does make writeJsonAtomic's `JSON.stringify` drop the key on the next
+    // write (JSON.stringify omits undefined-valued keys), which happens to
+    // correctly restore an originally-absent key — but only if this line
+    // actually runs, which the old bare-assertion version did not guarantee.
+    await updateTradeConfig({ marginFloor: original });
+  }
 });
 
-test('getMarginFloorConfig derives from legacy gmFloorPercent when marginFloor is absent', async () => {
+test('getMarginFloorConfig fills in a missing key from the legacy default when marginFloor is partial', async () => {
+  // Regression for Finding 2: a partial marginFloor (e.g. from a shallow-
+  // merged admin write that only touched one key) must not leave the other
+  // key undefined/NaN — every consumer computing Math.min(floors.spirits,
+  // floors.jaba) or `marginPercent < floors.jaba` would silently break.
+  const original = readTradeStore().config?.marginFloor;
+  try {
+    await updateTradeConfig({ marginFloor: { spirits: 5 } }); // no jaba key
+    const legacy = Number(readTradeStore().config?.gmFloorPercent) || 4.0;
+    const floor = getMarginFloorConfig();
+    assert.equal(floor.spirits, 5);
+    assert.ok(Number.isFinite(floor.jaba), 'jaba must be a finite number, not undefined/NaN');
+    assert.equal(floor.jaba, legacy);
+  } finally {
+    await updateTradeConfig({ marginFloor: original });
+  }
+});
+
+test('getMarginFloorConfig derives from legacy gmFloorPercent when marginFloor is absent', (t) => {
   const store = readTradeStore();
-  const original = store.config.marginFloor;
-  delete store.config.marginFloor;
-  // readTradeStore reads from disk each call, so simulate "absent" by writing
-  // a config without marginFloor directly via updateTradeConfig's merge —
-  // merge can't delete a key, so this test instead asserts the fallback
-  // value directly against whatever gmFloorPercent already is.
+  if (store.config?.marginFloor) {
+    // Someone (a real admin, or another test run that didn't clean up)
+    // has already set marginFloor on the shared data/trade-store.json
+    // config, so this run cannot exercise the legacy-fallback branch on a
+    // clean slate. Document rather than silently pass — see Finding 3a.
+    t.skip('config.marginFloor is already set on the shared store — legacy fallback path not exercised this run');
+    return;
+  }
+  const legacy = Number(store.config?.gmFloorPercent) || 4.0;
   const floor = getMarginFloorConfig();
-  const expected = store.config?.marginFloor
-    ? store.config.marginFloor
-    : { spirits: store.config?.gmFloorPercent || 4.0, jaba: store.config?.gmFloorPercent || 4.0 };
-  assert.deepEqual(floor, expected);
-  if (original) await updateTradeConfig({ marginFloor: original });
+  assert.deepEqual(floor, { spirits: legacy, jaba: legacy });
 });
 
 test('calculateTradeOrderPricing applies a per-tier priceOverride when present', () => {
@@ -130,6 +192,61 @@ test('calculateTradeOrderPricing computes jaba override margin consistently in V
   assert.equal(line.marginPercent, 13.79);
 });
 
+test('jaba ex-VAT->inc-VAT conversion agrees between setPriceOverride and calculateTradeOrderPricing (Finding 4)', async () => {
+  await ensureTradeDb();
+  // A low landed cost keeps every override below comfortably above the
+  // margin floor, so setPriceOverride never throws 'blocked' for any of
+  // the inputs exercised here.
+  const landedCost = 50;
+  const product = await createTestProduct({ priceLine: 'jaba', prkCostIncVat: landedCost, stockQuantity: 10 });
+  try {
+    // 700 is a plain 2-decimal currency value. 100.013 is a fractional-cent
+    // (3-decimal) input: with the *old* separate implementations
+    // (pricing-engine.js rounding vat then adding vs trade-costing.js
+    // multiplying the raw value by 1.16 in one step), this value produced
+    // unitPriceIncVat = 116.01 on one path and 116.02 on the other — see
+    // Finding 4 of the 2026-09-15 final review. After routing both call
+    // sites through the single jabaExVatToIncVat() function (and rounding
+    // the ex-VAT input to cents first, the same way pricing-engine.js's
+    // `unitPriceExVat = roundCent(override)` already does), they must
+    // agree on every input.
+    for (const overrideExVat of [700, 100.013]) {
+      const expectedIncVat = jabaExVatToIncVat(roundCent(overrideExVat));
+      const expectedMargin = expectedIncVat > 0
+        ? roundCent(((expectedIncVat - landedCost) / expectedIncVat) * 100)
+        : 0;
+
+      const { marginPercent: overrideMargin, status } = await setPriceOverride({
+        productId: product.id,
+        tierKey: 'T2',
+        priceLine: 'jaba',
+        price: overrideExVat,
+        updatedBy: 'test',
+      });
+      assert.notEqual(status, 'blocked', `override ${overrideExVat} unexpectedly blocked`);
+      assert.equal(overrideMargin, expectedMargin, `setPriceOverride margin mismatch for override ${overrideExVat}`);
+
+      const pricing = calculateTradeOrderPricing({
+        items: [{
+          sku: product.sku, priceLine: 'jaba', prkCostIncVat: landedCost, quantity: 60,
+          priceOverrides: { T2: overrideExVat },
+        }],
+      });
+      const line = pricing.items[0];
+      assert.equal(line.unitPriceIncVat, expectedIncVat, `pricing-engine unitPriceIncVat mismatch for override ${overrideExVat}`);
+      assert.equal(line.marginPercent, expectedMargin, `pricing-engine margin mismatch for override ${overrideExVat}`);
+
+      // The two call sites must agree with each other directly, not merely
+      // with our independently-computed expectation.
+      assert.equal(overrideMargin, line.marginPercent, `the two call sites disagree for override ${overrideExVat}`);
+
+      await clearPriceOverride({ productId: product.id, tierKey: 'T2' });
+    }
+  } finally {
+    await deleteTestProduct(product.id);
+  }
+});
+
 test('attachPriceOverrides + setPriceOverride round-trip through Postgres', async () => {
   await ensureTradeDb();
   const prod = await query(`SELECT id, sku, prk_cost_inc_vat FROM trade_products WHERE price_line = 'spirits' LIMIT 1`);
@@ -158,85 +275,118 @@ test('setPriceOverride rejects a price below landed cost', async () => {
 
 test('recordStockReceipt updates stock, landed cost, and writes an inventory log', async () => {
   await ensureTradeDb();
-  const prod = await query(`SELECT id, sku, stock_quantity, prk_cost_inc_vat FROM trade_products LIMIT 1`);
-  if (prod.rows.length === 0) return;
-  const before = prod.rows[0];
-  const beforeQty = Number(before.stock_quantity);
-  const beforeCost = Number(before.prk_cost_inc_vat) || 0;
+  const beforeQty = 60;
+  const beforeCost = 2900;
+  const product = await createTestProduct({ priceLine: 'spirits', prkCostIncVat: beforeCost, stockQuantity: beforeQty });
+  let receiptId;
+  try {
+    const receipt = await recordStockReceipt({
+      supplierName: 'Test Distributor Ltd',
+      reference: 'INV-TEST-001',
+      freightCost: 1000,
+      clearingCost: 500,
+      handlingCost: 0,
+      notes: 'Automated test receipt',
+      lines: [{ sku: product.sku, cases: 2, unitProductCost: 3000 }],
+      createdBy: 'test',
+    });
+    receiptId = receipt.id;
 
-  const receipt = await recordStockReceipt({
-    supplierName: 'Test Distributor Ltd',
-    reference: 'INV-TEST-001',
-    freightCost: 1000,
-    clearingCost: 500,
-    handlingCost: 0,
-    notes: 'Automated test receipt',
-    lines: [{ sku: before.sku, cases: 2, unitProductCost: 3000 }],
-    createdBy: 'test',
-  });
+    assert.ok(receipt.receiptNumber.startsWith('SR-'));
+    assert.equal(receipt.lines[0].bottles, 24); // 2 cases * default case_size 12
+    assert.ok(receipt.lines[0].landedUnitCost > 3000); // product cost + allocated logistics
 
-  assert.ok(receipt.receiptNumber.startsWith('SR-'));
-  assert.equal(receipt.lines[0].bottles, 24); // 2 cases * default case_size 12
-  assert.ok(receipt.lines[0].landedUnitCost > 3000); // product cost + allocated logistics
-
-  const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [before.id]);
-  assert.equal(Number(after.rows[0].stock_quantity), beforeQty + 24);
-  // new landed cost is the weighted average, strictly between the two batch costs
-  // when there was prior stock, or exactly the new batch's landed cost when there wasn't
-  const newCost = Number(after.rows[0].prk_cost_inc_vat);
-  if (beforeQty > 0 && beforeCost > 0) {
+    const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [product.id]);
+    assert.equal(Number(after.rows[0].stock_quantity), beforeQty + 24);
+    // new landed cost is the weighted average, strictly between the two batch costs
+    const newCost = Number(after.rows[0].prk_cost_inc_vat);
     const lo = Math.min(beforeCost, receipt.lines[0].landedUnitCost);
     const hi = Math.max(beforeCost, receipt.lines[0].landedUnitCost);
     assert.ok(newCost >= lo - 0.01 && newCost <= hi + 0.01);
-  } else {
-    assert.equal(newCost, receipt.lines[0].landedUnitCost);
-  }
 
-  const log = await query(
-    `SELECT * FROM inventory_logs WHERE reference_id = $1 AND reason = 'stock_receipt'`,
-    [receipt.id]
-  );
-  assert.equal(log.rows.length, 1);
-  assert.equal(Number(log.rows[0].change_qty), 24);
+    const log = await query(
+      `SELECT * FROM inventory_logs WHERE reference_id = $1 AND reason = 'stock_receipt'`,
+      [receipt.id]
+    );
+    assert.equal(log.rows.length, 1);
+    assert.equal(Number(log.rows[0].change_qty), 24);
+  } finally {
+    await deleteTestProduct(product.id, { receiptIds: receiptId ? [receiptId] : [] });
+  }
 });
 
 test('recordStockReceipt rejects an invalid unitProductCost before writing anything', async () => {
   await ensureTradeDb();
-  const prod = await query(`SELECT id, sku, stock_quantity, prk_cost_inc_vat FROM trade_products LIMIT 1`);
-  if (prod.rows.length === 0) return;
-  const before = prod.rows[0];
-  const beforeQty = Number(before.stock_quantity);
-  const beforeCost = Number(before.prk_cost_inc_vat);
+  const beforeQty = 60;
+  const beforeCost = 2900;
+  const product = await createTestProduct({ priceLine: 'spirits', prkCostIncVat: beforeCost, stockQuantity: beforeQty });
+  try {
+    // Negative cost
+    await assert.rejects(
+      () => recordStockReceipt({
+        supplierName: 'Test Distributor Ltd',
+        reference: 'INV-TEST-BAD-1',
+        freightCost: 1000,
+        clearingCost: 500,
+        handlingCost: 0,
+        lines: [{ sku: product.sku, cases: 2, unitProductCost: -100 }],
+        createdBy: 'test',
+      }),
+      /positive product cost/i
+    );
 
-  // Negative cost
-  await assert.rejects(
-    () => recordStockReceipt({
-      supplierName: 'Test Distributor Ltd',
-      reference: 'INV-TEST-BAD-1',
-      freightCost: 1000,
-      clearingCost: 500,
-      handlingCost: 0,
-      lines: [{ sku: before.sku, cases: 2, unitProductCost: -100 }],
-      createdBy: 'test',
-    }),
-    /positive product cost/i
-  );
+    // Missing / NaN cost
+    await assert.rejects(
+      () => recordStockReceipt({
+        supplierName: 'Test Distributor Ltd',
+        reference: 'INV-TEST-BAD-2',
+        freightCost: 1000,
+        clearingCost: 500,
+        handlingCost: 0,
+        lines: [{ sku: product.sku, cases: 2 }], // unitProductCost missing -> NaN
+        createdBy: 'test',
+      }),
+      /positive product cost/i
+    );
 
-  // Missing / NaN cost
-  await assert.rejects(
-    () => recordStockReceipt({
-      supplierName: 'Test Distributor Ltd',
-      reference: 'INV-TEST-BAD-2',
-      freightCost: 1000,
-      clearingCost: 500,
-      handlingCost: 0,
-      lines: [{ sku: before.sku, cases: 2 }], // unitProductCost missing -> NaN
-      createdBy: 'test',
-    }),
-    /positive product cost/i
-  );
+    const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [product.id]);
+    assert.equal(Number(after.rows[0].stock_quantity), beforeQty);
+    assert.equal(Number(after.rows[0].prk_cost_inc_vat), beforeCost);
+  } finally {
+    await deleteTestProduct(product.id);
+  }
+});
 
-  const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [before.id]);
-  assert.equal(Number(after.rows[0].stock_quantity), beforeQty);
-  assert.equal(Number(after.rows[0].prk_cost_inc_vat), beforeCost);
+test('recordStockReceipt rejects a receipt with two lines for the same SKU before writing anything (Finding 1)', async () => {
+  await ensureTradeDb();
+  const beforeQty = 60;
+  const beforeCost = 2900;
+  const product = await createTestProduct({ priceLine: 'spirits', prkCostIncVat: beforeCost, stockQuantity: beforeQty });
+  try {
+    await assert.rejects(
+      () => recordStockReceipt({
+        supplierName: 'Test Distributor Ltd',
+        reference: 'INV-TEST-DUP-1',
+        freightCost: 1000,
+        clearingCost: 500,
+        handlingCost: 0,
+        lines: [
+          { sku: product.sku, cases: 2, unitProductCost: 3000 },
+          { sku: product.sku, cases: 1, unitProductCost: 3000 },
+        ],
+        createdBy: 'test',
+      }),
+      /same SKU/i
+    );
+
+    // No partial write: stock and cost must be exactly what they were
+    // before the (rejected) receipt — the bug this guards against was two
+    // silently-overwriting UPDATEs, not a thrown error, so this assertion
+    // is the real regression check, not the rejection itself.
+    const after = await query('SELECT stock_quantity, prk_cost_inc_vat FROM trade_products WHERE id = $1', [product.id]);
+    assert.equal(Number(after.rows[0].stock_quantity), beforeQty);
+    assert.equal(Number(after.rows[0].prk_cost_inc_vat), beforeCost);
+  } finally {
+    await deleteTestProduct(product.id);
+  }
 });
