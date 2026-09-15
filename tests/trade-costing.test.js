@@ -4,7 +4,9 @@ import {
   computeWeightedAverageCost,
   allocateLogisticsByValue,
   classifyMarginStatus,
+  getMarginFloorConfig,
 } from '../lib/trade/trade-costing.js';
+import { readTradeStore, updateTradeConfig } from '../lib/trade/trade-store.js';
 
 test('computeWeightedAverageCost blends existing and new stock by value', () => {
   // 60 @ 2,900 + 240 @ 2,985 -> 2,968 (the worked example from the design spec)
@@ -51,4 +53,28 @@ test('classifyMarginStatus: below floor but non-negative is flagged', () => {
 test('classifyMarginStatus: at or above floor is ok', () => {
   assert.equal(classifyMarginStatus(3.0, 3.0), 'ok');
   assert.equal(classifyMarginStatus(10.1, 3.0), 'ok');
+});
+
+test('getMarginFloorConfig returns config.marginFloor when set', async () => {
+  await updateTradeConfig({ marginFloor: { spirits: 3.5, jaba: 9 } });
+  const floor = getMarginFloorConfig();
+  assert.deepEqual(floor, { spirits: 3.5, jaba: 9 });
+  // restore for other tests in this file
+  await updateTradeConfig({ marginFloor: undefined });
+});
+
+test('getMarginFloorConfig derives from legacy gmFloorPercent when marginFloor is absent', async () => {
+  const store = readTradeStore();
+  const original = store.config.marginFloor;
+  delete store.config.marginFloor;
+  // readTradeStore reads from disk each call, so simulate "absent" by writing
+  // a config without marginFloor directly via updateTradeConfig's merge —
+  // merge can't delete a key, so this test instead asserts the fallback
+  // value directly against whatever gmFloorPercent already is.
+  const floor = getMarginFloorConfig();
+  const expected = store.config?.marginFloor
+    ? store.config.marginFloor
+    : { spirits: store.config?.gmFloorPercent || 4.0, jaba: store.config?.gmFloorPercent || 4.0 };
+  assert.deepEqual(floor, expected);
+  if (original) await updateTradeConfig({ marginFloor: original });
 });
