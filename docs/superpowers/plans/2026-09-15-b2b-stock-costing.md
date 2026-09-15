@@ -72,7 +72,7 @@ re-justify them here.
   `trade_price_overrides`; sequence `trade_receipt_seq`. All consumed by
   Tasks 2-5.
 
-- [ ] **Step 1: Write the failing schema test**
+- [x] **Step 1: Write the failing schema test**
 
 ```js
 // tests/trade-costing-schema.test.js
