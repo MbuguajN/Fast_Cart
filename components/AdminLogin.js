@@ -56,14 +56,9 @@ export default function AdminLogin({ onLogin }) {
       <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #840037, #b8004f)' }}>
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-            </svg>
-          </div>
+          <img src="/images/happy-hour-logo.png" alt="Happy Hour Logo" className="w-24 h-auto mx-auto object-contain mb-4 drop-shadow-lg" />
           <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>
-            LiquorDash
+            Happy Hour
           </h1>
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter, sans-serif' }}>
             Admin Portal

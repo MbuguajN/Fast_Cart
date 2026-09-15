@@ -487,6 +487,40 @@ export default function AdminTradePage() {
     });
   }, [quotes, quoteSearch, quoteStatusFilter]);
 
+  // Analytics Calculations
+  const analytics = useMemo(() => {
+    if (!orders.length) return null;
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      return d.toISOString().split('T')[0];
+    }).reverse();
+    const revenueByDay = last7Days.reduce((acc, date) => ({ ...acc, [date]: 0 }), {});
+    const productSales = {};
+
+    orders.forEach(o => {
+      const date = new Date(o.createdAt || new Date()).toISOString().split('T')[0];
+      if (revenueByDay[date] !== undefined) revenueByDay[date] += Number(o.grandTotal || 0);
+      if (o.items && Array.isArray(o.items)) {
+        o.items.forEach(item => {
+          if (!productSales[item.name]) productSales[item.name] = 0;
+          productSales[item.name] += Number(item.quantity || 1);
+        });
+      }
+    });
+
+    const maxDailyRevenue = Math.max(...Object.values(revenueByDay), 1);
+    const topProducts = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const maxProductVolume = topProducts.length ? topProducts[0][1] : 1;
+
+    return {
+      revenueByDay: Object.entries(revenueByDay).map(([date, val]) => ({
+        date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+        val, height: `${(val / maxDailyRevenue) * 100}%`
+      })),
+      topProducts: topProducts.map(([name, qty]) => ({ name, qty, width: `${(qty / maxProductVolume) * 100}%` }))
+    };
+  }, [orders]);
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -499,52 +533,61 @@ export default function AdminTradePage() {
   }
 
   return (
-    <div className="space-y-5 max-w-[1400px] mx-auto pb-20 font-sans">
-      {/* Header & Tabs */}
-      <div className="bg-white px-6 py-5 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
+    <div className="flex flex-col lg:flex-row gap-6 max-w-[1400px] mx-auto pb-20 font-sans">
+      
+      {/* Vertical Navigation Sidebar */}
+      <div className="w-full lg:w-64 shrink-0 space-y-4">
+        <div className="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+          <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-[#840038] text-white">
               B2B Trade Hub
             </span>
-            <span className="text-xs text-gray-500 font-medium">Wholesale Pricing &amp; Account Vetting</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mt-1">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight mt-1 leading-tight">
             Trade Management &amp; Margins
           </h1>
+          <p className="text-[10px] text-gray-500 font-medium mt-1">Wholesale Pricing &amp; Account Vetting</p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-1 overflow-x-auto bg-gray-100 p-1 rounded-xl">
+        <nav className="bg-white p-2 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
           {[
-            { id: 'orders', label: 'Orders &amp; Logistics', count: orders.length },
-            { id: 'accounts', label: 'Accounts', badge: pendingAccountsCount > 0 ? pendingAccountsCount : null, badgeColor: 'bg-amber-500 text-white' },
-            { id: 'quotes', label: 'Quotes', count: quotes.length },
-            { id: 'products', label: 'Stock &amp; Costing', badge: productCounts.outOfStock > 0 ? `${productCounts.outOfStock} OOS` : (productCounts.lowStock > 0 ? `${productCounts.lowStock} Low` : null), badgeColor: 'bg-amber-500 text-white' },
-            { id: 'margins', label: 'Margin Audit', badge: subFloorCount > 0 ? `${subFloorCount} Alert` : null, badgeColor: 'bg-red-500 text-white' },
+            { id: 'orders', label: 'Orders &amp; Logistics', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>, count: orders.length },
+            { id: 'analytics', label: 'Analytics Insights', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg> },
+            { id: 'accounts', label: 'Accounts', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>, badge: pendingAccountsCount > 0 ? pendingAccountsCount : null, badgeColor: 'bg-amber-500 text-white' },
+            { id: 'quotes', label: 'Quotes', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>, count: quotes.length },
+            { id: 'products', label: 'Stock &amp; Costing', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" /></svg>, badge: productCounts.outOfStock > 0 ? `${productCounts.outOfStock} OOS` : (productCounts.lowStock > 0 ? `${productCounts.lowStock} Low` : null), badgeColor: 'bg-amber-500 text-white' },
+            { id: 'margins', label: 'Margin Audit', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, badge: subFloorCount > 0 ? `${subFloorCount} Alert` : null, badgeColor: 'bg-red-500 text-white' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === tab.id
-                  ? 'bg-white text-[#840038] shadow-xs'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-[#840038] text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              <span dangerouslySetInnerHTML={{ __html: tab.label }} />
+              <div className="flex items-center gap-3">
+                <span className={`flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                  {tab.icon}
+                </span>
+                <span dangerouslySetInnerHTML={{ __html: tab.label }} />
+              </div>
               {tab.badge && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${tab.badgeColor}`}>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${tab.badgeColor}`}>
                   {tab.badge}
                 </span>
               )}
               {tab.count !== undefined && !tab.badge && (
-                <span className="text-[10px] text-gray-400 font-mono">({tab.count})</span>
+                <span className={`text-[10px] font-mono ${activeTab === tab.id ? 'text-pink-200' : 'text-gray-400'}`}>({tab.count})</span>
               )}
             </button>
           ))}
-        </div>
+        </nav>
       </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 space-y-5">
 
       {/* Notification Toast */}
       {notification && (
@@ -552,6 +595,65 @@ export default function AdminTradePage() {
           notification.type === 'error' ? 'bg-red-600' : 'bg-emerald-600'
         }`}>
           {notification.msg}
+        </div>
+      )}
+
+      {/* TAB: ANALYTICS */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
+            <div>
+              <h2 className="text-base font-black text-gray-900">Performance Analytics</h2>
+              <p className="text-xs text-gray-500 mt-1">Revenue and volume insights based on recent trade orders.</p>
+            </div>
+            {!analytics ? (
+              <div className="py-20 text-center text-sm text-gray-400 font-medium">Not enough data to generate analytics.</div>
+            ) : (
+              <div className="mt-8 space-y-10">
+                <div>
+                  <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#840038]"></span>
+                    7-Day Revenue Trend
+                  </h3>
+                  <div className="h-48 flex items-end gap-2 sm:gap-4 mt-6">
+                    {analytics.revenueByDay.map((day, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
+                        <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none z-10">
+                          KES {day.val.toLocaleString()}
+                        </div>
+                        <div className="w-full bg-pink-50 rounded-t-lg relative overflow-hidden flex items-end justify-center h-full">
+                          <div className="w-full bg-[#840038] rounded-t-lg transition-all duration-700 ease-out" style={{ height: day.height, minHeight: day.val > 0 ? '4px' : '0' }}></div>
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-500">{day.date}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    Top Selling Products (Volume)
+                  </h3>
+                  <div className="space-y-4">
+                    {analytics.topProducts.map((prod, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <div className="w-6 text-xs font-black text-gray-400 text-right">#{i + 1}</div>
+                        <div className="flex-1">
+                          <div className="flex justify-between text-xs mb-1.5">
+                            <span className="font-bold text-gray-800">{prod.name}</span>
+                            <span className="font-bold text-[#840038]">{prod.qty} units</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div className="bg-emerald-500 h-full rounded-full transition-all duration-700" style={{ width: prod.width }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -2351,6 +2453,7 @@ export default function AdminTradePage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

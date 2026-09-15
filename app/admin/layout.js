@@ -124,13 +124,11 @@ export default function AdminLayout({ children }) {
       >
         {/* Brand */}
         <div className="h-16 flex items-center gap-3 px-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #840037, #b8004f)' }}>
-            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-            </svg>
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/10 p-1">
+            <img src="/images/happy-hour-logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <div>
-            <span className="text-white font-bold text-sm tracking-tight">LiquorDash</span>
+            <span className="text-white font-bold text-sm tracking-tight">Happy Hour</span>
             <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: 'rgba(132,0,55,0.3)', color: '#e88aaf' }}>
               ADMIN
             </span>
