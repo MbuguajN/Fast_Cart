@@ -7,6 +7,14 @@ import {
   getMarginFloorConfig,
 } from '../lib/trade/trade-costing.js';
 import { readTradeStore, updateTradeConfig } from '../lib/trade/trade-store.js';
+import { calculateTradeOrderPricing } from '../lib/trade/pricing-engine.js';
+import {
+  attachPriceOverrides,
+  calculateTradeOrderPricingWithOverrides,
+  setPriceOverride,
+  clearPriceOverride,
+} from '../lib/trade/trade-costing.js';
+import { ensureTradeDb, query } from '../lib/trade/trade-pg.js';
 
 test('computeWeightedAverageCost blends existing and new stock by value', () => {
   // 60 @ 2,900 + 240 @ 2,985 -> 2,968 (the worked example from the design spec)
@@ -77,4 +85,57 @@ test('getMarginFloorConfig derives from legacy gmFloorPercent when marginFloor i
     : { spirits: store.config?.gmFloorPercent || 4.0, jaba: store.config?.gmFloorPercent || 4.0 };
   assert.deepEqual(floor, expected);
   if (original) await updateTradeConfig({ marginFloor: original });
+});
+
+test('calculateTradeOrderPricing applies a per-tier priceOverride when present', () => {
+  const pricing = calculateTradeOrderPricing({
+    items: [{
+      sku: 'TEST-OVR-1', priceLine: 'spirits', prkCostIncVat: 2970, quantity: 30,
+      priceOverrides: { T2: 3200 },
+    }],
+  });
+  const line = pricing.items[0];
+  assert.equal(line.tierKey, 'T2'); // 30 bottles -> T2 band (25-72)
+  assert.equal(line.unitPriceIncVat, 3200);
+  assert.equal(line.overrideApplied, true);
+  assert.ok(line.suggestedUnitPriceIncVat > 0);
+  assert.ok(line.suggestedUnitPriceIncVat !== 3200);
+});
+
+test('calculateTradeOrderPricing with no matching override is unaffected', () => {
+  const withOverride = calculateTradeOrderPricing({
+    items: [{ sku: 'X', priceLine: 'spirits', prkCostIncVat: 2970, quantity: 30, priceOverrides: { T1: 9999 } }],
+  });
+  const without = calculateTradeOrderPricing({
+    items: [{ sku: 'X', priceLine: 'spirits', prkCostIncVat: 2970, quantity: 30 }],
+  });
+  // quantity 30 resolves to T2, so a T1-only override never applies
+  assert.equal(withOverride.items[0].unitPriceIncVat, without.items[0].unitPriceIncVat);
+  assert.equal(withOverride.items[0].overrideApplied, false);
+});
+
+test('attachPriceOverrides + setPriceOverride round-trip through Postgres', async () => {
+  await ensureTradeDb();
+  const prod = await query(`SELECT id, sku, prk_cost_inc_vat FROM trade_products WHERE price_line = 'spirits' LIMIT 1`);
+  if (prod.rows.length === 0) return; // no seeded spirits product in this environment — skip
+  const { id, sku } = prod.rows[0];
+
+  await setPriceOverride({ productId: id, tierKey: 'T1', priceLine: 'spirits', price: 999999, updatedBy: 'test' });
+  const [attached] = await attachPriceOverrides([{ sku, priceLine: 'spirits' }]);
+  assert.equal(attached.priceOverrides.T1, 999999);
+
+  await clearPriceOverride({ productId: id, tierKey: 'T1' });
+  const [cleared] = await attachPriceOverrides([{ sku, priceLine: 'spirits' }]);
+  assert.equal(cleared.priceOverrides.T1, undefined);
+});
+
+test('setPriceOverride rejects a price below landed cost', async () => {
+  await ensureTradeDb();
+  const prod = await query(`SELECT id FROM trade_products WHERE price_line = 'spirits' AND prk_cost_inc_vat > 0 LIMIT 1`);
+  if (prod.rows.length === 0) return;
+  const { id } = prod.rows[0];
+  await assert.rejects(
+    () => setPriceOverride({ productId: id, tierKey: 'T1', priceLine: 'spirits', price: 0.01, updatedBy: 'test' }),
+    /below landed cost/i
+  );
 });
