@@ -522,7 +522,6 @@ export default function AdminTradePage() {
             { id: 'quotes', label: 'Quotes', count: quotes.length },
             { id: 'products', label: 'Stock &amp; Costing', badge: productCounts.outOfStock > 0 ? `${productCounts.outOfStock} OOS` : (productCounts.lowStock > 0 ? `${productCounts.lowStock} Low` : null), badgeColor: 'bg-amber-500 text-white' },
             { id: 'margins', label: 'Margin Audit', badge: subFloorCount > 0 ? `${subFloorCount} Alert` : null, badgeColor: 'bg-red-500 text-white' },
-            { id: 'config', label: 'Tiers &amp; Rules' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1469,59 +1468,36 @@ export default function AdminTradePage() {
       )}
 
 
-      {/* TAB 5: TIER & RULES CONFIG */}
-      {activeTab === 'config' && config && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-6 space-y-6">
-          <h2 className="text-base font-bold text-gray-900 border-b border-gray-100 pb-3">
-            Pricing Engine Band &amp; Commerce Rules Configuration
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
-              <h3 className="text-xs font-bold uppercase text-[#840038]">Spirits Markups on PRK Cost (Inc-VAT)</h3>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span>Tier 1 (6–24 bottles)</span>
-                  <span className="font-bold font-mono">+10.0% markup</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tier 2 (25–72 bottles)</span>
-                  <span className="font-bold font-mono">+7.0% markup</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tier 3 (73+ bottles)</span>
-                  <span className="font-bold font-mono">+4.0% markup</span>
-                </div>
+      {/* Pricing Engine Reference */}
+      {activeTab === 'products' && (
+        <details className="group bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+          <summary className="flex items-center justify-between px-5 py-3.5 cursor-pointer select-none text-xs font-bold text-gray-600 hover:bg-gray-50 list-none">
+            <span>ℹ Pricing Engine Reference — Spirits markups &amp; Jaba band prices</span>
+            <svg className="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.586L3.707 6.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0l5-5a1 1 0 00-1.414-1.414L8 10.586z"/></svg>
+          </summary>
+          <div className="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100 pt-4">
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold uppercase text-[#840038] tracking-wide">Spirits — PRK Landed Cost Markup</p>
+              <div className="space-y-1 text-xs text-gray-700">
+                <div className="flex justify-between py-1 border-b border-gray-100"><span>Tier 1 &nbsp;·&nbsp; 6–24 bottles</span><span className="font-mono font-bold">+10.0%</span></div>
+                <div className="flex justify-between py-1 border-b border-gray-100"><span>Tier 2 &nbsp;·&nbsp; 25–72 bottles</span><span className="font-mono font-bold">+7.0%</span></div>
+                <div className="flex justify-between py-1"><span>Tier 3 &nbsp;·&nbsp; 73+ bottles</span><span className="font-mono font-bold">+4.0%</span></div>
               </div>
+              <p className="text-[10px] text-gray-400">Inline tier inputs above override the suggested price. Red = below margin floor, amber = flagged, blue = manually overridden.</p>
             </div>
-
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
-              <h3 className="text-xs font-bold uppercase text-[#840038]">Jaba Artisan Elixirs Band Prices (Ex-VAT)</h3>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span>T0 (1–10 bottles)</span>
-                  <span className="font-bold font-mono">KES 800 ex-VAT</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>T1 (11–50 bottles)</span>
-                  <span className="font-bold font-mono">KES 750 ex-VAT</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>T2 (51–100 bottles)</span>
-                  <span className="font-bold font-mono">KES 700 ex-VAT</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>T3 (101–200 bottles)</span>
-                  <span className="font-bold font-mono">KES 650 ex-VAT</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>T4 (201+ bottles)</span>
-                  <span className="font-bold font-mono">KES 600 ex-VAT</span>
-                </div>
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold uppercase text-blue-700 tracking-wide">Jaba Artisan Elixirs — Flat Band Prices (ex-VAT)</p>
+              <div className="space-y-1 text-xs text-gray-700">
+                <div className="flex justify-between py-1 border-b border-gray-100"><span>T0 &nbsp;·&nbsp; 1–10 bottles</span><span className="font-mono font-bold">KES 800</span></div>
+                <div className="flex justify-between py-1 border-b border-gray-100"><span>T1 &nbsp;·&nbsp; 11–50 bottles</span><span className="font-mono font-bold">KES 750</span></div>
+                <div className="flex justify-between py-1 border-b border-gray-100"><span>T2 &nbsp;·&nbsp; 51–100 bottles</span><span className="font-mono font-bold">KES 700</span></div>
+                <div className="flex justify-between py-1 border-b border-gray-100"><span>T3 &nbsp;·&nbsp; 101–200 bottles</span><span className="font-mono font-bold">KES 650</span></div>
+                <div className="flex justify-between py-1"><span>T4 &nbsp;·&nbsp; 201+ bottles</span><span className="font-mono font-bold">KES 600</span></div>
               </div>
+              <p className="text-[10px] text-gray-400">Jaba pricing is quantity-band driven; landed cost does not apply.</p>
             </div>
           </div>
-        </div>
+        </details>
       )}
 
       {/* Account Vetting Modal */}
