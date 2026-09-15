@@ -114,6 +114,21 @@ test('calculateTradeOrderPricing with no matching override is unaffected', () =>
   assert.equal(withOverride.items[0].overrideApplied, false);
 });
 
+test('calculateTradeOrderPricing computes jaba override margin consistently in VAT-inc terms', () => {
+  const pricing = calculateTradeOrderPricing({
+    items: [{
+      sku: 'TEST-JABA-OVR-1', priceLine: 'jaba', prkCostIncVat: 700, quantity: 60,
+      priceOverrides: { T2: 700 }, // ex-VAT override, same as landed cost inc-VAT
+    }],
+  });
+  const line = pricing.items[0];
+  assert.equal(line.tierKey, 'T2'); // 60 -> jaba T2 band (51-100)
+  assert.equal(line.unitPriceExVat, 700);
+  assert.equal(line.unitPriceIncVat, 812);
+  // NOT 0 — that would be the VAT-basis bug (comparing 700 ex-VAT to 700 inc-VAT cost)
+  assert.equal(line.marginPercent, 13.79);
+});
+
 test('attachPriceOverrides + setPriceOverride round-trip through Postgres', async () => {
   await ensureTradeDb();
   const prod = await query(`SELECT id, sku, prk_cost_inc_vat FROM trade_products WHERE price_line = 'spirits' LIMIT 1`);
