@@ -9,7 +9,7 @@ export async function GET(request) {
     const status = searchParams.get('status');
     const paymentStatus = searchParams.get('paymentStatus');
 
-    const orders = getTradeOrders({
+    const orders = await getTradeOrders({
       accountId: auth.account.id,
       status,
       paymentStatus,

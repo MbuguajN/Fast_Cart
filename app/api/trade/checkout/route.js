@@ -42,7 +42,7 @@ export async function POST(request) {
     // Server-authoritative line resolution: identifier + quantity only.
     let resolvedItems;
     try {
-      resolvedItems = resolveTradeLineItems(items, { account: auth.account });
+      resolvedItems = await resolveTradeLineItems(items, { account: auth.account, checkStock: true });
     } catch (resolutionError) {
       return NextResponse.json({ error: resolutionError.message }, { status: 400 });
     }

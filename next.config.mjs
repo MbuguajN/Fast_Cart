@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next 16 blocks cross-origin requests to /_next/* dev resources, allowing
+  // only the host the dev server was started with (`localhost`). Under WSL2 the
+  // browser on the Windows host reaches the server by its WSL NIC address, so
+  // every dev chunk and the HMR socket get blocked: the page server-renders,
+  // React never hydrates, and it sits on the loading spinner forever.
+  // Development-only setting; it has no effect on `next build`/`next start`.
+  allowedDevOrigins: ['127.0.0.1', '172.22.85.13', '172.*.*.*', '192.168.*.*'],
   images: {
     remotePatterns: [
       {

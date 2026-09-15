@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 
 export default function AdminTradePage() {
   const [activeTab, setActiveTab] = useState('accounts');
@@ -31,10 +32,70 @@ export default function AdminTradePage() {
   const [creditLimitInput, setCreditLimitInput] = useState(0);
   const [tierOverrideInput, setTierOverrideInput] = useState('');
 
+  // New Account Modal
+  const emptyNewAccount = {
+    tradingName: '',
+    legalName: '',
+    segment: 'horeca',
+    kraPin: '',
+    licenceNo: '',
+    licenceExpiry: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    status: 'active',
+    creditEnabled: false,
+    creditLimit: 0,
+    creditTerms: 14,
+  };
+  const [showNewAccountModal, setShowNewAccountModal] = useState(false);
+  const [newAccountForm, setNewAccountForm] = useState(emptyNewAccount);
+  const [creatingAccount, setCreatingAccount] = useState(false);
+
   // Cost Importer State
   const [csvText, setCsvText] = useState(`jameson-original-750ml,2900\nchivas-regal-12yo-750ml,3700\nthe-glenlivet-12yo-750ml,5500\nbeefeater-london-dry-gin-750ml,2000`);
   const [diffResult, setDiffResult] = useState(null);
   const [importing, setImporting] = useState(false);
+
+  // Products / Trade Catalogue & Live Stock
+  const [products, setProducts] = useState([]);
+  const [productCounts, setProductCounts] = useState({ total: 0, spirits: 0, jaba: 0, missingCost: 0, lowStock: 0, outOfStock: 0 });
+  const [productSearch, setProductSearch] = useState('');
+  const [productLineFilter, setProductLineFilter] = useState('all');
+  const [missingCostOnly, setMissingCostOnly] = useState(false);
+  const [editingSku, setEditingSku] = useState(null);
+  const [editingCostValue, setEditingCostValue] = useState('');
+  const [savingCost, setSavingCost] = useState(false);
+
+  // Live Inventory Stock Editing & Logs
+  const [editingStockSku, setEditingStockSku] = useState(null);
+  const [editingStockValue, setEditingStockValue] = useState('');
+  const [savingStock, setSavingStock] = useState(false);
+  const [historyModalProduct, setHistoryModalProduct] = useState(null);
+  const [productLogs, setProductLogs] = useState([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
+  // Live Orders & Dispatch
+  const [orders, setOrders] = useState([]);
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [dispatchModalOrder, setDispatchModalOrder] = useState(null);
+  const [dispatchForm, setDispatchForm] = useState({ driverName: '', driverPhone: '', vehicleRegistration: '', sealNumber: '' });
+  const [dispatching, setDispatching] = useState(false);
+
+  // Admin New Quote Modal
+  const [showNewQuoteModal, setShowNewQuoteModal] = useState(false);
+  const [newQuoteAccount, setNewQuoteAccount] = useState('');
+  const [newQuoteItems, setNewQuoteItems] = useState([{ sku: '', quantity: 12 }]);
+  const [newQuoteValidDays, setNewQuoteValidDays] = useState(14);
+  const [newQuoteNotes, setNewQuoteNotes] = useState('');
+  const [savingQuote, setSavingQuote] = useState(false);
+
+  // Admin Email Quote Modal
+  const [emailQuoteModal, setEmailQuoteModal] = useState(null);
+  const [emailQuoteRecipient, setEmailQuoteRecipient] = useState('');
+  const [emailQuoteNotes, setEmailQuoteNotes] = useState('');
+  const [sendingQuoteEmail, setSendingQuoteEmail] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setNotification({ msg, type });
@@ -48,12 +109,19 @@ export default function AdminTradePage() {
       fetch('/api/admin/trade/margin-report').then((r) => r.json()),
       fetch('/api/admin/trade/config').then((r) => r.json()),
       fetch('/api/admin/trade/quotes').then((r) => r.json()),
+      fetch('/api/admin/trade/products').then((r) => r.json()),
+      fetch('/api/admin/trade/orders').then((r) => r.json()),
     ])
-      .then(([accRes, margRes, cfgRes, qRes]) => {
+      .then(([accRes, margRes, cfgRes, qRes, prodRes, ordRes]) => {
         if (accRes.success) setAccounts(accRes.accounts || []);
         if (margRes.success) setMarginReport(margRes.report);
         if (cfgRes.success) setConfig(cfgRes.config);
         if (qRes.success) setQuotes(qRes.quotes || []);
+        if (prodRes.success) {
+          setProducts(prodRes.products || []);
+          setProductCounts(prodRes.counts || { total: 0, spirits: 0, jaba: 0, missingCost: 0, lowStock: 0, outOfStock: 0 });
+        }
+        if (ordRes?.success) setOrders(ordRes.orders || []);
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
@@ -87,6 +155,28 @@ export default function AdminTradePage() {
     }
   };
 
+  const handleCreateAccount = async () => {
+    try {
+      setCreatingAccount(true);
+      const res = await fetch('/api/admin/trade/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAccountForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create account');
+
+      showToast(`Trade account "${data.account.tradingName}" created!`);
+      setShowNewAccountModal(false);
+      setNewAccountForm(emptyNewAccount);
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
+
   const handleCostImport = async (isDryRun) => {
     try {
       setImporting(true);
@@ -111,6 +201,212 @@ export default function AdminTradePage() {
       setImporting(false);
     }
   };
+
+  const handleSaveCost = async (sku) => {
+    const cost = Number(editingCostValue);
+    if (!Number.isFinite(cost) || cost <= 0) {
+      showToast('Enter a valid cost greater than 0', 'error');
+      return;
+    }
+    try {
+      setSavingCost(true);
+      const res = await fetch('/api/admin/trade/costs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csvContent: `${sku},${cost}`, isDryRun: false }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save cost');
+
+      showToast(`Cost updated for ${sku}!`);
+      setEditingSku(null);
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingCost(false);
+    }
+  };
+
+  const handleSaveStock = async (sku) => {
+    const qty = parseInt(editingStockValue, 10);
+    if (isNaN(qty) || qty < 0) {
+      showToast('Enter a valid non-negative stock quantity', 'error');
+      return;
+    }
+    try {
+      setSavingStock(true);
+      const res = await fetch('/api/admin/trade/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, stockQuantity: qty, reason: 'Manual admin stock count adjustment' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update stock');
+      showToast(`Stock updated for ${sku}!`);
+      setEditingStockSku(null);
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingStock(false);
+    }
+  };
+
+  const handleViewStockLogs = async (product) => {
+    setHistoryModalProduct(product);
+    setLoadingLogs(true);
+    try {
+      const res = await fetch(`/api/admin/trade/products?sku=${encodeURIComponent(product.sku)}&logs=true`);
+      const data = await res.json();
+      if (data.success) {
+        setProductLogs(data.logs || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  const handleDispatchOrder = async (e) => {
+    e.preventDefault();
+    if (!dispatchModalOrder) return;
+    try {
+      setDispatching(true);
+      const res = await fetch(`/api/admin/trade/orders/${dispatchModalOrder.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'dispatched',
+          ...dispatchForm,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to dispatch order');
+      showToast(`Order ${dispatchModalOrder.orderNumber} dispatched! Delivery note generated & emailed.`);
+      setDispatchModalOrder(null);
+      setDispatchForm({ driverName: '', driverPhone: '', vehicleRegistration: '', sealNumber: '' });
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setDispatching(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const res = await fetch(`/api/admin/trade/orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update order status');
+      showToast(`Order status updated to ${newStatus}!`);
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleCreateAdminQuote = async (e) => {
+    e.preventDefault();
+    if (!newQuoteAccount) {
+      showToast('Select an account for the quote', 'error');
+      return;
+    }
+    const validItems = newQuoteItems.filter((i) => i.sku && Number(i.quantity) > 0);
+    if (validItems.length === 0) {
+      showToast('Add at least one item to quote', 'error');
+      return;
+    }
+    try {
+      setSavingQuote(true);
+      const targetAcc = accounts.find((a) => a.id === newQuoteAccount);
+      const res = await fetch('/api/admin/trade/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountId: newQuoteAccount,
+          accountName: targetAcc?.tradingName || 'Trade Client',
+          items: validItems,
+          validDays: parseInt(newQuoteValidDays, 10) || 14,
+          notes: newQuoteNotes,
+          tierOverride: targetAcc?.tierOverride || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create quote');
+      showToast(`Quote ${data.quote?.quoteNumber || ''} created successfully!`);
+      setShowNewQuoteModal(false);
+      setNewQuoteAccount('');
+      setNewQuoteItems([{ sku: '', quantity: 12 }]);
+      setNewQuoteNotes('');
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingQuote(false);
+    }
+  };
+
+  const handleSendQuoteEmail = async (e) => {
+    e.preventDefault();
+    if (!emailQuoteModal || !emailQuoteRecipient) return;
+    try {
+      setSendingQuoteEmail(true);
+      const res = await fetch(`/api/admin/trade/quotes/${emailQuoteModal.id}/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientEmail: emailQuoteRecipient,
+          customNotes: emailQuoteNotes,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send quote email');
+      showToast(`Quote PDF emailed to ${emailQuoteRecipient}!`);
+      setEmailQuoteModal(null);
+      setEmailQuoteNotes('');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSendingQuoteEmail(false);
+    }
+  };
+
+  // Filtered Orders List
+  const filteredOrdersList = useMemo(() => {
+    return orders.filter((o) => {
+      const q = orderSearch.trim().toLowerCase();
+      const matchSearch =
+        !q ||
+        (o.orderNumber || '').toLowerCase().includes(q) ||
+        (o.invoiceNumber || '').toLowerCase().includes(q) ||
+        (o.accountName || '').toLowerCase().includes(q) ||
+        (o.driverInfo?.driverName || '').toLowerCase().includes(q);
+
+      const matchStatus = orderStatusFilter === 'all' || o.status === orderStatusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [orders, orderSearch, orderStatusFilter]);
+
+  // Filtered Products
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const q = productSearch.trim().toLowerCase();
+      const matchSearch =
+        !q ||
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.sku || '').toLowerCase().includes(q) ||
+        (p.categoryName || '').toLowerCase().includes(q);
+      const matchLine = productLineFilter === 'all' || p.priceLine === productLineFilter;
+      const matchMissing = !missingCostOnly || p.hasExplicitCost === false;
+      return matchSearch && matchLine && matchMissing;
+    });
+  }, [products, productSearch, productLineFilter, missingCostOnly]);
 
   // Filtered Accounts
   const filteredAccounts = useMemo(() => {
@@ -201,8 +497,10 @@ export default function AdminTradePage() {
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 overflow-x-auto bg-gray-100 p-1 rounded-xl">
           {[
+            { id: 'orders', label: 'Orders &amp; Logistics', count: orders.length },
             { id: 'accounts', label: 'Accounts', badge: pendingAccountsCount > 0 ? pendingAccountsCount : null, badgeColor: 'bg-amber-500 text-white' },
             { id: 'quotes', label: 'Quotes', count: quotes.length },
+            { id: 'products', label: 'Live Stock &amp; Catalog', badge: productCounts.outOfStock > 0 ? `${productCounts.outOfStock} OOS` : (productCounts.lowStock > 0 ? `${productCounts.lowStock} Low` : null), badgeColor: 'bg-amber-500 text-white' },
             { id: 'margins', label: 'Margin Audit', badge: subFloorCount > 0 ? `${subFloorCount} Alert` : null, badgeColor: 'bg-red-500 text-white' },
             { id: 'costs', label: 'PRK Costs' },
             { id: 'config', label: 'Tiers &amp; Rules' },
@@ -236,6 +534,205 @@ export default function AdminTradePage() {
           notification.type === 'error' ? 'bg-red-600' : 'bg-emerald-600'
         }`}>
           {notification.msg}
+        </div>
+      )}
+
+      {/* TAB: ORDERS & LOGISTICS */}
+      {activeTab === 'orders' && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-50/50">
+            <div className="flex flex-1 flex-wrap items-center gap-2.5">
+              <input
+                type="text"
+                placeholder="Search order #, invoice #, client name, driver..."
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                className="flex-1 min-w-[220px] px-3 py-2 rounded-xl text-xs bg-white border border-gray-200 outline-hidden focus:border-[#840038]"
+              />
+              <div className="flex items-center bg-gray-200/70 p-0.5 rounded-xl text-xs">
+                {['all', 'confirmed', 'dispatched', 'delivered', 'cancelled'].map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setOrderStatusFilter(st)}
+                    className={`px-3 py-1.5 rounded-lg font-medium capitalize transition-all ${
+                      orderStatusFilter === st
+                        ? 'bg-white text-gray-900 shadow-2xs font-bold'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+              {(orderSearch || orderStatusFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setOrderSearch('');
+                    setOrderStatusFilter('all');
+                  }}
+                  className="text-xs text-[#840038] hover:underline font-semibold px-2 py-1"
+                >
+                  Reset ✕
+                </button>
+              )}
+            </div>
+            <span className="text-xs text-gray-500 font-medium shrink-0">
+              Showing <strong>{filteredOrdersList.length}</strong> of {orders.length} orders
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            {filteredOrdersList.length === 0 ? (
+              <div className="p-12 text-center text-gray-500">
+                <p className="text-sm font-semibold">No trade orders match your filters.</p>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-gray-50/80 uppercase text-[10px] text-gray-500 font-bold border-b border-gray-100">
+                    <th className="py-3 px-4">Order / Invoice #</th>
+                    <th className="py-3 px-4">Account Name</th>
+                    <th className="py-3 px-3">Bottles / Lines</th>
+                    <th className="py-3 px-3 text-right">Value (KES)</th>
+                    <th className="py-3 px-3 text-center">Status</th>
+                    <th className="py-3 px-3">Logistics &amp; Driver</th>
+                    <th className="py-3 px-4 text-right">Documents &amp; Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 font-medium">
+                  {filteredOrdersList.map((o) => {
+                    const isDispatched = o.status === 'dispatched';
+                    const isDelivered = o.status === 'delivered';
+                    const isCancelled = o.status === 'cancelled';
+                    const canDispatch = o.status === 'confirmed' || o.status === 'pending';
+
+                    return (
+                      <tr key={o.id} className="hover:bg-gray-50/60 transition-colors">
+                        <td className="py-3 px-4 font-mono font-bold text-gray-900">
+                          <div>{o.orderNumber || o.id}</div>
+                          <div className="text-[10px] text-gray-400 font-normal">
+                            {o.invoiceNumber || 'Pending Inv'} · {new Date(o.createdAt).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 font-bold text-gray-900">
+                          <div>{o.accountName || 'Trade Client'}</div>
+                          <div className="text-[10px] text-gray-500 font-normal truncate max-w-xs">
+                            {o.shippingAddress?.street || o.shippingAddress?.city || ''}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-gray-700">
+                          {o.totalBottles || 0} btls ({o.items?.length || 0} lines)
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono font-bold text-gray-900">
+                          <div>KES {Number(o.grandTotal || 0).toLocaleString()}</div>
+                          <div className="text-[10px] text-gray-400 font-sans font-normal uppercase">
+                            {o.paymentMethod === 'pay_on_account' ? 'On Account' : 'Prepaid'}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span
+                            className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
+                              isDelivered
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : isDispatched
+                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                : isCancelled
+                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                : 'bg-amber-50 text-amber-700 border border-amber-200'
+                            }`}
+                          >
+                            {o.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-xs">
+                          {o.driverInfo?.driverName ? (
+                            <div>
+                              <div className="font-bold text-gray-800">
+                                🚚 {o.driverInfo.driverName} ({o.driverInfo.vehicleRegistration})
+                              </div>
+                              <div className="text-[10px] text-gray-500 font-mono">
+                                Seal: <strong>{o.sealNumber || 'N/A'}</strong> · {o.driverInfo.driverPhone}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 italic text-[11px]">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                          {/* Invoice PDF */}
+                          <a
+                            href={`/api/admin/trade/orders/${o.id}/invoice`}
+                            download
+                            className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-md inline-block"
+                            title="Download Tax Invoice PDF"
+                          >
+                            📄 Inv
+                          </a>
+
+                          {/* Delivery Note PDF */}
+                          {(isDispatched || isDelivered) && (
+                            <a
+                              href={`/api/admin/trade/orders/${o.id}/delivery-note`}
+                              download
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-md inline-block"
+                              title="Download Goods Received Note (GRN) / Delivery Note PDF"
+                            >
+                              📋 GRN
+                            </a>
+                          )}
+
+                          {/* Dispatch Trigger */}
+                          {canDispatch && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDispatchModalOrder(o);
+                                setDispatchForm({
+                                  driverName: '',
+                                  driverPhone: '',
+                                  vehicleRegistration: '',
+                                  sealNumber: `SL-${Math.floor(100000 + Math.random() * 900000)}`,
+                                });
+                              }}
+                              className="px-2.5 py-1 bg-[#840038] hover:bg-[#6b002c] text-white text-[11px] font-bold rounded-md"
+                            >
+                              Dispatch →
+                            </button>
+                          )}
+
+                          {/* Mark Delivered */}
+                          {isDispatched && (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateOrderStatus(o.id, 'delivered')}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-md"
+                            >
+                              ✓ Delivered
+                            </button>
+                          )}
+
+                          {/* Cancel Order */}
+                          {!isDelivered && !isCancelled && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`Cancel order ${o.orderNumber}? Stock will be automatically restored to the warehouse.`)) {
+                                  handleUpdateOrderStatus(o.id, 'cancelled');
+                                }
+                              }}
+                              className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-bold rounded-md"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       )}
 
@@ -326,9 +823,22 @@ export default function AdminTradePage() {
               )}
             </div>
 
-            <span className="text-xs text-gray-500 font-medium shrink-0">
-              Showing <strong>{filteredAccounts.length}</strong> of {accounts.length} accounts
-            </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs text-gray-500 font-medium">
+                Showing <strong>{filteredAccounts.length}</strong> of {accounts.length} accounts
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setNewAccountForm(emptyNewAccount);
+                  setShowNewAccountModal(true);
+                }}
+                className="px-3 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5"
+              >
+                <span>+</span>
+                <span>New Account</span>
+              </button>
+            </div>
           </div>
 
           {/* Accounts Table */}
@@ -366,7 +876,9 @@ export default function AdminTradePage() {
                     return (
                       <tr key={acc.id} className="hover:bg-gray-50/60 transition-colors">
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-gray-900 text-sm">{acc.tradingName}</div>
+                          <Link href={`/admin/trade/accounts/${acc.id}`} className="font-bold text-gray-900 text-sm hover:text-[#840038] hover:underline">
+                            {acc.tradingName}
+                          </Link>
                           <div className="text-[11px] text-gray-400 font-normal">{acc.legalName}</div>
                         </td>
                         <td className="py-3.5 px-3 uppercase font-bold text-[10px] text-[#840038]">
@@ -408,7 +920,13 @@ export default function AdminTradePage() {
                             {acc.status}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <Link
+                            href={`/admin/trade/accounts/${acc.id}`}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs bg-gray-100 hover:bg-gray-200 text-gray-800 mr-2 inline-block"
+                          >
+                            View Details
+                          </Link>
                           <button
                             type="button"
                             onClick={() => {
@@ -497,6 +1015,23 @@ export default function AdminTradePage() {
             <span className="text-xs text-gray-500 font-medium">
               Showing <strong>{filteredQuotes.length}</strong> quotes
             </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs text-gray-500 font-medium">
+                Showing <strong>{filteredQuotes.length}</strong> quotes
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setNewQuoteAccount(accounts[0]?.id || '');
+                  setNewQuoteItems([{ sku: products[0]?.sku || '', quantity: 12 }]);
+                  setShowNewQuoteModal(true);
+                }}
+                className="px-3 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5"
+              >
+                <span>+</span>
+                <span>Create New Quote</span>
+              </button>
+            </div>
           </div>
 
           {/* Quotes Table */}
@@ -542,7 +1077,27 @@ export default function AdminTradePage() {
                           {q.status}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                        <a
+                          href={`/api/admin/trade/quotes/${q.id}/pdf`}
+                          download
+                          className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold inline-block"
+                          title="Download Quote PDF"
+                        >
+                          📄 PDF
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const acc = accounts.find((a) => a.id === q.accountId);
+                            setEmailQuoteRecipient(acc?.users?.[0]?.email || acc?.billingAddress?.email || '');
+                            setEmailQuoteModal(q);
+                          }}
+                          className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold"
+                          title="Email Quote PDF to customer"
+                        >
+                          ✉️ Email
+                        </button>
                         <button
                           onClick={() => setSelectedQuote(q)}
                           className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold"
@@ -654,6 +1209,224 @@ export default function AdminTradePage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: TRADE PRODUCT CATALOGUE */}
+      {activeTab === 'products' && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-50/50">
+            <div className="flex flex-1 flex-wrap items-center gap-2.5">
+              <input
+                type="text"
+                placeholder="Search name, SKU, category..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                className="flex-1 min-w-[220px] px-3 py-2 rounded-xl text-xs bg-white border border-gray-200 outline-hidden focus:border-[#840038] focus:ring-1 focus:ring-[#840038]"
+              />
+              <select
+                value={productLineFilter}
+                onChange={(e) => setProductLineFilter(e.target.value)}
+                className="px-3 py-2 rounded-xl text-xs bg-white border border-gray-200 outline-hidden cursor-pointer text-gray-700 font-medium"
+              >
+                <option value="all">All Price Lines</option>
+                <option value="spirits">Spirits (PRK)</option>
+                <option value="jaba">Jaba (Flat Tier)</option>
+              </select>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 px-2">
+                <input type="checkbox" checked={missingCostOnly} onChange={(e) => setMissingCostOnly(e.target.checked)} />
+                Missing cost only
+              </label>
+            </div>
+            <span className="text-xs text-gray-500 font-medium shrink-0">
+              Showing <strong>{filteredProducts.length}</strong> of {productCounts.total} · {productCounts.missingCost} spirits without a cost on file
+            </span>
+          </div>
+
+          {productCounts.missingCost > 0 && !missingCostOnly && (
+            <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold px-4 py-2.5 rounded-xl">
+              ⚠️ {productCounts.missingCost} spirits products have no cost on file — their tier prices are estimated from 75% of retail price until a real cost is entered.
+            </div>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-gray-50/80 uppercase text-[10px] text-gray-500 font-bold border-b border-gray-100">
+                  <th className="py-3 px-4">Product</th>
+                  <th className="py-3 px-3">Price Line</th>
+                  <th className="py-3 px-3 text-center">Live Stock</th>
+                  <th className="py-3 px-3 text-right">Cost (Inc-VAT)</th>
+                  <th className="py-3 px-3 text-right">T1 / T2 / T3</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {filteredProducts.map((p) => (
+                  <tr key={p.sku} className="hover:bg-gray-50/60">
+                    <td className="py-3 px-4">
+                      <div className="font-bold text-gray-900">{p.name}</div>
+                      <div className="text-[10px] text-gray-400 font-mono">{p.sku} · {p.categoryName}</div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${p.priceLine === 'spirits' ? 'bg-pink-50 text-[#840038]' : 'bg-blue-50 text-blue-700'}`}>
+                        {p.priceLine}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-center whitespace-nowrap">
+                      {editingStockSku === p.sku ? (
+                        <div className="flex items-center justify-center gap-1">
+                          <input
+                            type="number"
+                            min="0"
+                            autoFocus
+                            value={editingStockValue}
+                            onChange={(e) => setEditingStockValue(e.target.value)}
+                            className="w-16 px-1.5 py-1 border border-gray-300 rounded-lg text-center font-mono text-xs"
+                          />
+                          <button
+                            type="button"
+                            disabled={savingStock}
+                            onClick={() => handleSaveStock(p.sku)}
+                            className="px-2 py-1 rounded-lg text-xs font-bold bg-[#840038] text-white"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingStockSku(null)}
+                            className="px-1.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-600"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span
+                            className={`font-mono font-bold text-xs ${
+                              p.stockQuantity <= 0
+                                ? 'text-red-600'
+                                : p.stockQuantity <= 10
+                                ? 'text-amber-600'
+                                : 'text-gray-900'
+                            }`}
+                          >
+                            {p.stockQuantity ?? 0}
+                          </span>
+                          <span className="text-[10px] text-gray-400">btls</span>
+                          {p.stockQuantity <= 0 ? (
+                            <span className="text-[9px] font-bold uppercase px-1 py-0.2 bg-red-100 text-red-700 rounded">
+                              OOS
+                            </span>
+                          ) : p.stockQuantity <= 10 ? (
+                            <span className="text-[9px] font-bold uppercase px-1 py-0.2 bg-amber-100 text-amber-800 rounded">
+                              Low
+                            </span>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingStockSku(p.sku);
+                              setEditingStockValue(String(p.stockQuantity ?? 0));
+                            }}
+                            className="ml-1 text-[11px] text-gray-400 hover:text-[#840038]"
+                            title="Edit Stock Quantity"
+                          >
+                            ✎
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    {p.priceLine === 'spirits' ? (
+                      <>
+                        <td className="py-3 px-3 text-right">
+                          {editingSku === p.sku ? (
+                            <input
+                              type="number"
+                              autoFocus
+                              value={editingCostValue}
+                              onChange={(e) => setEditingCostValue(e.target.value)}
+                              className="w-24 px-2 py-1 border border-gray-300 rounded-lg text-right font-mono text-xs"
+                            />
+                          ) : (
+                            <span className={`font-mono font-bold ${p.hasExplicitCost ? 'text-gray-900' : 'text-amber-600'}`}>
+                              KES {Math.round(p.cost).toLocaleString()}
+                              {!p.hasExplicitCost && <span className="ml-1 text-[9px] font-sans font-bold uppercase">(est.)</span>}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono text-gray-600 text-[11px]">
+                          {p.tierPrices?.T1} / {p.tierPrices?.T2} / {p.tierPrices?.T3}
+                        </td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap space-x-1">
+                          {editingSku === p.sku ? (
+                            <>
+                              <button
+                                type="button"
+                                disabled={savingCost}
+                                onClick={() => handleSaveCost(p.sku)}
+                                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#840038] hover:bg-[#6b002c] text-white mr-1.5"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingSku(null)}
+                                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingSku(p.sku);
+                                  setEditingCostValue(String(Math.round(p.cost)));
+                                }}
+                                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800"
+                              >
+                                Edit Cost
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleViewStockLogs(p)}
+                                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                title="View inventory audit trail"
+                              >
+                                History
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="py-3 px-3 text-right text-gray-400 text-[11px]" colSpan={2}>
+                          Flat tier pricing — see Tiers &amp; Rules
+                        </td>
+                        <td className="py-3 px-4" />
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleViewStockLogs(p)}
+                            className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+                            title="View inventory audit trail"
+                          >
+                            History
+                          </button>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filteredProducts.length === 0 && (
+              <p className="text-xs text-gray-400 italic text-center py-8">No products match your filters.</p>
+            )}
           </div>
         </div>
       )}
@@ -870,6 +1643,175 @@ export default function AdminTradePage() {
         </div>
       )}
 
+      {/* New Account Modal */}
+      {showNewAccountModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-4 shadow-2xl text-gray-900 animate-slide-up max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold uppercase">New Trade Account</h3>
+                <p className="text-xs text-gray-500">Manually onboard an account that was vetted offline.</p>
+              </div>
+              <button onClick={() => setShowNewAccountModal(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Trading Name *</label>
+                  <input
+                    type="text"
+                    value={newAccountForm.tradingName}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, tradingName: e.target.value })}
+                    placeholder="e.g. Nairobi Serena Hotel"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Legal Name</label>
+                  <input
+                    type="text"
+                    value={newAccountForm.legalName}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, legalName: e.target.value })}
+                    placeholder="Defaults to trading name if left blank"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Segment</label>
+                  <select
+                    value={newAccountForm.segment}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, segment: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white text-xs"
+                  >
+                    <option value="horeca">HORECA (Hotels / Bars)</option>
+                    <option value="corporate">Corporate Accounts</option>
+                    <option value="events">Events &amp; Caterers</option>
+                    <option value="retail">Retail Stockists</option>
+                    <option value="residences">Residences</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Initial Status</label>
+                  <select
+                    value={newAccountForm.status}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white text-xs"
+                  >
+                    <option value="active">Active</option>
+                    <option value="pending">Pending Review</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">KRA PIN</label>
+                  <input
+                    type="text"
+                    value={newAccountForm.kraPin}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, kraPin: e.target.value })}
+                    placeholder="P051123456Z"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl font-mono text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Liquor Licence No.</label>
+                  <input
+                    type="text"
+                    value={newAccountForm.licenceNo}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, licenceNo: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl font-mono text-xs"
+                  />
+                </div>
+
+                <div className="col-span-2 border-t border-gray-100 pt-3">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 mb-2">Primary Contact (optional — grants a portal seat)</p>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Contact Name</label>
+                  <input
+                    type="text"
+                    value={newAccountForm.contactName}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, contactName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={newAccountForm.email}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={newAccountForm.phone}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, phone: e.target.value })}
+                    placeholder="+2547..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div className="col-span-2 border-t border-gray-100 pt-3 flex items-center gap-2">
+                  <input
+                    id="creditEnabled"
+                    type="checkbox"
+                    checked={newAccountForm.creditEnabled}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, creditEnabled: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="creditEnabled" className="text-xs font-bold text-gray-700">Enable credit terms</label>
+                </div>
+                {newAccountForm.creditEnabled && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">Credit Limit (KES)</label>
+                      <input
+                        type="number"
+                        value={newAccountForm.creditLimit}
+                        onChange={(e) => setNewAccountForm({ ...newAccountForm, creditLimit: Number(e.target.value) })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-xl font-bold text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">Terms (days)</label>
+                      <input
+                        type="number"
+                        value={newAccountForm.creditTerms}
+                        onChange={(e) => setNewAccountForm({ ...newAccountForm, creditTerms: Number(e.target.value) })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-xl font-bold text-xs"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowNewAccountModal(false)}
+                className="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={creatingAccount || !newAccountForm.tradingName.trim()}
+                onClick={handleCreateAccount}
+                className="px-5 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold shadow-xs disabled:opacity-50"
+              >
+                {creatingAccount ? 'Creating…' : 'Create Account →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quote Details Modal */}
       {selectedQuote && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -916,6 +1858,351 @@ export default function AdminTradePage() {
             <div className="flex justify-end pt-2 border-t border-gray-100">
               <button
                 onClick={() => setSelectedQuote(null)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CREATE NEW QUOTE (ADMIN) */}
+      {showNewQuoteModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-4 my-8 text-gray-900">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold uppercase text-gray-900">Issue Bespoke Volume Quotation</h3>
+                <p className="text-xs text-gray-500">Calculate wholesale tier prices and issue official proposal</p>
+              </div>
+              <button onClick={() => setShowNewQuoteModal(false)} className="text-gray-400 hover:text-gray-600 text-lg font-bold">
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateAdminQuote} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Trade Client Account *</label>
+                <select
+                  required
+                  value={newQuoteAccount}
+                  onChange={(e) => setNewQuoteAccount(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:border-[#840038]"
+                >
+                  <option value="">Select an Account...</option>
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.tradingName} ({a.segment} · Tier {a.tierOverride || 'Auto'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Items */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold uppercase text-gray-700">Quotation Line Items</label>
+                  <button
+                    type="button"
+                    onClick={() => setNewQuoteItems([...newQuoteItems, { sku: products[0]?.sku || '', quantity: 12 }])}
+                    className="text-xs font-bold text-[#840038] hover:underline"
+                  >
+                    + Add Product Line
+                  </button>
+                </div>
+
+                {newQuoteItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                    <select
+                      value={item.sku}
+                      onChange={(e) => {
+                        const updated = [...newQuoteItems];
+                        updated[idx].sku = e.target.value;
+                        setNewQuoteItems(updated);
+                      }}
+                      className="flex-1 px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg"
+                    >
+                      {products.map((p) => (
+                        <option key={p.sku} value={p.sku}>
+                          {p.name} ({p.sku}) · Stock: {p.stockQuantity ?? 0}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const updated = [...newQuoteItems];
+                        updated[idx].quantity = e.target.value;
+                        setNewQuoteItems(updated);
+                      }}
+                      className="w-20 px-2 py-1.5 text-xs text-center bg-white border border-gray-200 rounded-lg font-mono"
+                      placeholder="Qty"
+                    />
+
+                    {newQuoteItems.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setNewQuoteItems(newQuoteItems.filter((_, i) => i !== idx))}
+                        className="text-red-500 font-bold px-2 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Validity Period (Days)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newQuoteValidDays}
+                    onChange={(e) => setNewQuoteValidDays(e.target.value)}
+                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Special Notes / Conditions</label>
+                  <input
+                    type="text"
+                    value={newQuoteNotes}
+                    onChange={(e) => setNewQuoteNotes(e.target.value)}
+                    placeholder="E.g. Includes delivery to Naivasha venue"
+                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowNewQuoteModal(false)}
+                  className="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingQuote}
+                  className="px-5 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold disabled:opacity-50"
+                >
+                  {savingQuote ? 'Creating...' : 'Issue Quote →'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EMAIL QUOTE TO CUSTOMER */}
+      {emailQuoteModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-gray-900">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold uppercase">Email Quote PDF</h3>
+                <p className="text-xs text-gray-500 font-mono">{emailQuoteModal.quoteNumber}</p>
+              </div>
+              <button onClick={() => setEmailQuoteModal(null)} className="text-gray-400 hover:text-gray-600 text-lg font-bold">
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSendQuoteEmail} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Client Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  value={emailQuoteRecipient}
+                  onChange={(e) => setEmailQuoteRecipient(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                  placeholder="client@hotel.co.ke"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Accompanying Message</label>
+                <textarea
+                  rows={3}
+                  value={emailQuoteNotes}
+                  onChange={(e) => setEmailQuoteNotes(e.target.value)}
+                  placeholder="Attached please find your official quotation for review and sign-off..."
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setEmailQuoteModal(null)}
+                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={sendingQuoteEmail}
+                  className="px-5 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold disabled:opacity-50"
+                >
+                  {sendingQuoteEmail ? 'Sending...' : 'Send Quotation Email'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: DISPATCH ORDER */}
+      {dispatchModalOrder && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-gray-900">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold uppercase text-gray-900">Dispatch Order &amp; Issue GRN</h3>
+                <p className="text-xs text-gray-500">
+                  {dispatchModalOrder.orderNumber} · {dispatchModalOrder.accountName}
+                </p>
+              </div>
+              <button onClick={() => setDispatchModalOrder(null)} className="text-gray-400 hover:text-gray-600 text-lg font-bold">
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleDispatchOrder} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Driver Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={dispatchForm.driverName}
+                  onChange={(e) => setDispatchForm({ ...dispatchForm, driverName: e.target.value })}
+                  placeholder="e.g. Peter Mwangi"
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Driver Mobile Phone *</label>
+                <input
+                  type="tel"
+                  required
+                  value={dispatchForm.driverPhone}
+                  onChange={(e) => setDispatchForm({ ...dispatchForm, driverPhone: e.target.value })}
+                  placeholder="e.g. +254 722 000 111"
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Vehicle Registration *</label>
+                <input
+                  type="text"
+                  required
+                  value={dispatchForm.vehicleRegistration}
+                  onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleRegistration: e.target.value })}
+                  placeholder="e.g. KDF 452X"
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl uppercase font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Tamper-Evident Seal Number *</label>
+                <input
+                  type="text"
+                  required
+                  value={dispatchForm.sealNumber}
+                  onChange={(e) => setDispatchForm({ ...dispatchForm, sealNumber: e.target.value })}
+                  placeholder="e.g. SL-881922"
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl font-mono"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">This seal number prints on the Goods Received Note (GRN).</p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setDispatchModalOrder(null)}
+                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={dispatching}
+                  className="px-5 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold disabled:opacity-50"
+                >
+                  {dispatching ? 'Dispatching...' : 'Confirm Dispatch & Generate GRN'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: INVENTORY AUDIT TRAIL / LOGS */}
+      {historyModalProduct && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-4 text-gray-900 max-h-[85vh] flex flex-col">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3 shrink-0">
+              <div>
+                <h3 className="text-base font-bold uppercase text-gray-900">Inventory Stock Audit Trail</h3>
+                <p className="text-xs text-gray-500 font-mono">
+                  {historyModalProduct.name} ({historyModalProduct.sku}) · Live Balance: <strong>{historyModalProduct.stockQuantity ?? 0} btls</strong>
+                </p>
+              </div>
+              <button onClick={() => setHistoryModalProduct(null)} className="text-gray-400 hover:text-gray-600 text-lg font-bold">
+                ✕
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 text-xs">
+              {loadingLogs ? (
+                <div className="p-8 text-center text-gray-400 font-bold animate-pulse">Loading stock history...</div>
+              ) : productLogs.length === 0 ? (
+                <div className="p-8 text-center text-gray-400 italic">No inventory movements recorded yet.</div>
+              ) : (
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-100">
+                      <th className="p-2.5">Date &amp; Time</th>
+                      <th className="p-2.5">Movement</th>
+                      <th className="p-2.5 text-center">Change</th>
+                      <th className="p-2.5 text-right">Balance</th>
+                      <th className="p-2.5">Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-mono text-xs">
+                    {productLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50/50">
+                        <td className="p-2.5 text-gray-500">{new Date(log.created_at).toLocaleString()}</td>
+                        <td className="p-2.5 font-sans font-bold capitalize text-gray-800">
+                          {log.reason?.replace(/_/g, ' ')}
+                        </td>
+                        <td className="p-2.5 text-center font-bold">
+                          <span className={log.change_qty > 0 ? 'text-emerald-600' : 'text-red-600'}>
+                            {log.change_qty > 0 ? `+${log.change_qty}` : log.change_qty}
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-right font-bold text-gray-900">{log.balance_after}</td>
+                        <td className="p-2.5 text-gray-500 truncate max-w-[120px] font-sans">{log.reference_id || 'System'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-gray-100 shrink-0">
+              <button
+                type="button"
+                onClick={() => setHistoryModalProduct(null)}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold"
               >
                 Close

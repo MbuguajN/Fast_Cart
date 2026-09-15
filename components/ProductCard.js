@@ -60,7 +60,7 @@ export default function ProductCard({ product, quantity, onAdd, onIncrement, onD
       }}
     >
       <div className="aspect-square relative overflow-hidden bg-gray-50">
-        <Link href={`/product/${product.slug || product.wcId || product.id}`} className="block w-full h-full">
+        <Link href={`/product/${product.slug || product.wcId || product.id}`} className="relative block w-full h-full">
           {product.image ? (
             <Image
               src={selectedVariant?.image || product.image}

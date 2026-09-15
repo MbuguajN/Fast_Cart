@@ -139,12 +139,19 @@ export default function TradeVatInvoicePage() {
             <span>✉️ Email Invoice</span>
           </button>
 
+          <a
+            href={`/api/trade/invoices/${id}/pdf`}
+            className="px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2"
+          >
+            <span>⬇️ Download PDF</span>
+          </a>
+
           <button
             type="button"
             onClick={handlePrint}
             className="px-5 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-2"
           >
-            <span>🖨️ Print / Save as PDF</span>
+            <span>🖨️ Print</span>
           </button>
         </div>
       </div>

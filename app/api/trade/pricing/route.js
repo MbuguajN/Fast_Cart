@@ -34,7 +34,7 @@ export async function POST(request) {
     // the caller's problem (unknown SKU, licence gating) so they surface as 400.
     let resolvedItems;
     try {
-      resolvedItems = resolveTradeLineItems(items, { account });
+      resolvedItems = await resolveTradeLineItems(items, { account });
     } catch (resolutionError) {
       return NextResponse.json({ error: resolutionError.message }, { status: 400 });
     }

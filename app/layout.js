@@ -26,7 +26,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${montserrat.variable} scroll-smooth`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${montserrat.variable} scroll-smooth`}>
       <body className="antialiased min-h-screen flex flex-col selection:bg-[#840037] selection:text-white">
         <Suspense fallback={null}>
           <TopProgressBar />

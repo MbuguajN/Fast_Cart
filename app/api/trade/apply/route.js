@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { upsertTradeAccount, addTradeUser } from '@/lib/trade/trade-store.js';
+import { buildTradeAccount, upsertTradeAccount, addTradeUser } from '@/lib/trade/trade-store.js';
+import { sendTradeApplicationEmails } from '@/lib/trade/trade-email.js';
 
 export async function POST(request) {
   try {
@@ -9,74 +10,46 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing required business or contact fields' }, { status: 400 });
     }
 
-    if (data.kraPin) {
-      const kraRegex = /^[A-Z]\d{9}[A-Z]$/i;
-      if (!kraRegex.test(data.kraPin.trim())) {
-        return NextResponse.json({ error: 'Invalid KRA PIN format. Expected format like P051123456Z' }, { status: 400 });
+    let newAccount;
+    try {
+      newAccount = buildTradeAccount(data, { status: 'pending' });
+      if (data.licenceDocumentUrl) {
+        newAccount.licenceDocumentUrl = data.licenceDocumentUrl;
       }
+    } catch (err) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
     }
 
-    const accountId = `acc_${Date.now()}`;
     const userId = `usr_${Date.now()}`;
-
-    const newAccount = {
-      id: accountId,
-      tradingName: data.tradingName.trim(),
-      legalName: data.legalName ? data.legalName.trim() : data.tradingName.trim(),
-      segment: data.segment || 'horeca',
-      status: 'pending',
-      kraPin: data.kraPin ? data.kraPin.toUpperCase().trim() : '',
-      licenceNo: data.licenceNo ? data.licenceNo.trim() : '',
-      licenceExpiry: data.licenceExpiry || null,
-      licenceDocUrl: data.licenceDocUrl || null,
-      priceBook: 'standard',
-      tierOverride: null,
-      creditEnabled: false,
-      creditLimit: 0,
-      creditTerms: 14,
-      creditUsed: 0,
-      cleanOrders: 0,
-      orderCeiling: null,
-      accountManager: {
-        id: 'am_paulette',
-        name: 'Paulette Chege',
-        email: 'paulette@myhappyhour.co.ke',
-        phone: '+254711234567',
-        role: 'Key Account Director',
-      },
-      addresses: [
-        {
-          id: `addr_${Date.now()}`,
-          label: 'Primary Receiving Dock',
-          contactName: data.contactName,
-          phone: data.phone,
-          addressLine: data.deliveryAddress || 'Nairobi',
-          city: data.city || 'Nairobi',
-          deliveryWindow: data.deliveryWindow || '09:00 - 17:00 EAT',
-          isDefault: true,
-        },
-      ],
-      termsAccepted: {
-        version: '2026.1-B2B',
-        acceptedAt: new Date().toISOString(),
-      },
-      createdAt: new Date().toISOString(),
-    };
 
     await upsertTradeAccount(newAccount);
 
     // No password is set here. Portal access is issued by an admin once the
     // account passes vetting (POST /api/admin/trade/users/password), so an
     // application alone never grants a session.
+    // Initial account seat
     await addTradeUser({
       id: userId,
-      accountId,
+      accountId: newAccount.id,
       name: data.contactName,
       role: data.role || 'Business Owner',
       seatType: 'owner',
       email: data.email.toLowerCase().trim(),
       phone: data.phone.trim(),
     });
+
+    // Send customer acknowledgement & admin review alerts
+    try {
+      await sendTradeApplicationEmails({
+        application: {
+          ...data,
+          id: newAccount.id,
+          licenceDocumentUrl: data.licenceDocumentUrl,
+        },
+      });
+    } catch (emailErr) {
+      console.error('Application notification email error (application saved successfully):', emailErr.message);
+    }
 
     return NextResponse.json({
       success: true,

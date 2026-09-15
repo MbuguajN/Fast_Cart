@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getTradeAuthFromRequest } from '@/lib/trade/trade-auth.js';
-import { getPrkCosts, getSegmentTemplates } from '@/lib/trade/trade-store.js';
-import { getProducts } from '@/lib/data-store.js';
-import { resolveLineTier, isPrkOrJabaTradeProduct, getTradePriceLine } from '@/lib/trade/pricing-engine.js';
+import { getSegmentTemplates } from '@/lib/trade/trade-store.js';
+import { resolveLineTier } from '@/lib/trade/pricing-engine.js';
+import { getTradeProductsFromDb } from '@/lib/trade/trade-catalog.js';
 
 export async function GET(request) {
   try {
@@ -12,20 +12,15 @@ export async function GET(request) {
     }
 
     const { account } = auth;
-    const prkCosts = getPrkCosts();
-    const rawProducts = getProducts() || [];
-
-    // Filter STRICTLY to authorized Pernod Ricard Kenya (PRK) portfolio & Happy Hour Jaba juices
-    const tradeEligible = rawProducts.filter(isPrkOrJabaTradeProduct);
+    const dbProducts = await getTradeProductsFromDb();
 
     // Licence gating: If expired or corporate account without liquor licence, restrict to non-alcoholic Jaba lines
     const isLicenceExpired = account.licenceExpiry && new Date(account.licenceExpiry) < new Date();
     const hasLiquorLicence = !!account.licenceNo;
 
-    const tradeProducts = tradeEligible
+    const tradeProducts = dbProducts
       .map((p) => {
-        const slug = p.slug || p.id;
-        const priceLine = getTradePriceLine(p);
+        const priceLine = p.priceLine;
 
         // If licence is missing or expired, mark spirits as restricted/excluded
         if (priceLine === 'spirits' && (!hasLiquorLicence || isLicenceExpired)) {
@@ -33,7 +28,7 @@ export async function GET(request) {
         }
 
         const isJaba = priceLine === 'jaba';
-        const prkCost = Number(prkCosts[slug] || prkCosts[p.id] || (p.price ? p.price * 0.75 : 2000));
+        const prkCost = p.prkCostIncVat;
 
         const t1 = resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: isJaba ? 11 : 6, tierOverride: account.tierOverride });
         const t2 = resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: isJaba ? 51 : 25, tierOverride: account.tierOverride });
@@ -41,18 +36,17 @@ export async function GET(request) {
         const t4 = isJaba ? resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: 201, tierOverride: account.tierOverride }) : null;
 
         return {
-          id: p.id || p.wcId,
-          wcId: p.wcId || p.id,
-          sku: p.sku || slug,
+          id: p.id,
+          sku: p.sku,
           name: p.name,
           slug: p.slug,
-          image: p.image || p.images?.[0] || '/images/bottle-placeholder.png',
-          categoryName: isJaba ? 'Happy Hour Jaba Juice' : (p.categoryName || 'Pernod Ricard Spirits'),
+          image: p.image || '/images/bottle-placeholder.png',
+          categoryName: p.categoryName || (isJaba ? 'Happy Hour Jaba Juice' : 'Pernod Ricard Spirits'),
           brandName: p.brandName || (isJaba ? 'Jaba' : 'Pernod Ricard'),
           priceLine,
           prkCostIncVat: prkCost,
-          inStock: p.inStock ?? true,
-          stockQuantity: p.stockQuantity ?? 100,
+          inStock: p.inStock && p.stockQuantity > 0,
+          stockQuantity: p.stockQuantity,
           tierPrices: {
             T1: { unitPriceIncVat: t1.unitPriceIncVat, unitPriceExVat: t1.unitPriceExVat, band: isJaba ? '11–50 btls' : '6–24 btls' },
             T2: { unitPriceIncVat: t2.unitPriceIncVat, unitPriceExVat: t2.unitPriceExVat, band: isJaba ? '51–100 btls' : '25–72 btls' },
@@ -81,6 +75,7 @@ export async function GET(request) {
       templates,
     });
   } catch (error) {
+    console.error('Trade catalog route error:', error);
     return NextResponse.json({ error: error.message || 'Failed to load catalog' }, { status: 500 });
   }
 }

@@ -7,7 +7,7 @@ export async function GET(request) {
   if (denied) return denied;
 
   try {
-    const quotes = getTradeQuotes();
+    const quotes = await getTradeQuotes();
     return NextResponse.json({ success: true, quotes });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -20,7 +20,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const quote = createTradeQuote(body);
+    const quote = await createTradeQuote(body);
     return NextResponse.json({ success: true, quote });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

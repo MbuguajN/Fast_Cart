@@ -204,7 +204,11 @@ export default function AdminLayout({ children }) {
               </svg>
             </button>
             <h1 className="text-sm font-semibold text-gray-800 capitalize hidden md:block">
-              {pathname === '/admin' ? 'Dashboard' : pathname.split('/').pop()}
+              {pathname === '/admin'
+                ? 'Dashboard'
+                : pathname.startsWith('/admin/trade/accounts/')
+                  ? 'Trade Account'
+                  : pathname.split('/').pop()}
             </h1>
           </div>
           <div className="flex items-center gap-2">

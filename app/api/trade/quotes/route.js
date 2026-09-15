@@ -5,7 +5,7 @@ import { getTradeQuotes } from '@/lib/trade/trade-store.js';
 export async function GET(request) {
   try {
     const auth = await requireTradeAuth(request);
-    const quotes = getTradeQuotes({ accountId: auth.account.id });
+    const quotes = await getTradeQuotes({ accountId: auth.account.id });
 
     return NextResponse.json({
       success: true,

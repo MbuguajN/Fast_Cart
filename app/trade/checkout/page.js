@@ -138,6 +138,18 @@ export default function TradeCheckoutPage() {
               })}
             </div>
 
+            {selectedAddress?.city && selectedAddress.city.toLowerCase() !== 'nairobi' && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-2xl text-xs flex items-start gap-2">
+                <span className="text-base">📍</span>
+                <div>
+                  <strong>Regional Fulfillment ({selectedAddress.city}):</strong>
+                  <p className="mt-0.5 text-[11px] text-blue-700">
+                    Deliveries outside Nairobi are fulfilled via regional road freight or secured courier. Delivery schedule and freight cost will be confirmed directly by your Account Specialist prior to dispatch.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <label className="block text-xs font-bold uppercase text-gray-700 mb-1">

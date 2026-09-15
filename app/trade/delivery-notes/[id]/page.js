@@ -135,12 +135,19 @@ export default function TradeDeliveryNotePage() {
             <span>✉️ Email Manifest</span>
           </button>
 
+          <a
+            href={`/api/trade/delivery-notes/${id}/pdf`}
+            className="px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2"
+          >
+            <span>⬇️ Download PDF</span>
+          </a>
+
           <button
             type="button"
             onClick={handlePrint}
             className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-2"
           >
-            <span>🖨️ Print Delivery Note</span>
+            <span>🖨️ Print</span>
           </button>
         </div>
       </div>

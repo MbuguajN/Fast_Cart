@@ -6,7 +6,7 @@ export async function GET(request, { params }) {
   try {
     const auth = await requireTradeAuth(request);
     const { id } = await params;
-    const order = getTradeOrderById(id);
+    const order = await getTradeOrderById(id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
@@ -32,7 +32,7 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const { action } = body;
 
-    const order = getTradeOrderById(id);
+    const order = await getTradeOrderById(id);
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }

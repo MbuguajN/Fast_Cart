@@ -15,6 +15,7 @@ export default function TradeApplyPage() {
     kraPin: '',
     licenceNo: '',
     licenceExpiry: '',
+    licenceDocumentUrl: '',
     deliveryAddress: '',
     city: 'Nairobi',
     deliveryWindow: '08:00 - 12:00 EAT',
@@ -25,6 +26,34 @@ export default function TradeApplyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
+  const [uploadingLicence, setUploadingLicence] = useState(false);
+  const [licenceFileName, setLicenceFileName] = useState('');
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingLicence(true);
+      setError(null);
+      const data = new FormData();
+      data.append('file', file);
+
+      const res = await fetch('/api/trade/apply/upload', {
+        method: 'POST',
+        body: data,
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+      setFormData((prev) => ({ ...prev, licenceDocumentUrl: result.fileUrl }));
+      setLicenceFileName(result.fileName || file.name);
+    } catch (err) {
+      setError(err.message || 'Failed to upload document');
+    } finally {
+      setUploadingLicence(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -241,6 +270,44 @@ export default function TradeApplyPage() {
                 onChange={(e) => setFormData({ ...formData, licenceExpiry: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white focus:ring-2 focus:ring-[#840038]"
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                Upload Licence / Registration Document (PDF or Photo)
+              </label>
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="file"
+                  accept=".pdf,image/png,image/jpeg,image/webp"
+                  onChange={handleFileUpload}
+                  disabled={uploadingLicence}
+                  className="text-xs file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#840038] file:text-white hover:file:bg-[#6b002c] cursor-pointer"
+                />
+                {uploadingLicence && (
+                  <span className="text-xs text-[#840038] font-bold animate-pulse">Uploading file...</span>
+                )}
+                {formData.licenceDocumentUrl && (
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    <span>✓</span>
+                    <span className="truncate max-w-xs">{licenceFileName || 'Document Attached'}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, licenceDocumentUrl: '' }));
+                        setLicenceFileName('');
+                      }}
+                      className="ml-1 text-red-500 hover:text-red-700 font-bold text-sm"
+                      title="Remove attachment"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Upload your county liquor licence, business registration, or KRA PIN certificate to expedite 2-hour onboarding. Max 10MB.
+              </p>
             </div>
           </div>
         </div>

@@ -7,8 +7,8 @@ export async function POST(request, { params }) {
     const auth = await requireTradeAuth(request);
     const { id } = await params;
 
-    const quotes = getTradeQuotes({ accountId: auth.account.id });
-    const match = quotes.find((q) => q.id === id);
+    const quotes = await getTradeQuotes({ accountId: auth.account.id });
+    const match = quotes.find((q) => q.id === id || q.quoteNumber === id);
     if (!match) {
       return NextResponse.json({ error: 'Quote not found or unauthorized' }, { status: 404 });
     }
