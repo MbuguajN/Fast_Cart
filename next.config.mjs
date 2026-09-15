@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production';
+
 const nextConfig = {
   // Next 16 blocks cross-origin requests to /_next/* dev resources, allowing
   // only the host the dev server was started with (`localhost`). Under WSL2 the
@@ -45,10 +47,14 @@ const nextConfig = {
           value: [
             "default-src 'self'",
             "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co https://player.vimeo.com",
-            "style-src 'self' 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://myhappyhour.co.ke https://logo.clearbit.com https://i.vimeocdn.com https://f.vimeocdn.com https://*.tile.openstreetmap.org",
             "font-src 'self' https://fonts.gstatic.com",
-            "connect-src 'self' https://api.paystack.co https://vimeo.com https://*.vimeo.com https://*.vimeocdn.com",
+            // In dev: add ws://localhost:* for Turbopack HMR and http://localhost:* for RSC fetches.
+            // In production: only allow the configured external APIs.
+            isDev
+              ? "connect-src 'self' http://localhost:* ws://localhost:* https://api.paystack.co https://vimeo.com https://*.vimeo.com https://*.vimeocdn.com"
+              : "connect-src 'self' https://api.paystack.co https://vimeo.com https://*.vimeo.com https://*.vimeocdn.com",
             "frame-src 'self' https://checkout.paystack.com https://player.vimeo.com https://vimeo.com",
           ].join('; '),
         },

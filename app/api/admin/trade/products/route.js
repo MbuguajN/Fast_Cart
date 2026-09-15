@@ -4,8 +4,8 @@ import { adminGuard } from '@/lib/api-guard';
 
 /**
  * Admin API for B2B trade product catalog and live inventory management.
- * Provides live stock levels, PRK cost configuration, tier price calculations,
- * and inventory audit trail via PostgreSQL.
+ * Provides live stock levels, landed cost breakdown, tier price calculations
+ * with override support, and inventory audit trail via PostgreSQL.
  */
 export async function GET(request) {
   const denied = await adminGuard(request);
@@ -59,7 +59,7 @@ export async function PUT(request) {
 
   try {
     const body = await request.json();
-    const { sku, stockQuantity, prkCostIncVat, reason } = body;
+    const { sku, stockQuantity, reason, priceOverride } = body;
 
     if (!sku) {
       return NextResponse.json({ error: 'Product SKU or ID is required' }, { status: 400 });
@@ -73,24 +73,42 @@ export async function PUT(request) {
       }
       patch.stockQuantity = qty;
     }
+    if (reason) patch.reason = reason;
 
-    if (prkCostIncVat !== undefined) {
-      const cost = Number(prkCostIncVat);
-      if (isNaN(cost) || cost < 0) {
-        return NextResponse.json({ error: 'Cost must be a non-negative number' }, { status: 400 });
+    let updated = null;
+    if (Object.keys(patch).length > 0) {
+      updated = await updateTradeProduct(sku, patch, 'Admin');
+    }
+
+    let overrideResult = null;
+    if (priceOverride) {
+      const { setPriceOverride, clearPriceOverride } = await import('@/lib/trade/trade-costing.js');
+      const prodRes = await getTradeProducts({ search: sku });
+      const product = prodRes.find((p) => p.sku === sku) || prodRes[0];
+      if (!product) {
+        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
       }
-      patch.prkCostIncVat = cost;
+      if (priceOverride.price === null || priceOverride.price === undefined) {
+        await clearPriceOverride({ productId: product.id, tierKey: priceOverride.tierKey });
+      } else {
+        try {
+          overrideResult = await setPriceOverride({
+            productId: product.id,
+            tierKey: priceOverride.tierKey,
+            priceLine: product.priceLine,
+            price: priceOverride.price,
+            updatedBy: 'Admin',
+          });
+        } catch (overrideError) {
+          return NextResponse.json({ error: overrideError.message }, { status: 400 });
+        }
+      }
     }
-
-    if (reason) {
-      patch.reason = reason;
-    }
-
-    const updated = await updateTradeProduct(sku, patch, 'Admin');
 
     return NextResponse.json({
       success: true,
       product: updated,
+      override: overrideResult,
       message: `Product ${sku} successfully updated`,
     });
   } catch (error) {

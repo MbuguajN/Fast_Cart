@@ -11,7 +11,7 @@ export async function GET(request) {
     const accountId = searchParams.get('accountId');
     const segment = searchParams.get('segment');
 
-    const report = getTradeMarginReport({ accountId, segment });
+    const report = await getTradeMarginReport({ accountId, segment });
 
     return NextResponse.json({
       success: true,

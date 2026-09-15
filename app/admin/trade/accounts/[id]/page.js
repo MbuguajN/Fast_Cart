@@ -62,7 +62,9 @@ export default function AdminTradeAccountDetailPage() {
     );
   }
 
-  const { account, statement, orders, quotes } = data;
+  const { account, statement } = data;
+  const orders = Array.isArray(data.orders) ? data.orders : [];
+  const quotes = Array.isArray(data.quotes) ? data.quotes : [];
 
   return (
     <div className="space-y-6">

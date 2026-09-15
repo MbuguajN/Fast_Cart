@@ -52,10 +52,9 @@ export default function AdminTradePage() {
   const [newAccountForm, setNewAccountForm] = useState(emptyNewAccount);
   const [creatingAccount, setCreatingAccount] = useState(false);
 
-  // Cost Importer State
-  const [csvText, setCsvText] = useState(`jameson-original-750ml,2900\nchivas-regal-12yo-750ml,3700\nthe-glenlivet-12yo-750ml,5500\nbeefeater-london-dry-gin-750ml,2000`);
-  const [diffResult, setDiffResult] = useState(null);
-  const [importing, setImporting] = useState(false);
+  // Stock Receipt Modal
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [receiptForm, setReceiptForm] = useState({ supplierName: '', reference: '', freightCost: 0, clearingCost: 0, handlingCost: 0, notes: '', lines: [] });
 
   // Products / Trade Catalogue & Live Stock
   const [products, setProducts] = useState([]);
@@ -63,9 +62,7 @@ export default function AdminTradePage() {
   const [productSearch, setProductSearch] = useState('');
   const [productLineFilter, setProductLineFilter] = useState('all');
   const [missingCostOnly, setMissingCostOnly] = useState(false);
-  const [editingSku, setEditingSku] = useState(null);
-  const [editingCostValue, setEditingCostValue] = useState('');
-  const [savingCost, setSavingCost] = useState(false);
+
 
   // Live Inventory Stock Editing & Logs
   const [editingStockSku, setEditingStockSku] = useState(null);
@@ -177,56 +174,22 @@ export default function AdminTradePage() {
     }
   };
 
-  const handleCostImport = async (isDryRun) => {
+  const handlePriceOverride = async (sku, tierKey, price) => {
     try {
-      setImporting(true);
-      const res = await fetch('/api/admin/trade/costs', {
-        method: 'POST',
+      const res = await fetch('/api/admin/trade/products', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ csvContent: csvText, isDryRun }),
+        body: JSON.stringify({ sku, priceOverride: { tierKey, price } }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Import failed');
-
-      setDiffResult(data.result);
-      if (!isDryRun) {
-        showToast(`Successfully applied ${data.result.totalParsed} PRK cost updates!`);
-        loadAllAdminData();
-      } else {
-        showToast('Dry-run diff calculated! Review tier impacts below.');
-      }
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const handleSaveCost = async (sku) => {
-    const cost = Number(editingCostValue);
-    if (!Number.isFinite(cost) || cost <= 0) {
-      showToast('Enter a valid cost greater than 0', 'error');
-      return;
-    }
-    try {
-      setSavingCost(true);
-      const res = await fetch('/api/admin/trade/costs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ csvContent: `${sku},${cost}`, isDryRun: false }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save cost');
-
-      showToast(`Cost updated for ${sku}!`);
-      setEditingSku(null);
+      if (!res.ok) throw new Error(data.error || 'Failed to save override');
+      showToast(price === null ? `Override cleared for ${sku} ${tierKey}` : `Price override saved for ${sku} ${tierKey}`);
       loadAllAdminData();
     } catch (err) {
       showToast(err.message, 'error');
-    } finally {
-      setSavingCost(false);
     }
   };
+
 
   const handleSaveStock = async (sku) => {
     const qty = parseInt(editingStockValue, 10);
@@ -500,9 +463,8 @@ export default function AdminTradePage() {
             { id: 'orders', label: 'Orders &amp; Logistics', count: orders.length },
             { id: 'accounts', label: 'Accounts', badge: pendingAccountsCount > 0 ? pendingAccountsCount : null, badgeColor: 'bg-amber-500 text-white' },
             { id: 'quotes', label: 'Quotes', count: quotes.length },
-            { id: 'products', label: 'Live Stock &amp; Catalog', badge: productCounts.outOfStock > 0 ? `${productCounts.outOfStock} OOS` : (productCounts.lowStock > 0 ? `${productCounts.lowStock} Low` : null), badgeColor: 'bg-amber-500 text-white' },
+            { id: 'products', label: 'Stock &amp; Costing', badge: productCounts.outOfStock > 0 ? `${productCounts.outOfStock} OOS` : (productCounts.lowStock > 0 ? `${productCounts.lowStock} Low` : null), badgeColor: 'bg-amber-500 text-white' },
             { id: 'margins', label: 'Margin Audit', badge: subFloorCount > 0 ? `${subFloorCount} Alert` : null, badgeColor: 'bg-red-500 text-white' },
-            { id: 'costs', label: 'PRK Costs' },
             { id: 'config', label: 'Tiers &amp; Rules' },
           ].map((tab) => (
             <button
@@ -1238,6 +1200,13 @@ export default function AdminTradePage() {
                 <input type="checkbox" checked={missingCostOnly} onChange={(e) => setMissingCostOnly(e.target.checked)} />
                 Missing cost only
               </label>
+              <button
+                type="button"
+                onClick={() => setShowReceiptModal(true)}
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs shrink-0"
+              >
+                + Receive Stock
+              </button>
             </div>
             <span className="text-xs text-gray-500 font-medium shrink-0">
               Showing <strong>{filteredProducts.length}</strong> of {productCounts.total} · {productCounts.missingCost} spirits without a cost on file
@@ -1341,65 +1310,53 @@ export default function AdminTradePage() {
                     {p.priceLine === 'spirits' ? (
                       <>
                         <td className="py-3 px-3 text-right">
-                          {editingSku === p.sku ? (
-                            <input
-                              type="number"
-                              autoFocus
-                              value={editingCostValue}
-                              onChange={(e) => setEditingCostValue(e.target.value)}
-                              className="w-24 px-2 py-1 border border-gray-300 rounded-lg text-right font-mono text-xs"
-                            />
+                          {p.hasExplicitCost ? (
+                            <div>
+                              <div className="font-bold text-gray-900">KES {p.prkCostIncVat?.toLocaleString()}</div>
+                              {p.productCostIncVat !== null && (
+                                <div className="text-[10px] text-gray-400">
+                                  {p.productCostIncVat?.toLocaleString()} + {p.logisticsCostIncVat?.toLocaleString() || 0} lgx
+                                </div>
+                              )}
+                            </div>
                           ) : (
-                            <span className={`font-mono font-bold ${p.hasExplicitCost ? 'text-gray-900' : 'text-amber-600'}`}>
-                              KES {Math.round(p.cost).toLocaleString()}
-                              {!p.hasExplicitCost && <span className="ml-1 text-[9px] font-sans font-bold uppercase">(est.)</span>}
-                            </span>
+                            <span className="text-[10px] font-bold uppercase text-amber-600">No cost — receive stock</span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-right font-mono text-gray-600 text-[11px]">
-                          {p.tierPrices?.T1} / {p.tierPrices?.T2} / {p.tierPrices?.T3}
+                        <td className="py-3 px-3 text-right">
+                          {p.tierPrices && Object.entries(p.tierPrices).map(([tierKey, t]) => (
+                            <div key={tierKey} className="flex items-center justify-end gap-1.5 mb-0.5">
+                              <span className="text-[10px] text-gray-400 w-6">{tierKey}</span>
+                              <input
+                                type="number"
+                                defaultValue={t.actual}
+                                onBlur={(e) => {
+                                  const value = Number(e.target.value);
+                                  if (value === t.suggested && t.overrideApplied) {
+                                    handlePriceOverride(p.sku, tierKey, null);
+                                  } else if (value !== t.actual) {
+                                    handlePriceOverride(p.sku, tierKey, value);
+                                  }
+                                }}
+                                className={`w-24 px-1.5 py-0.5 text-right text-[11px] rounded-md border ${
+                                  t.status === 'blocked' ? 'border-red-400 bg-red-50' :
+                                  t.status === 'flagged' ? 'border-amber-400 bg-amber-50' :
+                                  t.overrideApplied ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                                }`}
+                              />
+                              {t.overrideApplied && <span className="text-[9px] text-blue-400" title={`Suggested: ${t.suggested}`}>✎</span>}
+                            </div>
+                          ))}
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap space-x-1">
-                          {editingSku === p.sku ? (
-                            <>
-                              <button
-                                type="button"
-                                disabled={savingCost}
-                                onClick={() => handleSaveCost(p.sku)}
-                                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#840038] hover:bg-[#6b002c] text-white mr-1.5"
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingSku(null)}
-                                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
-                              >
-                                Cancel
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setEditingSku(p.sku);
-                                  setEditingCostValue(String(Math.round(p.cost)));
-                                }}
-                                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800"
-                              >
-                                Edit Cost
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleViewStockLogs(p)}
-                                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
-                                title="View inventory audit trail"
-                              >
-                                History
-                              </button>
-                            </>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleViewStockLogs(p)}
+                            className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+                            title="View inventory audit trail"
+                          >
+                            History
+                          </button>
                         </td>
                       </>
                     ) : (
@@ -1431,80 +1388,6 @@ export default function AdminTradePage() {
         </div>
       )}
 
-      {/* TAB 4: PRK COST IMPORTER */}
-      {activeTab === 'costs' && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-6 space-y-5">
-          <div>
-            <h2 className="text-base font-bold text-gray-900">PRK CSV Cost Importer &amp; Tier Engine Diff</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Live input cost changes automatically update Tier 1 (+10%), Tier 2 (+7%), and Tier 3 (+4%) wholesale prices.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 space-y-3">
-              <label className="block text-xs font-bold text-gray-700">
-                Paste CSV Lines (SKU, Cost Inc-VAT)
-              </label>
-              <textarea
-                rows={8}
-                value={csvText}
-                onChange={(e) => setCsvText(e.target.value)}
-                className="w-full p-3 font-mono text-xs border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#840038] outline-hidden"
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={importing}
-                  onClick={() => handleCostImport(true)}
-                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold"
-                >
-                  🔍 Preview Dry-Run Diff
-                </button>
-                <button
-                  type="button"
-                  disabled={importing}
-                  onClick={() => handleCostImport(false)}
-                  className="flex-1 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold shadow-2xs"
-                >
-                  ✓ Commit Cost Update
-                </button>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 bg-gray-50 p-4 rounded-2xl border border-gray-200 overflow-x-auto">
-              <span className="text-[10px] font-bold uppercase text-gray-500 block mb-2">
-                {diffResult ? `${diffResult.totalParsed} SKUs in Diff Preview` : 'Click "Preview Dry-Run Diff" to evaluate tier price impacts'}
-              </span>
-
-              {diffResult?.diffs && (
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="text-[10px] uppercase text-gray-500 border-b border-gray-200">
-                      <th className="pb-2">SKU</th>
-                      <th className="pb-2 text-right">Old Cost</th>
-                      <th className="pb-2 text-right">New Cost</th>
-                      <th className="pb-2 text-center">New T1 / T2 / T3</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 font-mono">
-                    {diffResult.diffs.map((d, idx) => (
-                      <tr key={idx}>
-                        <td className="py-2 font-bold text-gray-800">{d.sku}</td>
-                        <td className="py-2 text-right text-gray-500">KES {d.oldCost}</td>
-                        <td className="py-2 text-right font-bold text-[#840038]">KES {d.newCost}</td>
-                        <td className="py-2 text-center text-gray-900 font-sans text-[11px]">
-                          T1: <strong>KES {d.newTierPrices.T1}</strong> · T2: <strong>KES {d.newTierPrices.T2}</strong> · T3: <strong>KES {d.newTierPrices.T3}</strong>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* TAB 5: TIER & RULES CONFIG */}
       {activeTab === 'config' && config && (
@@ -2207,6 +2090,86 @@ export default function AdminTradePage() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showReceiptModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-bold text-gray-900">Receive Stock</h3>
+            <p className="text-xs text-gray-500">Record a goods-received batch. Landed cost is computed from product cost + your share of freight, clearing &amp; handling.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Supplier name" value={receiptForm.supplierName}
+                onChange={(e) => setReceiptForm({ ...receiptForm, supplierName: e.target.value })}
+                className="col-span-2 px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input placeholder="Reference / invoice #" value={receiptForm.reference}
+                onChange={(e) => setReceiptForm({ ...receiptForm, reference: e.target.value })}
+                className="col-span-2 px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input type="number" placeholder="Freight cost (KES)" value={receiptForm.freightCost}
+                onChange={(e) => setReceiptForm({ ...receiptForm, freightCost: Number(e.target.value) })}
+                className="px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input type="number" placeholder="Clearing cost (KES)" value={receiptForm.clearingCost}
+                onChange={(e) => setReceiptForm({ ...receiptForm, clearingCost: Number(e.target.value) })}
+                className="px-3 py-2 rounded-xl text-xs border border-gray-200" />
+              <input type="number" placeholder="Handling cost (KES)" value={receiptForm.handlingCost}
+                onChange={(e) => setReceiptForm({ ...receiptForm, handlingCost: Number(e.target.value) })}
+                className="col-span-2 px-3 py-2 rounded-xl text-xs border border-gray-200" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-700">Lines</span>
+                <button type="button" onClick={() => setReceiptForm({ ...receiptForm, lines: [...receiptForm.lines, { sku: '', cases: 1, unitProductCost: 0 }] })}
+                  className="text-xs font-bold text-[#840038]">+ Add line</button>
+              </div>
+              {receiptForm.lines.length === 0 && (
+                <p className="text-xs text-gray-400 italic">Click &quot;+ Add line&quot; to add products to this receipt.</p>
+              )}
+              {receiptForm.lines.map((line, idx) => (
+                <div key={idx} className="grid grid-cols-4 gap-2">
+                  <select value={line.sku} onChange={(e) => {
+                    const lines = [...receiptForm.lines]; lines[idx] = { ...line, sku: e.target.value };
+                    setReceiptForm({ ...receiptForm, lines });
+                  }} className="col-span-2 px-2 py-1.5 rounded-lg text-xs border border-gray-200">
+                    <option value="">Select product...</option>
+                    {filteredProducts.map((p) => <option key={p.sku} value={p.sku}>{p.name}</option>)}
+                  </select>
+                  <input type="number" placeholder="Cases" value={line.cases} onChange={(e) => {
+                    const lines = [...receiptForm.lines]; lines[idx] = { ...line, cases: Number(e.target.value) };
+                    setReceiptForm({ ...receiptForm, lines });
+                  }} className="px-2 py-1.5 rounded-lg text-xs border border-gray-200" />
+                  <input type="number" placeholder="Cost/bottle" value={line.unitProductCost} onChange={(e) => {
+                    const lines = [...receiptForm.lines]; lines[idx] = { ...line, unitProductCost: Number(e.target.value) };
+                    setReceiptForm({ ...receiptForm, lines });
+                  }} className="px-2 py-1.5 rounded-lg text-xs border border-gray-200" />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button type="button" onClick={() => { setShowReceiptModal(false); setReceiptForm({ supplierName: '', reference: '', freightCost: 0, clearingCost: 0, handlingCost: 0, notes: '', lines: [] }); }}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-700">Cancel</button>
+              <button type="button" onClick={async () => {
+                try {
+                  if (receiptForm.lines.length === 0 || receiptForm.lines.some((l) => !l.sku)) {
+                    showToast('Please add at least one line with a product selected.', 'error'); return;
+                  }
+                  const res = await fetch('/api/admin/trade/stock-receipts', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(receiptForm),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || 'Failed to record receipt');
+                  showToast(`Receipt ${data.receipt.receiptNumber} recorded — ${data.receipt.lines.length} line(s) updated.`);
+                  setShowReceiptModal(false);
+                  setReceiptForm({ supplierName: '', reference: '', freightCost: 0, clearingCost: 0, handlingCost: 0, notes: '', lines: [] });
+                  loadAllAdminData();
+                } catch (err) {
+                  showToast(err.message, 'error');
+                }
+              }} className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#840038] text-white">Record Receipt</button>
             </div>
           </div>
         </div>

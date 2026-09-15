@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireTradeOr401 } from '@/lib/api-guard';
-import { calculateTradeOrderPricing } from '@/lib/trade/pricing-engine.js';
+import { calculateTradeOrderPricingWithOverrides } from '@/lib/trade/trade-costing.js';
 import { readTradeStore } from '@/lib/trade/trade-store.js';
 import { resolveTradeLineItems } from '@/lib/trade/trade-catalog.js';
 import { stripEconomics } from '@/lib/trade/pricing-visibility.js';
@@ -39,7 +39,7 @@ export async function POST(request) {
       return NextResponse.json({ error: resolutionError.message }, { status: 400 });
     }
 
-    const pricing = calculateTradeOrderPricing({
+    const pricing = await calculateTradeOrderPricingWithOverrides({
       items: resolvedItems,
       tierOverride: account?.tierOverride || null,
       isNairobi: deliveryAddress?.city ? /nairobi/i.test(deliveryAddress.city) : isNairobi,
