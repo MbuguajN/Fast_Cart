@@ -355,9 +355,9 @@ export default function PhoneEntry({ onSubmit }) {
               <footer className="text-center w-full">
                 <p className="text-center leading-relaxed" style={{ fontFamily: 'Montserrat, sans-serif', color: '#574145', fontSize: 'clamp(10px, 2.8vw, 12px)', maxWidth: '280px', margin: '0 auto' }}>
                   By continuing, you agree to our{' '}
-                  <a className="font-semibold hover:underline" style={{ color: '#840037' }} href="#">Terms of Service</a>
+                  <a className="font-semibold hover:underline" style={{ color: '#840037' }} href="/terms-conditions" target="_blank" rel="noopener noreferrer">Terms of Service</a>
                   {' '}&amp;{' '}
-                  <a className="font-semibold hover:underline" style={{ color: '#840037' }} href="#">Privacy Policy</a>
+                  <a className="font-semibold hover:underline" style={{ color: '#840037' }} href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                 </p>
               </footer>
             </>

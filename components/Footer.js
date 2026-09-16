@@ -99,7 +99,7 @@ export default function Footer() {
               <div className="flex items-center gap-2.5">
                 {/* Facebook */}
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/people/Happy-Hour/61574423863244/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -112,7 +112,7 @@ export default function Footer() {
 
                 {/* Instagram */}
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/myhappyhour254/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -125,7 +125,7 @@ export default function Footer() {
 
                 {/* TikTok */}
                 <a
-                  href="https://tiktok.com"
+                  href="https://www.tiktok.com/@myhappyhour254"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="TikTok"
@@ -138,7 +138,7 @@ export default function Footer() {
 
                 {/* X / Twitter */}
                 <a
-                  href="https://x.com"
+                  href="https://x.com/myhappyhour254"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="X"

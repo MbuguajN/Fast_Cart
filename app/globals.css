@@ -195,3 +195,98 @@ input, textarea, select {
     transition: none !important;
   }
 }
+
+/* Typography and Legal Policy Styling for Rendered Content */
+.wp-content-rendered h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+}
+
+@media (min-width: 640px) {
+  .wp-content-rendered h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.wp-content-rendered h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.wp-content-rendered h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.wp-content-rendered p {
+  color: #4b5563;
+  line-height: 1.7;
+  margin-bottom: 0.875rem;
+}
+
+.wp-content-rendered ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.wp-content-rendered ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.wp-content-rendered li {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 0.35rem;
+}
+
+.wp-content-rendered strong,
+.wp-content-rendered b {
+  font-weight: 600;
+  color: #111827;
+}
+
+.wp-content-rendered a {
+  color: #840037;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.wp-content-rendered a:hover {
+  color: #5b0024;
+}
+
+.wp-content-rendered table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.875rem;
+}
+
+.wp-content-rendered th,
+.wp-content-rendered td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.wp-content-rendered th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #111827;
+}
+
