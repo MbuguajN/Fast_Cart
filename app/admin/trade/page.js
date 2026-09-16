@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { IconDoc, IconTruck, IconDownload, IconMail, IconFolder } from '@/components/trade/TradeIcons.js';
 
 export default function AdminTradePage() {
   const [activeTab, setActiveTab] = useState('accounts');
@@ -133,7 +134,9 @@ export default function AdminTradePage() {
   };
 
   useEffect(() => {
-    loadAllAdminData();
+    queueMicrotask(() => {
+      loadAllAdminData();
+    });
   }, []);
 
   const handleUpdateStatus = async (accountId, status) => {
@@ -783,10 +786,11 @@ export default function AdminTradePage() {
                           <a
                             href={`/api/admin/trade/orders/${o.id}/invoice`}
                             download
-                            className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-md inline-block"
+                            className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-md inline-flex items-center gap-1"
                             title="Download Tax Invoice PDF"
                           >
-                            📄 Inv
+                            <IconDoc className="w-3.5 h-3.5" />
+                            <span>Inv</span>
                           </a>
 
                           {/* Delivery Note PDF */}
@@ -794,10 +798,11 @@ export default function AdminTradePage() {
                             <a
                               href={`/api/admin/trade/orders/${o.id}/delivery-note`}
                               download
-                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-md inline-block"
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-md inline-flex items-center gap-1"
                               title="Download Goods Received Note (GRN) / Delivery Note PDF"
                             >
-                              📋 GRN
+                              <IconTruck className="w-3.5 h-3.5" />
+                              <span>GRN</span>
                             </a>
                           )}
 
@@ -1201,10 +1206,11 @@ export default function AdminTradePage() {
                         <a
                           href={`/api/admin/trade/quotes/${q.id}/pdf`}
                           download
-                          className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold inline-block"
+                          className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold inline-flex items-center gap-1"
                           title="Download Quote PDF"
                         >
-                          📄 PDF
+                          <IconDownload className="w-3.5 h-3.5 text-gray-600" />
+                          <span>PDF</span>
                         </a>
                         <button
                           type="button"
@@ -1213,10 +1219,11 @@ export default function AdminTradePage() {
                             setEmailQuoteRecipient(acc?.users?.[0]?.email || acc?.billingAddress?.email || '');
                             setEmailQuoteModal(q);
                           }}
-                          className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold"
+                          className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold inline-flex items-center gap-1"
                           title="Email Quote PDF to customer"
                         >
-                          ✉️ Email
+                          <IconMail className="w-3.5 h-3.5 text-[#840038]" />
+                          <span>Email</span>
                         </button>
                         <button
                           onClick={() => setSelectedQuote(q)}
@@ -2278,14 +2285,14 @@ export default function AdminTradePage() {
                 setImportError(null);
               }} />
               {importFile ? (
-                <div>
-                  <div className="text-2xl mb-1">📄</div>
+                <div className="flex flex-col items-center">
+                  <div className="mb-1 text-emerald-700"><IconDoc className="w-8 h-8 mx-auto" /></div>
                   <div className="text-xs font-bold text-emerald-700">{importFile.name}</div>
                   <div className="text-[10px] text-gray-400">{(importFile.size / 1024).toFixed(1)} KB — click to change</div>
                 </div>
               ) : (
-                <div>
-                  <div className="text-2xl mb-1">📁</div>
+                <div className="flex flex-col items-center">
+                  <div className="mb-1 text-gray-400"><IconFolder className="w-8 h-8 mx-auto" /></div>
                   <div className="text-xs font-semibold text-gray-600">Click to select CSV file</div>
                   <div className="text-[10px] text-gray-400 mt-0.5">or drag &amp; drop — .csv files only</div>
                 </div>

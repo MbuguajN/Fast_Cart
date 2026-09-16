@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconMail, IconTruck, IconDoc } from '@/components/trade/TradeIcons.js';
 
 const TRACKING_STEPS = [
   { key: 'confirmed', label: 'Order Confirmed', desc: 'Order verified & inventory allocated' },
@@ -159,23 +160,26 @@ export default function SingleTradeOrderDetailPage() {
           <button
             type="button"
             onClick={() => setEmailModalOpen(true)}
-            className="px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+            className="px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2"
           >
-            <span>✉️ Email Invoice</span>
+            <IconMail className="w-4 h-4 text-[#840038]" />
+            <span>Email Invoice</span>
           </button>
 
           <Link
             href={`/trade/delivery-notes/${order.id}`}
-            className="px-3.5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-1.5"
+            className="px-3.5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-2"
           >
-            <span>🚚 Delivery Note (GRN)</span>
+            <IconTruck className="w-4 h-4" />
+            <span>Delivery Note (GRN)</span>
           </Link>
 
           <Link
             href={`/trade/invoices/${order.id}`}
-            className="px-4 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-2"
           >
-            <span>📄 VAT Tax Invoice</span>
+            <IconDoc className="w-4 h-4" />
+            <span>VAT Tax Invoice</span>
           </Link>
         </div>
       </div>

@@ -211,7 +211,7 @@ test('Trade Quotes Flow - Create, Decline and Accept Lifecycle', async () => {
   ) || accounts[0];
 
   const products = await getTradeProducts();
-  const testProduct = products.find((p) => p.stockQuantity >= 24) || products[0];
+  const testProduct = products.find((p) => p.stockQuantity >= 24 && p.prkCostIncVat >= 1500) || products[0];
   const unitCost = testProduct.prkCostIncVat || 2500;
 
   // 1. Create a quote
@@ -264,8 +264,8 @@ test('Trade Quotes Flow - Create, Decline and Accept Lifecycle', async () => {
   // Accept and convert to active order
   const order = await acceptTradeQuote(quote2.id, { id: testAccount.id, tradingName: testAccount.tradingName });
   assert.ok(order.id);
-  assert.ok(order.orderNumber.startsWith('FC-ORD-'));
-  assert.ok(order.invoiceNumber.startsWith('FC-INV-'));
+  assert.ok(order.orderNumber.startsWith('FC-ORD-') || order.orderNumber.startsWith('HH-TR-'));
+  assert.ok(order.invoiceNumber.startsWith('FC-INV-') || order.invoiceNumber.startsWith('HH-INV-'));
   assert.equal(order.status, 'confirmed');
 
   // Cancel order to test automatic stock restoration

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconPrint } from '@/components/trade/TradeIcons.js';
 
 export default function TradeReportsPage() {
   const router = useRouter();
@@ -96,9 +97,10 @@ export default function TradeReportsPage() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="px-4 py-2 bg-[#840038] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow"
+            className="px-4 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1.5 transition-all"
           >
-            🖨️ Export PDF / Print
+            <IconPrint className="w-4 h-4" />
+            <span>Export PDF / Print</span>
           </button>
         </div>
       </div>

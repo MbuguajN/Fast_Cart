@@ -10,8 +10,84 @@ const KPI_CONFIGS = [
   { key: 'outOfStock', label: 'Out of Stock', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> },
 ];
 
+const STORE_ACTIONS = [
+  {
+    label: 'B2B Trade Hub',
+    href: '/admin/trade',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+      </svg>
+    ),
+    desc: 'Orders, Margin Audit & Accounts',
+    color: 'bg-blue-50 text-blue-600',
+    tag: 'B2B Portal',
+  },
+  {
+    label: 'Products & Pricing',
+    href: '/admin/products',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+      </svg>
+    ),
+    desc: 'Catalogue and stock levels',
+    color: 'bg-emerald-50 text-emerald-600',
+    tag: 'Inventory',
+  },
+  {
+    label: 'Delivery Zones',
+    href: '/admin/zones',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+      </svg>
+    ),
+    desc: 'Configure shipping regions',
+    color: 'bg-purple-50 text-purple-600',
+    tag: 'Logistics',
+  },
+  {
+    label: 'Homepage Banners',
+    href: '/admin/slides',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+      </svg>
+    ),
+    desc: 'Edit marketing slides',
+    color: 'bg-amber-50 text-amber-600',
+    tag: 'Marketing',
+  },
+  {
+    label: 'Customers',
+    href: '/admin/customers',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      </svg>
+    ),
+    desc: 'Retail user management',
+    color: 'bg-cyan-50 text-cyan-600',
+    tag: 'CRM',
+  },
+  {
+    label: 'System Settings',
+    href: '/admin/settings',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+      </svg>
+    ),
+    desc: 'Global store configuration',
+    color: 'bg-gray-50 text-gray-600',
+    tag: 'Config',
+  },
+];
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('actions');
   const [stats, setStats] = useState({});
   const [orders, setOrders] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
@@ -70,7 +146,15 @@ export default function AdminDashboard() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => {
+      if (active) loadDashboard();
+    });
+    return () => {
+      active = false;
+    };
+  }, [loadDashboard]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -153,10 +237,10 @@ export default function AdminDashboard() {
   }, [orders]);
 
   const tabs = [
+    { id: 'actions', label: 'Quick Actions', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg> },
     { id: 'overview', label: 'Overview', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg> },
     { id: 'analytics', label: 'Analytics Insights', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg> },
     { id: 'alerts', label: 'Stock Alerts', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>, badge: lowStock.length },
-    { id: 'actions', label: 'Quick Actions', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg> },
   ];
 
   return (
@@ -230,6 +314,117 @@ export default function AdminDashboard() {
       {/* Main Content Area */}
       <div className="flex-1 space-y-6 min-w-0">
         
+        {/* TAB: ACTIONS (QUICK ACTIONS) */}
+        {activeTab === 'actions' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {KPI_CONFIGS.map((kpi) => (
+                <div
+                  key={kpi.key}
+                  className="relative overflow-hidden rounded-2xl p-5 bg-white border border-gray-100 shadow-xs hover:shadow-md transition-shadow group"
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity flex items-center justify-center -mr-2 -mt-2 text-[#840038]">
+                    {kpi.icon}
+                  </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-gray-50 p-1.5 rounded-lg text-gray-400">{kpi.icon}</span>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{kpi.label}</p>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-black text-gray-900 mt-2">
+                    {loading ? '—' : kpi.isCurrency 
+                      ? `KES ${(stats[kpi.key] || 0).toLocaleString()}` 
+                      : (stats[kpi.key] ?? '0')}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                <div>
+                  <h2 className="text-sm font-black text-gray-900 uppercase tracking-wider">Store Management & Quick Actions</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Direct portals to manage B2B trade, catalog, delivery zones, marketing, and settings.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Admin Live
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {STORE_ACTIONS.map((action) => (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    className="flex flex-col p-5 rounded-2xl border border-gray-100 hover:border-[#840038] hover:shadow-md transition-all group relative overflow-hidden bg-white"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${action.color} group-hover:scale-105 transition-transform`}>
+                        {action.icon}
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
+                        {action.tag}
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-900 group-hover:text-[#840038] transition-colors">{action.label}</p>
+                    <p className="text-xs text-gray-500 font-medium mt-1">{action.desc}</p>
+                    <div className="mt-4 flex items-center text-xs font-bold text-[#840038] opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Open management</span>
+                      <svg className="w-3.5 h-3.5 ml-1 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Operational Jump Hub */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Live Storefront</p>
+                  <p className="text-sm font-black text-gray-900 mt-1">Customer Portal</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">Preview products & retail checkout</p>
+                </div>
+                <Link href="/" target="_blank" className="px-3 py-2 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                  Visit ↗
+                </Link>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">B2B Trade Portal</p>
+                  <p className="text-sm font-black text-gray-900 mt-1">Wholesale Ordering</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">Browse client trade ordering pad</p>
+                </div>
+                <Link href="/trade" target="_blank" className="px-3 py-2 rounded-xl text-xs font-bold text-[#840038] bg-pink-50 hover:bg-pink-100 transition-colors">
+                  Open ↗
+                </Link>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">WooCommerce Sync</p>
+                  <p className="text-sm font-black text-gray-900 mt-1">Catalog Sync</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">Refresh products, stock & media</p>
+                </div>
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  className="px-3 py-2 rounded-xl text-xs font-bold text-[#840038] bg-pink-50 hover:bg-pink-100 transition-colors disabled:opacity-50"
+                >
+                  {syncing ? 'Syncing...' : 'Sync Now'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* TAB: OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-6 animate-in fade-in duration-300">
@@ -256,201 +451,187 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            {/* Recent Orders Overview */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
-              <div className="flex items-center justify-between p-5 border-b border-gray-50">
-                <h2 className="text-sm font-bold text-gray-900">Recent Transactions</h2>
-                <Link href="/admin/trade" className="text-xs font-bold text-[#840038] hover:underline bg-pink-50 px-3 py-1.5 rounded-lg">View Trade Hub →</Link>
+            {/* Quick Actions Shortcuts Bar */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#840038]" />
+                  <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider">Quick Action Shortcuts</h3>
+                </div>
+                <button
+                  onClick={() => setActiveTab('actions')}
+                  className="text-xs font-bold text-[#840038] hover:underline"
+                >
+                  View All Shortcuts →
+                </button>
               </div>
-              {recentOrders.length === 0 ? (
-                <div className="p-8 text-center text-gray-400 text-sm">No recent orders found</div>
-              ) : (
-                <div className="divide-y divide-gray-50">
-                  {recentOrders.map((order) => {
-                    const sc = statusColor(order.status);
-                    return (
-                      <div key={order.id} className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center">
-                            <span className="text-[10px] text-gray-400 font-bold">ORD</span>
-                            <span className="text-xs font-black text-gray-800">#{order.orderNumber || order.id}</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-gray-900">{order.accountName || order.billing?.first_name || 'Trade Client'}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
-                                style={{ backgroundColor: sc.bg, color: sc.text }}>
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc.dot }} />
-                                {order.status}
-                              </span>
-                              <span className="text-[10px] text-gray-400 font-medium">
-                                {new Date(order.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-black text-gray-900">KES {parseFloat(order.grandTotal || order.total || 0).toLocaleString()}</p>
-                          <p className="text-[10px] text-gray-500 font-medium">{order.items?.length || 0} lines</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB: ANALYTICS */}
-        {activeTab === 'analytics' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
-              <div>
-                <h2 className="text-base font-black text-gray-900">Performance Analytics</h2>
-                <p className="text-xs text-gray-500 mt-1">Revenue and volume insights based on recent trade orders.</p>
-              </div>
-
-              {!analytics ? (
-                <div className="py-20 text-center text-sm text-gray-400 font-medium">Not enough data to generate analytics.</div>
-              ) : (
-                <div className="mt-8 space-y-10">
-                  
-                  {/* Revenue Chart */}
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#840038]"></span>
-                      7-Day Revenue Trend
-                    </h3>
-                    <div className="h-48 flex items-end gap-2 sm:gap-4 mt-6">
-                      {analytics.revenueByDay.map((day, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
-                          {/* Tooltip */}
-                          <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none z-10">
-                            KES {day.val.toLocaleString()}
-                          </div>
-                          
-                          {/* Bar */}
-                          <div className="w-full bg-pink-50 rounded-t-lg relative overflow-hidden flex items-end justify-center h-full">
-                            <div 
-                              className="w-full bg-[#840038] rounded-t-lg transition-all duration-700 ease-out" 
-                              style={{ height: day.height, minHeight: day.val > 0 ? '4px' : '0' }}
-                            ></div>
-                          </div>
-                          <span className="text-[10px] font-bold text-gray-500">{day.date}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Top Selling Products */}
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      Top Selling Products (Volume)
-                    </h3>
-                    <div className="space-y-4">
-                      {analytics.topProducts.map((prod, i) => (
-                        <div key={i} className="flex items-center gap-4">
-                          <div className="w-6 text-xs font-black text-gray-400 text-right">#{i + 1}</div>
-                          <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-1.5">
-                              <span className="font-bold text-gray-800">{prod.name}</span>
-                              <span className="font-bold text-[#840038]">{prod.qty} units</span>
-                            </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                              <div className="bg-emerald-500 h-full rounded-full transition-all duration-700" style={{ width: prod.width }}></div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB: ALERTS */}
-        {activeTab === 'alerts' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
-              <div className="p-5 border-b border-gray-50 flex items-center justify-between bg-amber-50/30">
-                <div>
-                  <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> Low Stock Alerts
-                  </h2>
-                  <p className="text-[10px] text-gray-500 mt-0.5">Products with 5 or fewer units in stock.</p>
-                </div>
-                <Link href="/admin/products" className="text-xs font-bold text-amber-700 hover:underline bg-amber-100 px-3 py-1.5 rounded-lg">Manage Stock →</Link>
-              </div>
-              
-              {lowStock.length === 0 ? (
-                <div className="px-5 pb-5">
-                  <p className="text-xs text-gray-400 italic py-10 text-center font-medium">All products are well stocked 🎉</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-50">
-                  {lowStock.map((p) => (
-                    <div key={p.wcId || p.sku} className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
-                      {p.image ? (
-                        <img src={p.image} alt="" className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-xs" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center">
-                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-900 truncate">{p.name}</p>
-                        <p className="text-xs text-gray-400 font-medium">{p.categoryName || 'Uncategorized'} · SKU: {p.sku}</p>
-                      </div>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-black text-xs shadow-xs"
-                        style={{
-                          backgroundColor: (p.stockQuantity || 0) <= 2 ? '#fef2f2' : '#fffbeb',
-                          color: (p.stockQuantity || 0) <= 2 ? '#dc2626' : '#d97706',
-                          border: `1px solid ${(p.stockQuantity || 0) <= 2 ? '#fecaca' : '#fde68a'}`
-                        }}>
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: (p.stockQuantity || 0) <= 2 ? '#dc2626' : '#d97706' }} />
-                        {p.stockQuantity ?? 0} units left
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB: ACTIONS */}
-        {activeTab === 'actions' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
-              <h2 className="text-sm font-black text-gray-900 mb-6 uppercase tracking-wider">Store Management</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {[
-                  { label: 'B2B Trade Hub', href: '/admin/trade', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>, desc: 'Orders, Margin Audit & Accounts', color: 'bg-blue-50 text-blue-600' },
-                  { label: 'Products & Pricing', href: '/admin/products', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" /></svg>, desc: 'Catalogue and stock levels', color: 'bg-emerald-50 text-emerald-600' },
-                  { label: 'Delivery Zones', href: '/admin/zones', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>, desc: 'Configure shipping regions', color: 'bg-purple-50 text-purple-600' },
-                  { label: 'Homepage Banners', href: '/admin/slides', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>, desc: 'Edit marketing slides', color: 'bg-amber-50 text-amber-600' },
-                  { label: 'Customers', href: '/admin/customers', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>, desc: 'Retail user management', color: 'bg-cyan-50 text-cyan-600' },
-                  { label: 'System Settings', href: '/admin/settings', icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>, desc: 'Global store configuration', color: 'bg-gray-50 text-gray-600' },
-                ].map((action) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {STORE_ACTIONS.map((action) => (
                   <Link
                     key={action.href}
                     href={action.href}
-                    className="flex flex-col p-5 rounded-2xl border border-gray-100 hover:border-[#840038] hover:shadow-md transition-all group"
+                    className="flex flex-col items-center text-center p-3 rounded-xl border border-gray-100 hover:border-[#840038] hover:shadow-xs transition-all group bg-gray-50/50 hover:bg-white"
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${action.color} group-hover:scale-110 transition-transform`}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-2 ${action.color} group-hover:scale-110 transition-transform`}>
                       {action.icon}
                     </div>
-                    <p className="text-sm font-bold text-gray-900 group-hover:text-[#840038] transition-colors">{action.label}</p>
-                    <p className="text-xs text-gray-500 font-medium mt-1">{action.desc}</p>
+                    <p className="text-xs font-bold text-gray-900 group-hover:text-[#840038] transition-colors leading-snug line-clamp-1">{action.label}</p>
+                    <span className="text-[10px] text-gray-400 font-medium mt-0.5">{action.tag}</span>
                   </Link>
                 ))}
               </div>
             </div>
+
+            {/* Balanced 2-Column Split: Recent Transactions (Left 2/3) & Stock Alerts / Store Status (Right 1/3) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Left Column: Recent Transactions */}
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden flex flex-col">
+                <div className="flex items-center justify-between p-5 border-b border-gray-50">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-gray-900">Recent Transactions</h2>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                      {recentOrders.length}
+                    </span>
+                  </div>
+                  <Link href="/admin/trade" className="text-xs font-bold text-[#840038] hover:underline bg-pink-50 px-3 py-1.5 rounded-lg">
+                    View Trade Hub →
+                  </Link>
+                </div>
+                {recentOrders.length === 0 ? (
+                  <div className="p-12 text-center text-gray-400 text-sm flex-1 flex items-center justify-center">
+                    No recent orders found
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-50 flex-1">
+                    {recentOrders.map((order) => {
+                      const sc = statusColor(order.status);
+                      return (
+                        <div key={order.id} className="p-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0 pr-4">
+                            <div className="w-10 h-10 shrink-0 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center">
+                              <span className="text-[9px] text-gray-400 font-bold">ORD</span>
+                              <span className="text-xs font-black text-gray-800">#{order.orderNumber || order.id}</span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-gray-900 truncate">
+                                {order.accountName || order.billing?.first_name || 'Trade Client'}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span
+                                  className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                                  style={{ backgroundColor: sc.bg, color: sc.text }}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc.dot }} />
+                                  {order.status}
+                                </span>
+                                <span className="text-[10px] text-gray-400 font-medium">
+                                  {new Date(order.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-black text-gray-900">
+                              KES {parseFloat(order.grandTotal || order.total || 0).toLocaleString()}
+                            </p>
+                            <p className="text-[10px] text-gray-500 font-medium">{order.items?.length || 0} lines</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Low Stock Alerts & Store Insights */}
+              <div className="space-y-6">
+                
+                {/* Low Stock Alerts Preview Widget */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+                  <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-amber-50/20">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <h3 className="text-xs font-bold text-gray-900">Low Stock Alerts</h3>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('alerts')}
+                      className="text-[11px] font-bold text-amber-700 hover:underline"
+                    >
+                      View All ({lowStock.length}) →
+                    </button>
+                  </div>
+
+                  {lowStock.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-gray-400 italic">
+                      All products are well stocked 🎉
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-50">
+                      {lowStock.slice(0, 5).map((p) => (
+                        <div key={p.wcId || p.sku} className="p-3.5 flex items-center gap-3 hover:bg-gray-50/50 transition-colors">
+                          {p.image ? (
+                            <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center shrink-0">
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                              </svg>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-gray-900 truncate">{p.name}</p>
+                            <p className="text-[10px] text-gray-400 font-medium">SKU: {p.sku}</p>
+                          </div>
+                          <span
+                            className="text-[10px] font-black px-2 py-0.5 rounded-md shrink-0"
+                            style={{
+                              backgroundColor: (p.stockQuantity || 0) <= 2 ? '#fef2f2' : '#fffbeb',
+                              color: (p.stockQuantity || 0) <= 2 ? '#dc2626' : '#d97706',
+                              border: `1px solid ${(p.stockQuantity || 0) <= 2 ? '#fecaca' : '#fde68a'}`,
+                            }}
+                          >
+                            {p.stockQuantity ?? 0} left
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Performance & Sync Status */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Store Status</span>
+                    <button
+                      onClick={() => setActiveTab('analytics')}
+                      className="text-[11px] font-bold text-[#840038] hover:underline"
+                    >
+                      Analytics →
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50">
+                      <span className="text-gray-500 font-medium">Total Catalog Size</span>
+                      <span className="font-bold text-gray-900">{stats.products || 0} Products</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50">
+                      <span className="text-gray-500 font-medium">Recent Orders</span>
+                      <span className="font-bold text-gray-900">{orders.length} orders</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs py-1.5">
+                      <span className="text-gray-500 font-medium">Items Out of Stock</span>
+                      <span className="font-bold text-rose-600">{stats.outOfStock || 0} items</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
         )}
 

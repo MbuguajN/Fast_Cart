@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconTruck, IconDoc } from '@/components/trade/TradeIcons.js';
 
 export default function TradeInvoicesListPage() {
   const router = useRouter();
@@ -103,16 +104,18 @@ export default function TradeInvoicesListPage() {
                     <div className="flex items-center justify-end gap-1.5">
                       <Link
                         href={`/trade/delivery-notes/${o.id}`}
-                        className="px-2.5 py-1 bg-gray-100 hover:bg-emerald-50 hover:text-emerald-800 text-gray-700 rounded-lg text-[10px] font-bold transition-all"
+                        className="px-2.5 py-1.5 bg-gray-100 hover:bg-emerald-50 hover:text-emerald-800 text-gray-700 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5"
                         title="View Delivery Note"
                       >
-                        🚚 GRN
+                        <IconTruck className="w-3.5 h-3.5" />
+                        <span>GRN</span>
                       </Link>
                       <Link
                         href={`/trade/invoices/${o.id}`}
-                        className="px-3 py-1 bg-[#840038] text-white hover:bg-[#6b002c] rounded-lg text-[10px] font-bold transition-all shadow-xs"
+                        className="px-3 py-1.5 bg-[#840038] text-white hover:bg-[#6b002c] rounded-lg text-[10px] font-bold transition-all shadow-xs flex items-center gap-1.5"
                       >
-                        📄 Tax Invoice
+                        <IconDoc className="w-3.5 h-3.5" />
+                        <span>Tax Invoice</span>
                       </Link>
                     </div>
                   </td>

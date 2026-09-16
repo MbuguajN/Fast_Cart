@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconDownload, IconMail } from '@/components/trade/TradeIcons.js';
 
 export default function TradeQuotesPage() {
   const router = useRouter();
@@ -31,28 +32,25 @@ export default function TradeQuotesPage() {
   const [requestNotes, setRequestNotes] = useState('');
   const [submittingRequest, setSubmittingRequest] = useState(false);
 
-  const fetchQuotes = () => {
+  const fetchQuotes = React.useCallback(() => {
     fetch('/api/trade/quotes')
       .then((r) => r.json())
       .then((data) => {
         if (data.success) setQuotes(data.quotes || []);
       })
       .finally(() => setLoadingQuotes(false));
-  };
+  }, []);
 
-  const fetchCatalog = () => {
+  const fetchCatalog = React.useCallback(() => {
     fetch('/api/trade/catalog')
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
           setCatalogProducts(data.products || []);
-          if (data.products?.length > 0 && !requestItems[0].sku) {
-            setRequestItems([{ sku: data.products[0].sku, quantity: 12 }]);
-          }
         }
       })
       .catch(console.error);
-  };
+  }, []);
 
   useEffect(() => {
     if (!loading && (!user || !account)) {
@@ -61,10 +59,12 @@ export default function TradeQuotesPage() {
     }
 
     if (user && account) {
-      fetchQuotes();
-      fetchCatalog();
+      queueMicrotask(() => {
+        fetchQuotes();
+        fetchCatalog();
+      });
     }
-  }, [user, account, loading, router]);
+  }, [user, account, loading, router, fetchQuotes, fetchCatalog]);
 
   const handleAcceptQuote = async (quoteId) => {
     try {
@@ -298,7 +298,8 @@ export default function TradeQuotesPage() {
                         className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center gap-1.5"
                         title="Download official PDF quotation"
                       >
-                        <span>📄</span> PDF
+                        <IconDownload className="w-3.5 h-3.5 text-gray-600" />
+                        <span>Download PDF</span>
                       </a>
 
                       {/* Email Quote */}
@@ -311,7 +312,8 @@ export default function TradeQuotesPage() {
                         className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center gap-1.5"
                         title="Email quotation PDF to yourself or accounting"
                       >
-                        <span>✉️</span> Email
+                        <IconMail className="w-3.5 h-3.5 text-[#840038]" />
+                        <span>Email</span>
                       </button>
 
                       {/* Decline Quote */}

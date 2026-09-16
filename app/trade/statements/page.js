@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconPrint } from '@/components/trade/TradeIcons.js';
 
 export default function TradeStatementPage() {
   const router = useRouter();
@@ -68,7 +69,8 @@ export default function TradeStatementPage() {
             onClick={handlePrint}
             className="px-5 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-2"
           >
-            <span>🖨️ Print Statement</span>
+            <IconPrint className="w-4 h-4" />
+            <span>Print Statement</span>
           </button>
         </div>
       </div>

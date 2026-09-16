@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconMail, IconDownload, IconPrint } from '@/components/trade/TradeIcons.js';
 
 export default function TradeVatInvoicePage() {
   const { id } = useParams();
@@ -136,14 +137,16 @@ export default function TradeVatInvoicePage() {
             onClick={() => setEmailModalOpen(true)}
             className="px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2"
           >
-            <span>✉️ Email Invoice</span>
+            <IconMail className="w-4 h-4 text-[#840038]" />
+            <span>Email Invoice</span>
           </button>
 
           <a
             href={`/api/trade/invoices/${id}/pdf`}
             className="px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2"
           >
-            <span>⬇️ Download PDF</span>
+            <IconDownload className="w-4 h-4 text-gray-600" />
+            <span>Download PDF</span>
           </a>
 
           <button
@@ -151,7 +154,8 @@ export default function TradeVatInvoicePage() {
             onClick={handlePrint}
             className="px-5 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow transition-all flex items-center gap-2"
           >
-            <span>🖨️ Print</span>
+            <IconPrint className="w-4 h-4" />
+            <span>Print</span>
           </button>
         </div>
       </div>

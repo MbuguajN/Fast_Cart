@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
+import { IconDownload } from '@/components/trade/TradeIcons.js';
 
 export default function TradeOrdersPage() {
   const router = useRouter();
@@ -98,7 +99,8 @@ export default function TradeOrdersPage() {
             onClick={exportCsv}
             className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold uppercase text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-1.5"
           >
-            <span>📥 Export CSV</span>
+            <IconDownload className="w-4 h-4 text-gray-600" />
+            <span>Export CSV</span>
           </button>
           <Link
             href="/trade/order-pad"
