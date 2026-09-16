@@ -49,7 +49,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const rl = await rateLimitRequest(request, { maxRequests: 10, windowMs: 300000 });
+  const rl = await rateLimitRequest(request, { maxRequests: 30, windowMs: 300000 });
   if (!rl.allowed) {
     return NextResponse.json({ error: 'Too many sign-in attempts. Please wait.' }, { status: 429 });
   }
@@ -67,7 +67,7 @@ export async function POST(request) {
     // Per-seat throttle, so rotating IPs cannot brute force one account.
     const identityLimit = await rateLimitIdentity(identifier.trim().toLowerCase(), {
       scope: 'trade-login',
-      maxRequests: 10,
+      maxRequests: 30,
       windowMs: 900000,
     });
     if (!identityLimit.allowed) {
