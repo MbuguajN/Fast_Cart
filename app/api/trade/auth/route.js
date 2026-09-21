@@ -77,7 +77,7 @@ export async function POST(request) {
       );
     }
 
-    const user = findTradeUserByIdentifier(identifier);
+    const user = await findTradeUserByIdentifier(identifier);
 
     // Unknown seat and wrong password are indistinguishable to the caller —
     // trade emails are guessable from any corporate website, and a distinct
@@ -107,7 +107,7 @@ export async function POST(request) {
       return invalidCredentials();
     }
 
-    const authRes = getTradeUserWithAccount(user.id);
+    const authRes = await getTradeUserWithAccount(user.id);
     if (!authRes?.account) {
       return NextResponse.json({ error: 'Associated trade account not found' }, { status: 404 });
     }

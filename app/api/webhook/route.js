@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { upsertProduct, mutateStore, updateStore } from '@/lib/data-store';
-import { wcFetch, WC_WEBHOOK_SECRET } from '@/lib/wc-config';
-import { extractStockDelta, isDeletion } from '@/lib/catalog-delta';
+import { WC_WEBHOOK_SECRET } from '@/lib/wc-config';
 import { recordEvent, EVENT_KINDS, OUTCOMES } from '@/lib/event-log';
+import { recordWebhookEvent, markWebhookProcessed, markWebhookFailed } from '@/lib/webhook-store.js';
+import { processWebhookPayload } from '@/lib/webhook-processor.js';
 import crypto from 'crypto';
 
 /**
@@ -37,16 +37,6 @@ function verifyWebhook(request, rawBody) {
   }
 }
 
-async function fetchProduct(productId) {
-  try {
-    const { data } = await wcFetch(`products/${productId}`);
-    return data;
-  } catch (err) {
-    console.error(`Webhook product fetch failed for ${productId}:`, err.message);
-    return null;
-  }
-}
-
 export async function POST(request) {
   // Raw bytes first — the signature is computed over exactly what was sent.
   let rawBody;
@@ -72,99 +62,27 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
+  const topic = request.headers.get('x-wc-webhook-topic') || '';
+
+  // Recorded before processing starts, so a crash mid-processing still
+  // leaves a 'pending'-turned-'failed' row the reconcile cron can retry,
+  // instead of the event only ever existing in this request's memory.
+  let eventId = null;
   try {
-    const topic = request.headers.get('x-wc-webhook-topic') || '';
-
-    if (topic.startsWith('product.')) {
-      const productId = body.id;
-      if (!productId) {
-        return NextResponse.json({ received: true });
-      }
-
-      if (isDeletion(topic)) {
-        await mutateStore((store) => {
-          store.products = (store.products || []).filter((p) => p.wcId !== productId);
-        });
-        recordEvent({ kind: EVENT_KINDS.WEBHOOK, outcome: OUTCOMES.OK, detail: `product ${productId} deleted` });
-        return NextResponse.json({ received: true });
-      }
-
-      // The webhook payload already carries price and stock, so a stock
-      // change lands in the cache without a round trip back to the origin.
-      // Only fall back to fetching when the payload is too thin to use.
-      const delta = extractStockDelta(body);
-      if (delta && delta.stockStatus) {
-        upsertProduct(delta);
-        recordEvent({
-          kind: EVENT_KINDS.WEBHOOK,
-          outcome: OUTCOMES.OK,
-          detail: `product ${productId} -> ${delta.stockStatus}`,
-        });
-        updateStore({ lastSync: new Date().toISOString() });
-        return NextResponse.json({ received: true });
-      }
-
-      const wcProduct = await fetchProduct(productId);
-      if (!wcProduct) {
-        recordEvent({
-          kind: EVENT_KINDS.WEBHOOK,
-          outcome: OUTCOMES.FAIL,
-          detail: `product ${productId} refetch failed`,
-        });
-        return NextResponse.json({ received: true });
-      }
-
-      const primaryImage = wcProduct.images?.[0]?.src || '';
-      const brandAttr = wcProduct.attributes?.find(
-        (a) => a.name.toLowerCase() === 'brand' || a.name.toLowerCase() === 'manufacturer'
-      );
-      const brandName = brandAttr?.options?.[0] || '';
-
-      upsertProduct({
-        wcId: wcProduct.id,
-        name: wcProduct.name,
-        slug: wcProduct.slug,
-        price: wcProduct.price || wcProduct.regular_price,
-        regularPrice: wcProduct.regular_price,
-        salePrice: wcProduct.sale_price,
-        stockStatus: wcProduct.stock_status,
-        stockQuantity: wcProduct.stock_quantity,
-        image: primaryImage,
-        images: (wcProduct.images || []).map((img) => img.src),
-        categoryId: wcProduct.categories?.[0]?.id || null,
-        categoryName: wcProduct.categories?.[0]?.name || '',
-        brandId: brandName ? `brand_${brandName.toLowerCase().replace(/\s+/g, '_')}` : null,
-        brandName,
-        description: wcProduct.description || '',
-        shortDescription: wcProduct.short_description || '',
-        sku: wcProduct.sku || '',
-        weight: wcProduct.weight || '',
-      });
-
-      recordEvent({ kind: EVENT_KINDS.WEBHOOK, outcome: OUTCOMES.OK, detail: `product ${productId} refetched` });
-      updateStore({ lastSync: new Date().toISOString() });
-    }
-
-    if (topic === 'order.created' || topic === 'order.completed') {
-      // Under the store lock: two concurrent orders would otherwise each read
-      // the same starting quantity and one decrement would be lost.
-      await mutateStore((store) => {
-        for (const item of body.line_items || []) {
-          const prod = store.products.find((p) => p.wcId === item.product_id);
-          if (prod && prod.stockQuantity !== null) {
-            prod.stockQuantity = Math.max(0, (prod.stockQuantity || 0) - (item.quantity || 1));
-            if (prod.stockQuantity <= 0) {
-              prod.stockStatus = 'outofstock';
-            }
-          }
-        }
-      });
-      updateStore({ lastSync: new Date().toISOString() });
-    }
-
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('Webhook processing error');
-    return NextResponse.json({ received: true });
+    eventId = await recordWebhookEvent(topic, body);
+  } catch (err) {
+    console.error('Webhook buffer write failed (processing continues without retry coverage):', err.message);
   }
+
+  try {
+    await processWebhookPayload(topic, body);
+    if (eventId) await markWebhookProcessed(eventId).catch(() => {});
+  } catch (error) {
+    console.error('Webhook processing error:', error.message);
+    if (eventId) await markWebhookFailed(eventId, error).catch(() => {});
+  }
+
+  // Always acknowledged, matching the original behaviour — WooCommerce's
+  // own retry is not relied on; the reconcile cron's retry pass is.
+  return NextResponse.json({ received: true });
 }

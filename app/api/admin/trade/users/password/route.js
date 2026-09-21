@@ -35,7 +35,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'A user identifier is required' }, { status: 400 });
     }
 
-    const user = findTradeUserByIdentifier(identifier);
+    const user = await findTradeUserByIdentifier(identifier);
     if (!user) {
       return NextResponse.json({ error: 'Trade user not found' }, { status: 404 });
     }

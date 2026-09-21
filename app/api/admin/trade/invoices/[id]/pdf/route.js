@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    const account = getTradeAccountById(order.accountId);
+    const account = await getTradeAccountById(order.accountId);
     const invoice = generateTradeInvoiceDocument(order, account);
     const pdf = await renderInvoicePdf(invoice);
 

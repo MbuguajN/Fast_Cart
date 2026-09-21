@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Delivery note not found' }, { status: 404 });
     }
 
-    const account = getTradeAccountById(order.accountId);
+    const account = await getTradeAccountById(order.accountId);
     const deliveryNote = generateTradeDeliveryNote(order, account);
     const pdf = await renderDeliveryNotePdf(deliveryNote);
 

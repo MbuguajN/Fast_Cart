@@ -24,7 +24,7 @@ export default function AdminLogin({ onLogin }) {
 
       if (data.success) {
         if (onLogin) {
-          onLogin({ name: data.name || 'Admin' });
+          onLogin({ name: data.name || 'Admin', role: data.role || 'owner' });
         } else {
           window.location.href = '/admin';
         }

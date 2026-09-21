@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
 
   try {
     const { id } = await params;
-    const account = getTradeAccountById(id);
+    const account = await getTradeAccountById(id);
     if (!account) {
       return NextResponse.json({ error: 'Account not found' }, { status: 404 });
     }

@@ -6,64 +6,79 @@ import { usePathname } from 'next/navigation';
 import AdminLogin from '@/components/AdminLogin';
 
 const NAV = [
-  { label: 'Health', href: '/admin/health', icon: (
+  { label: 'Health', href: '/admin/health', scope: 'any', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h3l2-5 4 10 2-5h5" />
     </svg>
   )},
-  { label: 'Dashboard', href: '/admin', icon: (
+  { label: 'Dashboard', href: '/admin', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   )},
-  { label: 'Orders', href: '/admin/orders', icon: (
+  { label: 'Orders', href: '/admin/orders', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
     </svg>
   )},
-  { label: 'Products', href: '/admin/products', icon: (
+  { label: 'Products', href: '/admin/products', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
     </svg>
   )},
-  { label: 'Brands', href: '/admin/brands', icon: (
+  { label: 'Brands', href: '/admin/brands', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
     </svg>
   )},
-  { label: 'Customers', href: '/admin/customers', icon: (
+  { label: 'Customers', href: '/admin/customers', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
   )},
-  { label: 'B2B Trade', href: '/admin/trade', icon: (
+  { label: 'B2B Trade', href: '/admin/trade', scope: 'trade', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
     </svg>
   )},
-  { label: 'Banners', href: '/admin/slides', icon: (
+  { label: 'Banners', href: '/admin/slides', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
   )},
-  { label: 'Delivery Zones', href: '/admin/zones', icon: (
+  { label: 'Delivery Zones', href: '/admin/zones', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   )},
-  { label: 'Settings', href: '/admin/settings', icon: (
+  { label: 'Settings', href: '/admin/settings', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   )},
+  { label: 'Staff & Access', href: '/admin/staff', scope: 'owner', icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20 8v4m2-2h-4" />
+    </svg>
+  )},
 ];
+
+function navVisibleForRole(item, role) {
+  if (item.scope === 'any') return true;
+  if (role === 'owner') return true;
+  return item.scope === role;
+}
+
+/** Where a role lands after login / when it hits a page outside its scope. */
+const HOME_FOR_ROLE = { owner: '/admin', retail: '/admin', trade: '/admin/trade' };
 
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState(null);
-  const [adminInfo, setAdminInfo] = useState({ name: 'Admin', avatar: null });
+  const [adminInfo, setAdminInfo] = useState({ name: 'Admin', avatar: null, role: 'owner' });
   const pathname = usePathname();
 
   useEffect(() => {
@@ -73,7 +88,7 @@ export default function AdminLayout({ children }) {
       .then((data) => {
         if (!ignore) {
           setAuthenticated(Boolean(data.authenticated));
-          if (data.name) setAdminInfo({ name: data.name, avatar: data.avatar || null });
+          if (data.name) setAdminInfo({ name: data.name, avatar: data.avatar || null, role: data.role || 'owner' });
         }
       })
       .catch(() => {
@@ -102,7 +117,33 @@ export default function AdminLayout({ children }) {
   }
 
   if (!authenticated) {
-    return <AdminLogin onLogin={(info) => { setAuthenticated(true); if (info?.name) setAdminInfo(info); }} />;
+    return <AdminLogin onLogin={(info) => { setAuthenticated(true); if (info?.name) setAdminInfo({ name: info.name, avatar: null, role: info.role || 'owner' }); }} />;
+  }
+
+  const role = adminInfo.role || 'owner';
+  const visibleNav = NAV.filter((item) => navVisibleForRole(item, role));
+  const activeItem = NAV.find((item) => pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href)));
+  const outOfScope = activeItem && !navVisibleForRole(activeItem, role);
+
+  if (outOfScope) {
+    const home = HOME_FOR_ROLE[role] || '/admin';
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: '#f0f2f5' }}>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 max-w-sm w-full text-center space-y-3" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+          <h1 className="text-sm font-bold text-gray-900">Not part of your area</h1>
+          <p className="text-xs text-gray-500">
+            Your account is scoped to {role === 'retail' ? 'retail' : 'trade'} admin — this page isn&apos;t available to you.
+          </p>
+          <Link
+            href={home}
+            className="inline-block px-4 py-2 rounded-xl text-xs font-bold text-white"
+            style={{ backgroundColor: '#840037' }}
+          >
+            Go to your dashboard
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -137,7 +178,7 @@ export default function AdminLayout({ children }) {
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
-          {NAV.map((item) => {
+          {visibleNav.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
             return (
               <Link
@@ -173,7 +214,7 @@ export default function AdminLayout({ children }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-white/90 truncate">{adminInfo.name}</p>
-              <p className="text-[10px] text-white/40">Store Admin</p>
+              <p className="text-[10px] text-white/40 capitalize">{role === 'owner' ? 'Owner' : `${role} admin`}</p>
             </div>
             <button
               onClick={handleLogout}

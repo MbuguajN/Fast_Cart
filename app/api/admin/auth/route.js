@@ -2,8 +2,30 @@ import { NextResponse } from 'next/server';
 import { signToken, adminCookieOptions, ADMIN_COOKIE } from '@/lib/auth';
 import { timingSafeEquals } from '@/lib/crypto-tokens';
 import { rateLimitRequest } from '@/lib/rate-limit';
+import { getAdminStaffByEmail } from '@/lib/admin-store.js';
 
 const ADMIN_ROLES = ['administrator', 'shop_manager'];
+
+/**
+ * /admin access is an explicit allowlist, not "anyone with the right
+ * credentials". Successfully authenticating (WordPress or the .env
+ * fallback) only proves who someone is — whether they're allowed in at all,
+ * and what they're scoped to, is decided by the admin_staff roster. The
+ * .env ADMIN_EMAIL is the one exception: it's the bootstrap/owner account,
+ * so it always resolves to 'owner' even with no roster row — otherwise
+ * there'd be no way to create the first roster entry.
+ */
+async function resolveStaffRole(email) {
+  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  const normalized = String(email || '').trim().toLowerCase();
+  if (adminEmail && normalized === adminEmail) {
+    return { role: 'owner', name: 'Owner' };
+  }
+
+  const staff = await getAdminStaffByEmail(normalized);
+  if (!staff || !staff.isActive) return null;
+  return { role: staff.role, name: staff.name || null };
+}
 
 async function verifyWordPressCredentials(username, password) {
   const wpUrl = process.env.WOOCOMMERCE_STORE_URL;
@@ -67,15 +89,24 @@ export async function POST(request) {
     // Strategy 1: Try WordPress REST API authentication
     const wpUser = await verifyWordPressCredentials(email, password);
     if (wpUser) {
+      const staffRole = await resolveStaffRole(wpUser.email);
+      if (!staffRole) {
+        console.error(`Admin auth: ${wpUser.email} authenticated with WordPress but is not on the staff roster.`);
+        return NextResponse.json(
+          { error: 'Your account is not provisioned for admin access. Contact the owner.' },
+          { status: 403 }
+        );
+      }
+
       const token = await signToken({
         email: wpUser.email,
-        name: wpUser.displayName,
+        name: staffRole.name || wpUser.displayName,
         avatar: wpUser.avatar,
-        role: 'admin',
+        role: staffRole.role,
         wpUserId: wpUser.id,
       });
 
-      const response = NextResponse.json({ success: true, name: wpUser.displayName });
+      const response = NextResponse.json({ success: true, name: staffRole.name || wpUser.displayName, role: staffRole.role });
       response.cookies.set(ADMIN_COOKIE, token, adminCookieOptions());
       return response;
     }
@@ -98,9 +129,11 @@ export async function POST(request) {
       const passwordMatches = timingSafeEquals(password, adminPassword);
 
       if (identifierMatches && passwordMatches) {
-        const token = await signToken({ email: adminEmail, name: 'Admin', role: 'admin' });
+        // Always the bootstrap owner — the whole point of this path is to
+        // never be lockable-out by the staff roster.
+        const token = await signToken({ email: adminEmail, name: 'Owner', role: 'owner' });
 
-        const response = NextResponse.json({ success: true, name: 'Admin' });
+        const response = NextResponse.json({ success: true, name: 'Owner', role: 'owner' });
         response.cookies.set(ADMIN_COOKIE, token, adminCookieOptions());
         return response;
       }
