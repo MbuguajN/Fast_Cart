@@ -7,7 +7,7 @@ import {
   getMarginFloorConfig,
 } from '../lib/trade/trade-costing.js';
 import { readTradeStore, updateTradeConfig } from '../lib/trade/trade-store.js';
-import { calculateTradeOrderPricing, jabaExVatToIncVat, roundCent } from '../lib/trade/pricing-engine.js';
+import { calculateTradeOrderPricing, roundKes, roundCent } from '../lib/trade/pricing-engine.js';
 import {
   attachPriceOverrides,
   calculateTradeOrderPricingWithOverrides,
@@ -177,41 +177,37 @@ test('calculateTradeOrderPricing with no matching override is unaffected', () =>
   assert.equal(withOverride.items[0].overrideApplied, false);
 });
 
-test('calculateTradeOrderPricing computes jaba override margin consistently in VAT-inc terms', () => {
+test('calculateTradeOrderPricing computes jaba override margin correctly (standardized to inc-VAT, same as spirits)', () => {
   const pricing = calculateTradeOrderPricing({
     items: [{
-      sku: 'TEST-JABA-OVR-1', priceLine: 'jaba', prkCostIncVat: 700, quantity: 60,
-      priceOverrides: { T2: 700 }, // ex-VAT override, same as landed cost inc-VAT
+      sku: 'TEST-JABA-OVR-1', priceLine: 'jaba', prkCostIncVat: 600, quantity: 60,
+      priceOverrides: { T2: 700 }, // inc-VAT override — same convention as spirits now, no ex-VAT conversion
     }],
   });
   const line = pricing.items[0];
   assert.equal(line.tierKey, 'T2'); // 60 -> jaba T2 band (51-100)
-  assert.equal(line.unitPriceExVat, 700);
-  assert.equal(line.unitPriceIncVat, 812);
-  // NOT 0 — that would be the VAT-basis bug (comparing 700 ex-VAT to 700 inc-VAT cost)
-  assert.equal(line.marginPercent, 13.79);
+  assert.equal(line.unitPriceIncVat, 700);
+  assert.equal(line.unitPriceExVat, 603.45); // roundCent(700 / 1.16)
+  assert.equal(line.marginPercent, 14.29); // (700-600)/700*100
 });
 
-test('jaba ex-VAT->inc-VAT conversion agrees between setPriceOverride and calculateTradeOrderPricing (Finding 4)', async () => {
+test('jaba price override agrees between setPriceOverride and calculateTradeOrderPricing, same as spirits (Finding 4, updated for the inc-VAT standardization)', async () => {
   await ensureTradeDb();
-  // A low landed cost keeps every override below comfortably above the
-  // margin floor, so setPriceOverride never throws 'blocked' for any of
-  // the inputs exercised here.
+  // A low landed cost keeps every override comfortably above the margin
+  // floor, so setPriceOverride never throws 'blocked' for any of the
+  // inputs exercised here.
   const landedCost = 50;
   const product = await createTestProduct({ priceLine: 'jaba', prkCostIncVat: landedCost, stockQuantity: 10 });
   try {
-    // 700 is a plain 2-decimal currency value. 100.013 is a fractional-cent
-    // (3-decimal) input: with the *old* separate implementations
-    // (pricing-engine.js rounding vat then adding vs trade-costing.js
-    // multiplying the raw value by 1.16 in one step), this value produced
-    // unitPriceIncVat = 116.01 on one path and 116.02 on the other — see
-    // Finding 4 of the 2026-09-15 final review. After routing both call
-    // sites through the single jabaExVatToIncVat() function (and rounding
-    // the ex-VAT input to cents first, the same way pricing-engine.js's
-    // `unitPriceExVat = roundCent(override)` already does), they must
-    // agree on every input.
-    for (const overrideExVat of [700, 100.013]) {
-      const expectedIncVat = jabaExVatToIncVat(roundCent(overrideExVat));
+    // 700 is a plain whole-KES value. 100.013 is a fractional-cent (3-decimal)
+    // input: setPriceOverride and calculateTradeOrderPricing's override
+    // branch must round it to the same whole-KES figure (roundKes), or the
+    // margin setPriceOverride reports and the price an order is actually
+    // charged would silently disagree — this was Finding 4's original
+    // failure mode, now against the standardized inc-VAT-for-both-price-
+    // lines convention instead of jaba's old separate ex-VAT conversion.
+    for (const overrideIncVat of [700, 100.013]) {
+      const expectedIncVat = roundKes(overrideIncVat);
       const expectedMargin = expectedIncVat > 0
         ? roundCent(((expectedIncVat - landedCost) / expectedIncVat) * 100)
         : 0;
@@ -220,25 +216,25 @@ test('jaba ex-VAT->inc-VAT conversion agrees between setPriceOverride and calcul
         productId: product.id,
         tierKey: 'T2',
         priceLine: 'jaba',
-        price: overrideExVat,
+        price: overrideIncVat,
         updatedBy: 'test',
       });
-      assert.notEqual(status, 'blocked', `override ${overrideExVat} unexpectedly blocked`);
-      assert.equal(overrideMargin, expectedMargin, `setPriceOverride margin mismatch for override ${overrideExVat}`);
+      assert.notEqual(status, 'blocked', `override ${overrideIncVat} unexpectedly blocked`);
+      assert.equal(overrideMargin, expectedMargin, `setPriceOverride margin mismatch for override ${overrideIncVat}`);
 
       const pricing = calculateTradeOrderPricing({
         items: [{
           sku: product.sku, priceLine: 'jaba', prkCostIncVat: landedCost, quantity: 60,
-          priceOverrides: { T2: overrideExVat },
+          priceOverrides: { T2: overrideIncVat },
         }],
       });
       const line = pricing.items[0];
-      assert.equal(line.unitPriceIncVat, expectedIncVat, `pricing-engine unitPriceIncVat mismatch for override ${overrideExVat}`);
-      assert.equal(line.marginPercent, expectedMargin, `pricing-engine margin mismatch for override ${overrideExVat}`);
+      assert.equal(line.unitPriceIncVat, expectedIncVat, `pricing-engine unitPriceIncVat mismatch for override ${overrideIncVat}`);
+      assert.equal(line.marginPercent, expectedMargin, `pricing-engine margin mismatch for override ${overrideIncVat}`);
 
       // The two call sites must agree with each other directly, not merely
       // with our independently-computed expectation.
-      assert.equal(overrideMargin, line.marginPercent, `the two call sites disagree for override ${overrideExVat}`);
+      assert.equal(overrideMargin, line.marginPercent, `the two call sites disagree for override ${overrideIncVat}`);
 
       await clearPriceOverride({ productId: product.id, tierKey: 'T2' });
     }

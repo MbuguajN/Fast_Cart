@@ -332,15 +332,13 @@ export default function TradeCatalogPage() {
                     <span className="text-[10px] font-mono text-gray-400 block mt-0.5">{p.sku}</span>
                   </div>
 
-                  {/* Tier Ladder Matrix — Jaba is priced and published
-                      ex-VAT (VAT added at invoice); spirits are inc-VAT.
-                      Showing Jaba's inc-VAT figure under an unlabelled
-                      "price" reads as wrong next to the 800/750/700/650/600
-                      the price list actually quotes. */}
+                  {/* Tier Ladder Matrix — standardized to inc-VAT for every
+                      price line, including Jaba, so there's one convention
+                      across the whole catalogue. */}
                   <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100 space-y-1.5 text-xs">
                     <div className="flex justify-between text-[10px] uppercase font-bold text-gray-400 border-b border-gray-200 pb-1">
                       <span>Volume Band</span>
-                      <span>Unit Price ({isJaba ? 'Ex-VAT' : 'Inc-VAT'})</span>
+                      <span>Unit Price (Inc-VAT)</span>
                     </div>
                     {p.tierPrices && Object.entries(p.tierPrices).map(([tierKey, data]) => (
                       <div key={tierKey} className="flex justify-between items-center py-0.5">
@@ -348,7 +346,7 @@ export default function TradeCatalogPage() {
                           {tierKey} ({data.band})
                         </span>
                         <span className="font-mono font-bold text-gray-900">
-                          KES {(isJaba ? data.unitPriceExVat : data.unitPriceIncVat)?.toLocaleString()}
+                          KES {data.unitPriceIncVat?.toLocaleString()}
                         </span>
                       </div>
                     ))}

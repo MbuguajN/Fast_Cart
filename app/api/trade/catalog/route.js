@@ -50,13 +50,11 @@ export async function GET(request) {
           let unitPriceIncVat = resolved.unitPriceIncVat;
           let unitPriceExVat = resolved.unitPriceExVat;
           if (override !== undefined && override !== null) {
-            if (isJaba) {
-              unitPriceExVat = Number(override);
-              unitPriceIncVat = Math.round((unitPriceExVat * 1.16) * 100) / 100;
-            } else {
-              unitPriceIncVat = Math.round(Number(override));
-              unitPriceExVat = Math.round((unitPriceIncVat / 1.16) * 100) / 100;
-            }
+            // Standardized: an override is inc-VAT for both price lines —
+            // Jaba no longer has a separate ex-VAT input convention (see
+            // pricing-engine.js's DEFAULT_PRICE_BANDS.jaba).
+            unitPriceIncVat = Math.round(Number(override));
+            unitPriceExVat = Math.round((unitPriceIncVat / 1.16) * 100) / 100;
           }
 
           tierPrices[tierKey] = { unitPriceIncVat, unitPriceExVat, band: tierBands[tierKey] };

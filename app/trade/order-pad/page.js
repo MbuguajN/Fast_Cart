@@ -335,7 +335,7 @@ export default function BulkOrderPadPage() {
                 <th className="py-3.5 px-3 font-bold text-center">Order Quantity</th>
                 <th className="py-3.5 px-3 font-bold text-center">Case Presets</th>
                 <th className="py-3.5 px-3 font-bold text-center">Qualified Tier</th>
-                <th className="py-3.5 px-4 font-bold text-right">Unit Price (spirits inc-VAT, Jaba ex-VAT)</th>
+                <th className="py-3.5 px-4 font-bold text-right">Unit Price (Inc-VAT)</th>
                 <th className="py-3.5 px-4 font-bold text-right">Line Total</th>
                 <th className="py-3.5 px-4 font-bold text-center">Tier Optimization</th>
               </tr>
@@ -376,12 +376,10 @@ export default function BulkOrderPadPage() {
                   const tierRes = {
                     ...rawTierRes,
                     unitPriceIncVat: product.tierPrices?.[rawTierRes.tierKey]?.unitPriceIncVat ?? 0,
-                    unitPriceExVat: product.tierPrices?.[rawTierRes.tierKey]?.unitPriceExVat ?? 0,
                   };
-                  // Jaba is priced and published ex-VAT (VAT added at
-                  // invoice); spirits are inc-VAT — same convention as the
-                  // catalog page and the rest of checkout.
-                  const displayUnitPrice = isJaba ? tierRes.unitPriceExVat : tierRes.unitPriceIncVat;
+                  // Standardized to inc-VAT for every price line, including
+                  // Jaba — same convention as the catalog page.
+                  const displayUnitPrice = tierRes.unitPriceIncVat;
 
                   const rawUpgradeNudge = calculateUpgradeNudge({
                     priceLine: product.priceLine,
@@ -389,7 +387,7 @@ export default function BulkOrderPadPage() {
                   });
                   const upgradeNudge = rawUpgradeNudge && (() => {
                     const nextTier = product.tierPrices?.[rawUpgradeNudge.targetTier];
-                    const nextPrice = (isJaba ? nextTier?.unitPriceExVat : nextTier?.unitPriceIncVat) ?? displayUnitPrice;
+                    const nextPrice = nextTier?.unitPriceIncVat ?? displayUnitPrice;
                     return { ...rawUpgradeNudge, savingsPerBottle: displayUnitPrice - nextPrice };
                   })();
 
@@ -530,8 +528,7 @@ export default function BulkOrderPadPage() {
                         </span>
                       </td>
 
-                      {/* Unit Price — inc-VAT for spirits, ex-VAT for Jaba
-                          (VAT added at invoice); see header note. */}
+                      {/* Unit Price — inc-VAT for every price line. */}
                       <td className="py-3 px-4 text-right font-mono font-bold text-gray-800">
                         KES {displayUnitPrice.toLocaleString()}
                       </td>

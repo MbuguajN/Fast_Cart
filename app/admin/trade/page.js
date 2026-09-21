@@ -108,6 +108,7 @@ export default function AdminTradePage() {
   const [productCounts, setProductCounts] = useState({ total: 0, spirits: 0, jaba: 0, missingCost: 0, lowStock: 0, outOfStock: 0 });
   const [productSearch, setProductSearch] = useState('');
   const [productLineFilter, setProductLineFilter] = useState('all');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
   const [missingCostOnly, setMissingCostOnly] = useState(false);
   const [showInactiveProducts, setShowInactiveProducts] = useState(false);
 
@@ -616,6 +617,10 @@ export default function AdminTradePage() {
   }, [orders, orderSearch, orderStatusFilter]);
 
   // Filtered Products
+  const productCategories = useMemo(() => {
+    return Array.from(new Set(products.map((p) => p.categoryName).filter(Boolean))).sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const q = productSearch.trim().toLowerCase();
@@ -625,11 +630,12 @@ export default function AdminTradePage() {
         (p.sku || '').toLowerCase().includes(q) ||
         (p.categoryName || '').toLowerCase().includes(q);
       const matchLine = productLineFilter === 'all' || p.priceLine === productLineFilter;
+      const matchCategory = productCategoryFilter === 'all' || p.categoryName === productCategoryFilter;
       const matchMissing = !missingCostOnly || p.hasExplicitCost === false;
       const matchActive = showInactiveProducts || p.isActive !== false;
-      return matchSearch && matchLine && matchMissing && matchActive;
+      return matchSearch && matchLine && matchCategory && matchMissing && matchActive;
     });
-  }, [products, productSearch, productLineFilter, missingCostOnly, showInactiveProducts]);
+  }, [products, productSearch, productLineFilter, productCategoryFilter, missingCostOnly, showInactiveProducts]);
 
   // Filtered Accounts
   const filteredAccounts = useMemo(() => {
@@ -1561,6 +1567,16 @@ export default function AdminTradePage() {
                 <option value="spirits">Spirits (PRK)</option>
                 <option value="jaba">Jaba (Flat Tier)</option>
               </select>
+              <select
+                value={productCategoryFilter}
+                onChange={(e) => setProductCategoryFilter(e.target.value)}
+                className="px-3 py-2 rounded-xl text-xs bg-white border border-gray-200 outline-hidden cursor-pointer text-gray-700 font-medium"
+              >
+                <option value="all">All Categories</option>
+                {productCategories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
               <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 px-2">
                 <input type="checkbox" checked={missingCostOnly} onChange={(e) => setMissingCostOnly(e.target.checked)} />
                 Missing cost only
@@ -1626,7 +1642,7 @@ export default function AdminTradePage() {
                   <th className="py-3 px-3">Price Line</th>
                   <th className="py-3 px-3 text-center">Live Stock</th>
                   <th className="py-3 px-3 text-right">Cost (Inc-VAT)</th>
-                  <th className="py-3 px-3 text-right">T1 / T2 / T3</th>
+                  <th className="py-3 px-3 text-right">Tier Prices</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -1774,10 +1790,34 @@ export default function AdminTradePage() {
                       </>
                     ) : (
                       <>
-                        <td className="py-3 px-3 text-right text-gray-400 text-[11px]" colSpan={2}>
-                          Flat tier pricing — see Tiers &amp; Rules
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-gray-900">KES {p.prkCostIncVat?.toLocaleString() ?? 0}</div>
                         </td>
-                        <td className="py-3 px-4" />
+                        <td className="py-3 px-3 text-right">
+                          {p.tierPrices && Object.entries(p.tierPrices).map(([tierKey, t]) => (
+                            <div key={tierKey} className="flex items-center justify-end gap-1.5 mb-0.5">
+                              <span className="text-[10px] text-gray-400 w-6">{tierKey}</span>
+                              <input
+                                type="number"
+                                defaultValue={t.actual}
+                                onBlur={(e) => {
+                                  const value = Number(e.target.value);
+                                  if (value === t.suggested && t.overrideApplied) {
+                                    handlePriceOverride(p.sku, tierKey, null);
+                                  } else if (value !== t.actual) {
+                                    handlePriceOverride(p.sku, tierKey, value);
+                                  }
+                                }}
+                                className={`w-24 px-1.5 py-0.5 text-right text-[11px] rounded-md border ${
+                                  t.status === 'blocked' ? 'border-red-400 bg-red-50' :
+                                  t.status === 'flagged' ? 'border-amber-400 bg-amber-50' :
+                                  t.overrideApplied ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                                }`}
+                              />
+                              {t.overrideApplied && <span className="text-[9px] text-blue-400" title={`Suggested: ${t.suggested}`}>✎</span>}
+                            </div>
+                          ))}
+                        </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
                           <ProductActionIcons
                             product={p}
