@@ -155,7 +155,7 @@ export default function BulkOrderPadPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-40 text-[#231F20]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-40 space-y-6 text-[#231F20] animate-page-enter">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-4">
         <div>
@@ -335,7 +335,7 @@ export default function BulkOrderPadPage() {
                 <th className="py-3.5 px-3 font-bold text-center">Order Quantity</th>
                 <th className="py-3.5 px-3 font-bold text-center">Case Presets</th>
                 <th className="py-3.5 px-3 font-bold text-center">Qualified Tier</th>
-                <th className="py-3.5 px-4 font-bold text-right">Unit Price (Inc-VAT)</th>
+                <th className="py-3.5 px-4 font-bold text-right">Unit Price (spirits inc-VAT, Jaba ex-VAT)</th>
                 <th className="py-3.5 px-4 font-bold text-right">Line Total</th>
                 <th className="py-3.5 px-4 font-bold text-center">Tier Optimization</th>
               </tr>
@@ -364,20 +364,36 @@ export default function BulkOrderPadPage() {
                   const isSelected = qty > 0;
                   const isJaba = product.priceLine === 'jaba';
 
-                  const tierRes = resolveLineTier({
+                  // Band matching (tierKey/eligible) doesn't depend on cost,
+                  // only the price fields do — so those are read straight
+                  // from the catalogue's public, override-corrected
+                  // tierPrices ladder instead, same as the catalog page.
+                  const rawTierRes = resolveLineTier({
                     sku: product.sku,
                     priceLine: product.priceLine,
-                    prkCostIncVat: product.prkCostIncVat,
                     quantity: qty || (isJaba ? 11 : 6),
                   });
+                  const tierRes = {
+                    ...rawTierRes,
+                    unitPriceIncVat: product.tierPrices?.[rawTierRes.tierKey]?.unitPriceIncVat ?? 0,
+                    unitPriceExVat: product.tierPrices?.[rawTierRes.tierKey]?.unitPriceExVat ?? 0,
+                  };
+                  // Jaba is priced and published ex-VAT (VAT added at
+                  // invoice); spirits are inc-VAT — same convention as the
+                  // catalog page and the rest of checkout.
+                  const displayUnitPrice = isJaba ? tierRes.unitPriceExVat : tierRes.unitPriceIncVat;
 
-                  const upgradeNudge = calculateUpgradeNudge({
+                  const rawUpgradeNudge = calculateUpgradeNudge({
                     priceLine: product.priceLine,
-                    prkCostIncVat: product.prkCostIncVat,
                     quantity: qty,
                   });
+                  const upgradeNudge = rawUpgradeNudge && (() => {
+                    const nextTier = product.tierPrices?.[rawUpgradeNudge.targetTier];
+                    const nextPrice = (isJaba ? nextTier?.unitPriceExVat : nextTier?.unitPriceIncVat) ?? displayUnitPrice;
+                    return { ...rawUpgradeNudge, savingsPerBottle: displayUnitPrice - nextPrice };
+                  })();
 
-                  const lineTotal = qty * tierRes.unitPriceIncVat;
+                  const lineTotal = qty * displayUnitPrice;
 
                   return (
                     <tr
@@ -514,9 +530,10 @@ export default function BulkOrderPadPage() {
                         </span>
                       </td>
 
-                      {/* Unit Price */}
+                      {/* Unit Price — inc-VAT for spirits, ex-VAT for Jaba
+                          (VAT added at invoice); see header note. */}
                       <td className="py-3 px-4 text-right font-mono font-bold text-gray-800">
-                        KES {tierRes.unitPriceIncVat.toLocaleString()}
+                        KES {displayUnitPrice.toLocaleString()}
                       </td>
 
                       {/* Line Total */}

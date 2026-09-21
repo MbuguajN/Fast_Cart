@@ -2,7 +2,45 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { IconDoc, IconTruck, IconDownload, IconMail, IconFolder } from '@/components/trade/TradeIcons.js';
+import { IconDoc, IconTruck, IconDownload, IconMail, IconFolder, IconPencil, IconTrash, IconClock, IconRestore } from '@/components/trade/TradeIcons.js';
+
+/**
+ * Icon-only actions for a catalogue row — swapped in for the old text
+ * buttons (Edit / History / Remove) specifically because the text labels
+ * were widening the Actions column enough to force the products table into
+ * horizontal scroll.
+ */
+function ProductActionIcons({ product, onEdit, onHistory, onToggleActive }) {
+  const isRemoved = product.isActive === false;
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <button
+        type="button"
+        onClick={() => onEdit(product)}
+        className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
+        title="Edit name, category, brand or image"
+      >
+        <IconPencil className="w-3.5 h-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onHistory(product)}
+        className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
+        title="View inventory audit trail"
+      >
+        <IconClock className="w-3.5 h-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onToggleActive(product)}
+        className={`w-7 h-7 flex items-center justify-center rounded-lg ${isRemoved ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700' : 'bg-red-50 hover:bg-red-100 text-red-700'}`}
+        title={isRemoved ? 'Restore to the live trade catalogue' : 'Remove from the live trade catalogue'}
+      >
+        {isRemoved ? <IconRestore className="w-3.5 h-3.5" /> : <IconTrash className="w-3.5 h-3.5" />}
+      </button>
+    </div>
+  );
+}
 
 export default function AdminTradePage() {
   const [activeTab, setActiveTab] = useState('accounts');
@@ -71,6 +109,7 @@ export default function AdminTradePage() {
   const [productSearch, setProductSearch] = useState('');
   const [productLineFilter, setProductLineFilter] = useState('all');
   const [missingCostOnly, setMissingCostOnly] = useState(false);
+  const [showInactiveProducts, setShowInactiveProducts] = useState(false);
 
 
   // Live Inventory Stock Editing & Logs
@@ -80,6 +119,21 @@ export default function AdminTradePage() {
   const [historyModalProduct, setHistoryModalProduct] = useState(null);
   const [productLogs, setProductLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
+
+  // Trade Catalogue Product Editor (add new / edit metadata & image) — the
+  // B2B catalogue is managed independently of retail here; the only tie to
+  // retail is an optional "borrow this image" search.
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null); // null = create mode
+  const [productForm, setProductForm] = useState({
+    sku: '', name: '', priceLine: 'spirits', categoryName: '', brand: '',
+    imageUrl: '', prkCostIncVat: '', stockQuantity: '', caseSize: '12',
+  });
+  const [savingProduct, setSavingProduct] = useState(false);
+  const [uploadingProductImage, setUploadingProductImage] = useState(false);
+  const [retailSearchQuery, setRetailSearchQuery] = useState('');
+  const [retailSearchResults, setRetailSearchResults] = useState([]);
+  const [searchingRetail, setSearchingRetail] = useState(false);
 
   // Live Orders & Dispatch
   const [orders, setOrders] = useState([]);
@@ -276,6 +330,151 @@ export default function AdminTradePage() {
     }
   };
 
+  const openCreateProductModal = () => {
+    setEditingProduct(null);
+    setProductForm({ sku: '', name: '', priceLine: 'spirits', categoryName: '', brand: '', imageUrl: '', prkCostIncVat: '', stockQuantity: '0', caseSize: '12' });
+    setRetailSearchQuery('');
+    setRetailSearchResults([]);
+    setShowProductModal(true);
+  };
+
+  const openEditProductModal = (product) => {
+    setEditingProduct(product);
+    setProductForm({
+      sku: product.sku,
+      name: product.name,
+      priceLine: product.priceLine,
+      categoryName: product.categoryName || '',
+      brand: product.brandName || '',
+      imageUrl: product.image || '',
+      prkCostIncVat: '', // not editable here — cost comes from receipts
+      stockQuantity: String(product.stockQuantity ?? 0),
+      caseSize: String(product.caseSize ?? 12),
+    });
+    setRetailSearchQuery('');
+    setRetailSearchResults([]);
+    setShowProductModal(true);
+  };
+
+  const handleProductImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingProductImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      setProductForm((prev) => ({ ...prev, imageUrl: data.url }));
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setUploadingProductImage(false);
+    }
+  };
+
+  const handleSearchRetailProducts = async (q) => {
+    setRetailSearchQuery(q);
+    if (q.trim().length < 2) {
+      setRetailSearchResults([]);
+      return;
+    }
+    setSearchingRetail(true);
+    try {
+      const res = await fetch('/api/admin/products');
+      const all = await res.json();
+      const needle = q.trim().toLowerCase();
+      const matches = (Array.isArray(all) ? all : []).filter((p) =>
+        (p.name || '').toLowerCase().includes(needle) || (p.sku || '').toLowerCase().includes(needle)
+      ).slice(0, 12);
+      setRetailSearchResults(matches);
+    } catch (err) {
+      console.error('Retail product search failed:', err);
+    } finally {
+      setSearchingRetail(false);
+    }
+  };
+
+  const handleBorrowRetailImage = (retailProduct) => {
+    const image = retailProduct.image || retailProduct.images?.[0];
+    if (!image) {
+      showToast('That retail product has no image to borrow', 'error');
+      return;
+    }
+    setProductForm((prev) => ({ ...prev, imageUrl: image }));
+    setRetailSearchResults([]);
+    setRetailSearchQuery('');
+  };
+
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    if (!productForm.sku.trim() || !productForm.name.trim()) {
+      showToast('SKU and name are required', 'error');
+      return;
+    }
+    setSavingProduct(true);
+    try {
+      if (editingProduct) {
+        const res = await fetch('/api/admin/trade/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sku: productForm.sku,
+            name: productForm.name,
+            categoryName: productForm.categoryName,
+            brand: productForm.brand,
+            imageUrl: productForm.imageUrl,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to update product');
+        showToast(`${productForm.name} updated`);
+      } else {
+        const res = await fetch('/api/admin/trade/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sku: productForm.sku.trim(),
+            name: productForm.name.trim(),
+            priceLine: productForm.priceLine,
+            categoryName: productForm.categoryName,
+            brand: productForm.brand,
+            imageUrl: productForm.imageUrl,
+            prkCostIncVat: productForm.prkCostIncVat,
+            stockQuantity: productForm.stockQuantity,
+            caseSize: productForm.caseSize,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to create product');
+        showToast(`${productForm.name} added to the trade catalogue`);
+      }
+      setShowProductModal(false);
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingProduct(false);
+    }
+  };
+
+  const handleToggleProductActive = async (product) => {
+    try {
+      const res = await fetch('/api/admin/trade/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku: product.sku, isActive: !product.isActive }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update product');
+      showToast(product.isActive ? `${product.name} removed from the trade catalogue` : `${product.name} restored to the trade catalogue`);
+      loadAllAdminData();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const handleViewStockLogs = async (product) => {
     setHistoryModalProduct(product);
     setLoadingLogs(true);
@@ -427,9 +626,10 @@ export default function AdminTradePage() {
         (p.categoryName || '').toLowerCase().includes(q);
       const matchLine = productLineFilter === 'all' || p.priceLine === productLineFilter;
       const matchMissing = !missingCostOnly || p.hasExplicitCost === false;
-      return matchSearch && matchLine && matchMissing;
+      const matchActive = showInactiveProducts || p.isActive !== false;
+      return matchSearch && matchLine && matchMissing && matchActive;
     });
-  }, [products, productSearch, productLineFilter, missingCostOnly]);
+  }, [products, productSearch, productLineFilter, missingCostOnly, showInactiveProducts]);
 
   // Filtered Accounts
   const filteredAccounts = useMemo(() => {
@@ -1365,6 +1565,10 @@ export default function AdminTradePage() {
                 <input type="checkbox" checked={missingCostOnly} onChange={(e) => setMissingCostOnly(e.target.checked)} />
                 Missing cost only
               </label>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 px-2">
+                <input type="checkbox" checked={showInactiveProducts} onChange={(e) => setShowInactiveProducts(e.target.checked)} />
+                Show removed
+              </label>
               <div className="flex items-center gap-2 shrink-0">
                 <div className="relative group">
                   <button
@@ -1393,6 +1597,13 @@ export default function AdminTradePage() {
                   className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
                 >
                   + Receive Stock
+                </button>
+                <button
+                  type="button"
+                  onClick={openCreateProductModal}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-[#840038] hover:bg-[#6b002c] text-white shadow-xs"
+                >
+                  + Add Product
                 </button>
               </div>
             </div>
@@ -1423,8 +1634,24 @@ export default function AdminTradePage() {
                 {filteredProducts.map((p) => (
                   <tr key={p.sku} className="hover:bg-gray-50/60">
                     <td className="py-3 px-4">
-                      <div className="font-bold text-gray-900">{p.name}</div>
-                      <div className="text-[10px] text-gray-400 font-mono">{p.sku} · {p.categoryName}</div>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+                          {p.image ? (
+                            <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <span className="text-gray-300 text-sm">🍾</span>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                            <span className="truncate">{p.name}</span>
+                            {p.isActive === false && (
+                              <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 bg-gray-200 text-gray-600 rounded shrink-0">Removed</span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-gray-400 font-mono">{p.sku} · {p.categoryName}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="py-3 px-3">
                       <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${p.priceLine === 'spirits' ? 'bg-pink-50 text-[#840038]' : 'bg-blue-50 text-blue-700'}`}>
@@ -1536,15 +1763,13 @@ export default function AdminTradePage() {
                             </div>
                           ))}
                         </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap space-x-1">
-                          <button
-                            type="button"
-                            onClick={() => handleViewStockLogs(p)}
-                            className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
-                            title="View inventory audit trail"
-                          >
-                            History
-                          </button>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <ProductActionIcons
+                            product={p}
+                            onEdit={openEditProductModal}
+                            onHistory={handleViewStockLogs}
+                            onToggleActive={handleToggleProductActive}
+                          />
                         </td>
                       </>
                     ) : (
@@ -1553,15 +1778,13 @@ export default function AdminTradePage() {
                           Flat tier pricing — see Tiers &amp; Rules
                         </td>
                         <td className="py-3 px-4" />
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleViewStockLogs(p)}
-                            className="px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
-                            title="View inventory audit trail"
-                          >
-                            History
-                          </button>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <ProductActionIcons
+                            product={p}
+                            onEdit={openEditProductModal}
+                            onHistory={handleViewStockLogs}
+                            onToggleActive={handleToggleProductActive}
+                          />
                         </td>
                       </>
                     )}
@@ -2257,6 +2480,195 @@ export default function AdminTradePage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {showProductModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={handleSaveProduct}
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-4 text-gray-900 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <h3 className="text-base font-bold uppercase text-gray-900">
+                {editingProduct ? 'Edit Trade Product' : 'Add Trade Product'}
+              </h3>
+              <button type="button" onClick={() => setShowProductModal(false)} className="text-gray-400 hover:text-gray-600 text-lg font-bold">
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">SKU</label>
+                <input
+                  type="text"
+                  required
+                  disabled={!!editingProduct}
+                  value={productForm.sku}
+                  onChange={(e) => setProductForm((p) => ({ ...p, sku: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200 disabled:bg-gray-50 disabled:text-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Price Line</label>
+                <select
+                  disabled={!!editingProduct}
+                  value={productForm.priceLine}
+                  onChange={(e) => setProductForm((p) => ({ ...p, priceLine: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200 disabled:bg-gray-50 disabled:text-gray-400"
+                >
+                  <option value="spirits">Spirits (PRK tiers)</option>
+                  <option value="jaba">Jaba (flat tiers)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Product Name</label>
+              <input
+                type="text"
+                required
+                value={productForm.name}
+                onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))}
+                className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Category</label>
+                <input
+                  type="text"
+                  value={productForm.categoryName}
+                  onChange={(e) => setProductForm((p) => ({ ...p, categoryName: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Brand</label>
+                <input
+                  type="text"
+                  value={productForm.brand}
+                  onChange={(e) => setProductForm((p) => ({ ...p, brand: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+                />
+              </div>
+            </div>
+
+            {!editingProduct && (
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Opening Cost (Inc-VAT)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={productForm.prkCostIncVat}
+                    onChange={(e) => setProductForm((p) => ({ ...p, prkCostIncVat: e.target.value }))}
+                    placeholder="e.g. 2000"
+                    className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Initial Stock</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={productForm.stockQuantity}
+                    onChange={(e) => setProductForm((p) => ({ ...p, stockQuantity: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Case Size</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={productForm.caseSize}
+                    onChange={(e) => setProductForm((p) => ({ ...p, caseSize: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="border-t border-gray-100 pt-3 space-y-2.5">
+              <label className="block text-[10px] font-bold uppercase text-gray-500">Product Image</label>
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 rounded-xl bg-gray-50 border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+                  {productForm.imageUrl ? (
+                    <img src={productForm.imageUrl} alt="" className="w-full h-full object-contain" />
+                  ) : (
+                    <span className="text-gray-300 text-xl">🍾</span>
+                  )}
+                </div>
+                <div className="flex-1 space-y-1.5 min-w-0">
+                  <input
+                    type="text"
+                    value={productForm.imageUrl}
+                    onChange={(e) => setProductForm((p) => ({ ...p, imageUrl: e.target.value }))}
+                    placeholder="Image URL"
+                    className="w-full px-3 py-1.5 rounded-lg text-[11px] border border-gray-200 font-mono"
+                  />
+                  <label className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#840038] cursor-pointer">
+                    <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" className="hidden" onChange={handleProductImageUpload} />
+                    {uploadingProductImage ? 'Uploading…' : '↑ Upload new image'}
+                  </label>
+                </div>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  value={retailSearchQuery}
+                  onChange={(e) => handleSearchRetailProducts(e.target.value)}
+                  placeholder="Or borrow an image — search the retail catalog by name or SKU..."
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-gray-200"
+                />
+                {(searchingRetail || retailSearchResults.length > 0) && retailSearchQuery && (
+                  <div className="absolute z-10 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg max-h-56 overflow-y-auto">
+                    {searchingRetail ? (
+                      <div className="p-3 text-[11px] text-gray-400 text-center">Searching…</div>
+                    ) : (
+                      retailSearchResults.map((rp) => (
+                        <button
+                          type="button"
+                          key={rp.id || rp.wcId || rp.sku}
+                          onClick={() => handleBorrowRetailImage(rp)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left border-b border-gray-50 last:border-0"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+                            {(rp.image || rp.images?.[0]) ? (
+                              <img src={rp.image || rp.images[0]} alt="" className="w-full h-full object-contain" />
+                            ) : (
+                              <span className="text-gray-300 text-xs">🍾</span>
+                            )}
+                          </div>
+                          <span className="text-[11px] font-semibold text-gray-800 truncate">{rp.name}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowProductModal(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingProduct}
+                className="px-4 py-2 bg-[#840038] hover:bg-[#6b002c] text-white rounded-xl text-xs font-bold disabled:opacity-50"
+              >
+                {savingProduct ? 'Saving…' : editingProduct ? 'Save Changes' : 'Add Product'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
       {showImportModal && (

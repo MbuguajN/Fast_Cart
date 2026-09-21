@@ -16,6 +16,18 @@ export default function TradeCheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Guest checkout — no account/login required. Filled in directly instead
+  // of picking from a saved address list.
+  const [buyerName, setBuyerName] = useState('');
+  const [buyerPhone, setBuyerPhone] = useState('');
+  const [buyerEmail, setBuyerEmail] = useState('');
+  const [guestAddressLine, setGuestAddressLine] = useState('');
+  const [guestCity, setGuestCity] = useState('Nairobi');
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+
+  const hasSpirits = cart.some((i) => i.priceLine === 'spirits');
+  const deliveryCity = account ? selectedAddress?.city : guestCity;
+
   if (cart.length === 0) {
     return (
       <div className="max-w-xl mx-auto py-20 text-center space-y-4 text-[#231F20]">
@@ -36,8 +48,23 @@ export default function TradeCheckoutPage() {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (!selectedAddress) {
+
+    if (!account) {
+      if (!buyerName.trim() || !buyerPhone.trim() || !buyerEmail.trim()) {
+        setError('Please fill in your name, phone and email.');
+        return;
+      }
+      if (!guestAddressLine.trim() || !guestCity.trim()) {
+        setError('Please fill in a delivery address.');
+        return;
+      }
+    } else if (!selectedAddress) {
       setError('Please select or specify a delivery address.');
+      return;
+    }
+
+    if (hasSpirits && !ageConfirmed) {
+      setError('Please confirm you are of legal drinking age to order spirits.');
       return;
     }
 
@@ -60,11 +87,15 @@ export default function TradeCheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart,
-          deliveryAddress: selectedAddress,
+          deliveryAddress: account
+            ? selectedAddress
+            : { addressLine: guestAddressLine, city: guestCity, contactName: buyerName, phone: buyerPhone },
           deliveryDate,
           poReference,
           notes,
           paymentMethod,
+          ageConfirmed,
+          ...(!account ? { buyerName, buyerPhone, buyerEmail } : {}),
         }),
       });
 
@@ -84,7 +115,7 @@ export default function TradeCheckoutPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#231F20]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#231F20] animate-page-enter">
       <div className="border-b border-gray-200 pb-4">
         <Link href="/trade/cart" className="text-xs font-bold text-[#840038] uppercase hover:underline">
           ← Back to Trade Cart
@@ -103,46 +134,115 @@ export default function TradeCheckoutPage() {
       <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left: Form (8 cols) */}
         <div className="lg:col-span-8 space-y-8">
+          {!account && (
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-4">
+              <h2 className="text-base font-bold uppercase text-[#231F20] border-b border-gray-100 pb-3">
+                Your Details
+              </h2>
+              <p className="text-xs text-gray-500">
+                No account needed to order. <Link href="/trade/login" className="font-bold text-[#840038] hover:underline">Sign in</Link> if you already have one.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={buyerName}
+                    onChange={(e) => setBuyerName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={buyerPhone}
+                    onChange={(e) => setBuyerPhone(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={buyerEmail}
+                  onChange={(e) => setBuyerEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                />
+              </div>
+            </div>
+          )}
+
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-4">
             <h2 className="text-base font-bold uppercase text-[#231F20] border-b border-gray-100 pb-3">
               1. Delivery Receiving Dock / Address
             </h2>
 
-            <div className="space-y-3">
-              {account?.addresses?.map((addr) => {
-                const isSelected = selectedAddress?.id === addr.id;
-                return (
-                  <div
-                    key={addr.id}
-                    onClick={() => setSelectedAddress(addr)}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                      isSelected
-                        ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-xs font-bold text-gray-900 block">{addr.label}</span>
-                        <p className="text-xs text-gray-600 mt-0.5">{addr.addressLine} ({addr.city})</p>
-                        <p className="text-[11px] text-gray-500 mt-1">
-                          Contact: {addr.contactName} · {addr.phone} · Window: {addr.deliveryWindow}
-                        </p>
+            {account ? (
+              <div className="space-y-3">
+                {account?.addresses?.map((addr) => {
+                  const isSelected = selectedAddress?.id === addr.id;
+                  return (
+                    <div
+                      key={addr.id}
+                      onClick={() => setSelectedAddress(addr)}
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
+                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="text-xs font-bold text-gray-900 block">{addr.label}</span>
+                          <p className="text-xs text-gray-600 mt-0.5">{addr.addressLine} ({addr.city})</p>
+                          <p className="text-[11px] text-gray-500 mt-1">
+                            Contact: {addr.contactName} · {addr.phone} · Window: {addr.deliveryWindow}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <span className="text-xs font-bold text-[#840038]">✓ Selected</span>
+                        )}
                       </div>
-                      {isSelected && (
-                        <span className="text-xs font-bold text-[#840038]">✓ Selected</span>
-                      )}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Delivery Address</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Street, building, floor..."
+                    value={guestAddressLine}
+                    onChange={(e) => setGuestAddressLine(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">City / Town</label>
+                  <input
+                    type="text"
+                    required
+                    value={guestCity}
+                    onChange={(e) => setGuestCity(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                  />
+                </div>
+              </div>
+            )}
 
-            {selectedAddress?.city && selectedAddress.city.toLowerCase() !== 'nairobi' && (
+            {deliveryCity && deliveryCity.toLowerCase() !== 'nairobi' && (
               <div className="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-2xl text-xs flex items-start gap-2">
                 <span className="text-base">📍</span>
                 <div>
-                  <strong>Regional Fulfillment ({selectedAddress.city}):</strong>
+                  <strong>Regional Fulfillment ({deliveryCity}):</strong>
                   <p className="mt-0.5 text-[11px] text-blue-700">
                     Deliveries outside Nairobi are fulfilled via regional road freight or secured courier. Delivery schedule and freight cost will be confirmed directly by your Account Specialist prior to dispatch.
                   </p>
@@ -292,6 +392,22 @@ export default function TradeCheckoutPage() {
               </div>
             </div>
           </div>
+
+          {hasSpirits && (
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={ageConfirmed}
+                  onChange={(e) => setAgeConfirmed(e.target.checked)}
+                  className="mt-0.5 w-5 h-5 rounded accent-[#840038] focus:ring-[#840038]"
+                />
+                <span className="text-xs text-gray-700 leading-relaxed">
+                  I confirm I am 18 years or older and legally permitted to purchase alcohol.
+                </span>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Right: Summary (4 cols) */}

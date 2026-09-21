@@ -3,38 +3,68 @@ import { getTradeAuthFromRequest } from '@/lib/trade/trade-auth.js';
 import { getSegmentTemplates } from '@/lib/trade/trade-store.js';
 import { resolveLineTier } from '@/lib/trade/pricing-engine.js';
 import { getTradeProductsFromDb } from '@/lib/trade/trade-catalog.js';
+import { attachPriceOverrides } from '@/lib/trade/trade-costing.js';
 
+/**
+ * Wholesale catalogue is public — no login required to browse or price.
+ * Licence verification is only collected for the credit/partner track (see
+ * /trade/apply); browsing and cash checkout only need the site's standard
+ * age confirmation, taken once at checkout.
+ *
+ * Tier ladders are built from `resolveLineTier` and then corrected with
+ * `attachPriceOverrides` so the displayed price is always the one that will
+ * be charged — the catalogue and the checkout must never compute two
+ * different numbers for the same SKU and tier.
+ */
 export async function GET(request) {
   try {
     const auth = await getTradeAuthFromRequest(request);
-    if (!auth || !auth.user || !auth.account) {
-      return NextResponse.json({ error: 'Trade authentication required to view wholesale catalog.' }, { status: 401 });
-    }
-
-    const { account } = auth;
+    const account = auth?.account || null;
     const dbProducts = await getTradeProductsFromDb();
 
-    // Licence gating: If expired or corporate account without liquor licence, restrict to non-alcoholic Jaba lines
-    const isLicenceExpired = account.licenceExpiry && new Date(account.licenceExpiry) < new Date();
-    const hasLiquorLicence = !!account.licenceNo;
+    const withOverrides = await attachPriceOverrides(
+      dbProducts.map((p) => ({ sku: p.sku, priceLine: p.priceLine }))
+    );
+    const overridesBySku = new Map(withOverrides.map((r) => [r.sku, r.priceOverrides || {}]));
 
     const tradeProducts = dbProducts
       .map((p) => {
         const priceLine = p.priceLine;
-
-        // If licence is missing or expired, mark spirits as restricted/excluded
-        if (priceLine === 'spirits' && (!hasLiquorLicence || isLicenceExpired)) {
-          return null;
-        }
-
         const isJaba = priceLine === 'jaba';
         const prkCost = p.prkCostIncVat;
+        const overrides = overridesBySku.get(p.sku) || {};
 
-        const t1 = resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: isJaba ? 11 : 6, tierOverride: account.tierOverride });
-        const t2 = resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: isJaba ? 51 : 25, tierOverride: account.tierOverride });
-        const t3 = resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: isJaba ? 101 : 73, tierOverride: account.tierOverride });
-        const t4 = isJaba ? resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: 201, tierOverride: account.tierOverride }) : null;
+        const tierQuantities = isJaba
+          ? { T0: 1, T1: 11, T2: 51, T3: 101, T4: 201 }
+          : { T0: 1, T1: 6, T2: 25, T3: 73 };
+        const tierBands = isJaba
+          ? { T0: '1–10 btls', T1: '11–50 btls', T2: '51–100 btls', T3: '101–200 btls', T4: '201+ btls' }
+          : { T0: '1–5 btls', T1: '6–24 btls', T2: '25–72 btls', T3: '73+ btls' };
 
+        const tierPrices = {};
+        for (const [tierKey, qty] of Object.entries(tierQuantities)) {
+          const resolved = resolveLineTier({ priceLine, prkCostIncVat: prkCost, quantity: qty, tierOverride: account?.tierOverride });
+          if (!resolved.eligible) continue;
+
+          const override = overrides[tierKey];
+          let unitPriceIncVat = resolved.unitPriceIncVat;
+          let unitPriceExVat = resolved.unitPriceExVat;
+          if (override !== undefined && override !== null) {
+            if (isJaba) {
+              unitPriceExVat = Number(override);
+              unitPriceIncVat = Math.round((unitPriceExVat * 1.16) * 100) / 100;
+            } else {
+              unitPriceIncVat = Math.round(Number(override));
+              unitPriceExVat = Math.round((unitPriceIncVat / 1.16) * 100) / 100;
+            }
+          }
+
+          tierPrices[tierKey] = { unitPriceIncVat, unitPriceExVat, band: tierBands[tierKey] };
+        }
+
+        // prkCostIncVat and the raw override map are the wholesale cost base
+        // and admin-set price ladder — never sent to the client. tierPrices
+        // (below) already carries every number a buyer is entitled to see.
         return {
           id: p.id,
           sku: p.sku,
@@ -44,15 +74,9 @@ export async function GET(request) {
           categoryName: p.categoryName || (isJaba ? 'Happy Hour Jaba Juice' : 'Pernod Ricard Spirits'),
           brandName: p.brandName || (isJaba ? 'Jaba' : 'Pernod Ricard'),
           priceLine,
-          prkCostIncVat: prkCost,
           inStock: p.inStock && p.stockQuantity > 0,
           stockQuantity: p.stockQuantity,
-          tierPrices: {
-            T1: { unitPriceIncVat: t1.unitPriceIncVat, unitPriceExVat: t1.unitPriceExVat, band: isJaba ? '11–50 btls' : '6–24 btls' },
-            T2: { unitPriceIncVat: t2.unitPriceIncVat, unitPriceExVat: t2.unitPriceExVat, band: isJaba ? '51–100 btls' : '25–72 btls' },
-            T3: { unitPriceIncVat: t3.unitPriceIncVat, unitPriceExVat: t3.unitPriceExVat, band: isJaba ? '101–200 btls' : '73+ btls' },
-            ...(t4 ? { T4: { unitPriceIncVat: t4.unitPriceIncVat, unitPriceExVat: t4.unitPriceExVat, band: '201+ btls' } } : {}),
-          },
+          tierPrices,
         };
       })
       .filter(Boolean);
@@ -61,16 +85,15 @@ export async function GET(request) {
 
     return NextResponse.json({
       success: true,
-      account: {
-        id: account.id,
-        tradingName: account.tradingName,
-        segment: account.segment,
-        tierOverride: account.tierOverride,
-        licenceNo: account.licenceNo,
-        licenceExpiry: account.licenceExpiry,
-        isLicenceExpired,
-        hasLiquorLicence,
-      },
+      account: account
+        ? {
+            id: account.id,
+            tradingName: account.tradingName,
+            segment: account.segment,
+            tierOverride: account.tierOverride,
+            creditEnabled: account.creditEnabled,
+          }
+        : null,
       products: tradeProducts,
       templates,
     });

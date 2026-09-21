@@ -91,15 +91,21 @@ export default function TradeApplyPage() {
           ✓
         </div>
         <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#231F20]">
-          Application Received
+          Credit Account Application Received
         </h1>
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
-          Thank you for applying for a Happy Hour B2B Trade Account. Our vetting team is reviewing your KRA PIN and business details. You will receive an SMS and email with login credentials within 2 business hours.
+          Thank you for applying for Net 14 trade credit terms. Our vetting team is reviewing your KRA PIN and licence. You will receive an SMS and email with login credentials within 2 business hours — in the meantime, you can already order and pay by M-Pesa or bank transfer without an account.
         </p>
         <div className="pt-4 flex justify-center gap-4">
           <Link
-            href="/trade/login"
+            href="/trade/catalog"
             className="px-6 py-3 bg-[#840038] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow hover:bg-[#6b002c]"
+          >
+            Browse Wholesale Catalog →
+          </Link>
+          <Link
+            href="/trade/login"
+            className="px-6 py-3 bg-white/10 text-[#840038] border border-[#840038]/30 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-pink-50"
           >
             Go to Trade Login →
           </Link>
@@ -109,16 +115,18 @@ export default function TradeApplyPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 text-[#231F20]">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 text-[#231F20] animate-page-enter">
       <div className="border-b border-gray-200 pb-4">
         <Link href="/trade" className="text-xs font-bold text-[#840038] uppercase hover:underline">
           ← Back to Trade Overview
         </Link>
         <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#231F20] mt-1">
-          B2B Trade Account Application
+          Apply for a Trade Credit Account
         </h1>
         <p className="text-xs text-gray-500 font-medium mt-1">
-          Open a verified wholesale procurement account for direct distributor pricing and Net 14 credit terms.
+          No application is needed to browse the wholesale catalog or place a cash order. This form is only for
+          partners who want Net 14 credit terms and gapless VAT invoicing — it requires your KRA PIN and liquor
+          licence for verification.
         </p>
       </div>
 
@@ -379,7 +387,7 @@ export default function TradeApplyPage() {
             />
           </div>
           <div className="text-xs text-gray-700 leading-relaxed">
-            I agree to the <strong className="text-[#840038]">Happy Hour B2B Wholesale Terms &amp; Conditions (v2026.1)</strong>, confirming minimum orders of 12 bottles / KES 10,000 ex-VAT and authorizing business credential verification with the Kenya Revenue Authority and relevant County Liquor Licensing Boards.
+            I agree to the <strong className="text-[#840038]">Happy Hour B2B Wholesale Terms &amp; Conditions (v2026.1)</strong> and authorize verification of these business credentials with the Kenya Revenue Authority and relevant County Liquor Licensing Boards for the purpose of approving Net 14 credit terms.
           </div>
         </div>
 
@@ -388,7 +396,7 @@ export default function TradeApplyPage() {
           disabled={submitting}
           className="w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50"
         >
-          {submitting ? 'Submitting Application...' : 'Submit Trade Account Application →'}
+          {submitting ? 'Submitting Application...' : 'Submit Credit Account Application →'}
         </button>
       </form>
     </div>

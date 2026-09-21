@@ -36,7 +36,13 @@ function TradePortalShell({ children }) {
 
   const isLicenceExpired = account?.licenceExpiry && new Date(account.licenceExpiry) < new Date();
 
-  const isPublicPage = pathname === '/trade' || pathname === '/trade/login' || pathname === '/trade/apply';
+  const isPublicPage =
+    pathname === '/trade' ||
+    pathname === '/trade/login' ||
+    pathname === '/trade/apply' ||
+    pathname === '/trade/how-it-works';
+
+  const totalCartBottles = cart.reduce((acc, i) => acc + (i.quantity || 0), 0);
 
   // Navigation Links organized into logical procurement & accounting groups
   const navSections = [
@@ -134,8 +140,6 @@ function TradePortalShell({ children }) {
     },
   ];
 
-  const totalCartBottles = cart.reduce((acc, i) => acc + (i.quantity || 0), 0);
-
   // ----------------------------------------------------
   // Layout 1: Unauthenticated / Public Landing & Login Shell
   // ----------------------------------------------------
@@ -160,17 +164,45 @@ function TradePortalShell({ children }) {
             </div>
 
             <div className="flex items-center gap-4 text-xs font-semibold">
-              <Link href="/trade" className={`transition-colors ${pathname === '/trade' ? 'text-pink-300 font-bold' : 'text-gray-300 hover:text-white'}`}>
-                Overview
+              <Link
+                href="/trade/catalog"
+                className={`transition-colors ${pathname === '/trade/catalog' ? 'text-pink-300 font-bold' : 'text-gray-300 hover:text-white'}`}
+              >
+                Catalog
               </Link>
-              <Link href="/trade/apply" className={`transition-colors ${pathname === '/trade/apply' ? 'text-pink-300 font-bold' : 'text-gray-300 hover:text-white'}`}>
-                Open Account
+              <Link
+                href="/trade/how-it-works"
+                className={`hidden sm:inline transition-colors ${pathname === '/trade/how-it-works' ? 'text-pink-300 font-bold' : 'text-gray-300 hover:text-white'}`}
+              >
+                How It Works
               </Link>
+              <Link
+                href="/trade/apply"
+                className={`hidden sm:inline transition-colors ${pathname === '/trade/apply' ? 'text-pink-300 font-bold' : 'text-gray-300 hover:text-white'}`}
+              >
+                Credit Account
+              </Link>
+
+              <Link
+                href="/trade/cart"
+                className="relative flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors"
+                title="Wholesale cart"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                {totalCartBottles > 0 && (
+                  <span className="absolute -top-2 -right-2.5 bg-[#840038] text-white text-[9px] font-black rounded-full w-4.5 h-4.5 flex items-center justify-center border border-white/20">
+                    {totalCartBottles}
+                  </span>
+                )}
+              </Link>
+
               <Link
                 href="/trade/login"
                 className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#840038] hover:bg-[#6b002c] shadow transition-all"
               >
-                Trade Sign In →
+                Sign In →
               </Link>
               <Link
                 href="/"
@@ -345,22 +377,23 @@ function TradePortalShell({ children }) {
 
       {/* Main Workspace Canvas */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Licence Expiry Ribbon (if active) */}
-        {isLicenceExpiringSoon && (
+        {/* Licence Expiry Ribbon — relevant only to credit/partner accounts;
+            spirits ordering itself is no longer licence-gated. */}
+        {account?.creditEnabled && isLicenceExpiringSoon && (
           <div className="bg-amber-500 text-black px-4 py-2 text-xs font-bold flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
               <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              <span>Liquor licence expires on <strong>{account.licenceExpiry}</strong>. Submit renewed document to your Account Manager ({account.accountManager?.name}) to avoid ordering restrictions.</span>
+              <span>Liquor licence expires on <strong>{account.licenceExpiry}</strong>. Submit renewed document to your Account Manager ({account.accountManager?.name}) to keep your credit terms active.</span>
             </div>
           </div>
         )}
 
-        {isLicenceExpired && (
+        {account?.creditEnabled && isLicenceExpired && (
           <div className="bg-red-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-between">
             <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-              <span>⚠️ Liquor licence expired. Spirits ordering is locked. Jaba non-alcoholic juices remain available.</span>
+              <span>⚠️ Liquor licence expired. Renew it with your Account Manager to keep ordering on credit terms.</span>
             </div>
           </div>
         )}
@@ -426,12 +459,21 @@ function TradeNotificationToast() {
   const { notification } = useTrade();
   if (!notification) return null;
 
-  const bg = notification.type === 'error' ? 'bg-red-600' : notification.type === 'success' ? 'bg-emerald-600' : 'bg-[#840038]';
+  const config = {
+    error: { bg: 'bg-red-600', icon: '⚠' },
+    success: { bg: 'bg-emerald-600', icon: '✓' },
+    info: { bg: 'bg-[#840038]', icon: 'ℹ' },
+  }[notification.type] || { bg: 'bg-[#840038]', icon: 'ℹ' };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
-      <div className={`${bg} text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold border border-white/20 max-w-md`}>
-        <span>{notification.msg}</span>
+    <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 flex justify-center sm:justify-end animate-slide-up">
+      <div
+        className={`${config.bg} text-white px-5 py-4 rounded-2xl shadow-2xl ring-4 ring-black/5 flex items-start gap-3 text-sm font-bold border-2 border-white/25 w-full sm:w-auto sm:max-w-md`}
+      >
+        <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-base shrink-0">
+          {config.icon}
+        </span>
+        <span className="leading-snug pt-0.5">{notification.msg}</span>
       </div>
     </div>
   );

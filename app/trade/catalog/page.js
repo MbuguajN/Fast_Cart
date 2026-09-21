@@ -1,17 +1,50 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
 
 export default function TradeCatalogPage() {
-  const router = useRouter();
-  const { catalog, addToCart, user, account, loading } = useTrade();
+  const { catalog, addToCart, loading } = useTrade();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [quantities, setQuantities] = useState({});
+
+  // Category dock scroll state — same hidden-scrollbar + arrow pattern as
+  // the retail CategoryDock/BrandsBar, so this row scrolls without ever
+  // showing a native scrollbar.
+  const scrollRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragScrollLeft = useRef(0);
+
+  const updateScrollState = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft: sl, scrollWidth, clientWidth } = scrollRef.current;
+    setShowLeftArrow(sl > 5);
+    setShowRightArrow(sl < scrollWidth - clientWidth - 5);
+  };
+
+  const scrollDockBy = (offset) => {
+    scrollRef.current?.scrollBy({ left: offset, behavior: 'smooth' });
+  };
+
+  const handleDockMouseDown = (e) => {
+    isDragging.current = true;
+    dragStartX.current = e.pageX - scrollRef.current.offsetLeft;
+    dragScrollLeft.current = scrollRef.current.scrollLeft;
+  };
+  const handleDockMouseUp = () => { isDragging.current = false; };
+  const handleDockMouseMove = (e) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - dragStartX.current) * 1.5;
+    scrollRef.current.scrollLeft = dragScrollLeft.current - walk;
+  };
 
   // Category counts and distinct list
   const categoryStats = useMemo(() => {
@@ -27,6 +60,18 @@ export default function TradeCatalogPage() {
     const distinct = Array.from(new Set(catalog.map((p) => p.categoryName || 'Spirits')));
     return ['all', ...distinct];
   }, [catalog]);
+
+  useEffect(() => {
+    updateScrollState();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', updateScrollState);
+    window.addEventListener('resize', updateScrollState);
+    return () => {
+      el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
+  }, [categories]);
 
   // Filter and Sort Products
   const filteredProducts = useMemo(() => {
@@ -72,34 +117,33 @@ export default function TradeCatalogPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-[#840038] border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Loading Wholesale Catalog...</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+        <div className="h-16 bg-gray-100 rounded-2xl animate-pulse" />
+        <div className="h-16 bg-gray-100 rounded-2xl animate-pulse" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-3xl border border-gray-200 overflow-hidden">
+              <div className="h-44 sm:h-52 bg-gray-100 animate-pulse" />
+              <div className="p-5 space-y-3">
+                <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
+                <div className="h-4 w-3/4 bg-gray-100 rounded animate-pulse" />
+                <div className="h-20 bg-gray-50 rounded-2xl border border-gray-100 animate-pulse" />
+                <div className="h-9 bg-gray-100 rounded-xl animate-pulse" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
-  if (!user || !account) {
-    return (
-      <div className="max-w-xl mx-auto py-20 text-center space-y-4 text-[#231F20]">
-        <h1 className="text-xl font-bold uppercase">Wholesale Catalog is Confidential</h1>
-        <p className="text-xs text-gray-500">Please sign in with your verified trade account credentials to view distributor pricing ladders.</p>
-        <Link href="/trade/login" className="text-xs font-bold text-[#840038] hover:underline">
-          Sign In to Trade Portal →
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-7xl mx-auto space-y-8 text-[#231F20]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#231F20] animate-page-enter">
       {/* Header & Order Pad Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5">
         <div>
           <span className="text-[10px] font-black uppercase tracking-widest text-[#840038]">
-            Confidential Wholesale Trade Pricing
+            Wholesale Trade Pricing
           </span>
           <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#231F20] mt-1">
             Pernod Ricard &amp; Craft Spirits Catalog
@@ -166,38 +210,74 @@ export default function TradeCatalogPage() {
           </div>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            const count = categoryStats[cat] || 0;
-
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                  isSelected
-                    ? 'bg-[#840038] text-white shadow-2xs'
-                    : 'bg-gray-100/80 hover:bg-gray-200/80 text-gray-700'
-                }`}
-              >
-                <span>{cat === 'all' ? 'All' : cat}</span>
-                <span className={`text-[10px] px-1 py-0.2 rounded-full font-mono ${
-                  isSelected ? 'bg-white/20 text-white' : 'text-gray-500'
-                }`}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-
-          {(searchQuery || selectedCategory !== 'all' || sortBy !== 'default') && (
+        {/* Category Filter Dock — hidden native scrollbar, drag-to-scroll
+            and arrow buttons, matching the retail CategoryDock/BrandsBar. */}
+        <div className="relative group">
+          {showLeftArrow && (
             <button
-              onClick={handleClearFilters}
-              className="text-xs font-bold text-[#840038] hover:underline whitespace-nowrap ml-2 px-1 py-1"
+              type="button"
+              onClick={() => scrollDockBy(-220)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white shadow-md border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-[#840038] hover:text-white transition-all active:scale-95"
+              aria-label="Scroll categories left"
             >
-              Reset ✕
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          <div
+            ref={scrollRef}
+            onMouseDown={handleDockMouseDown}
+            onMouseLeave={handleDockMouseUp}
+            onMouseUp={handleDockMouseUp}
+            onMouseMove={handleDockMouseMove}
+            className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing select-none"
+          >
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              const count = categoryStats[cat] || 0;
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                    isSelected
+                      ? 'bg-[#840038] text-white shadow-2xs'
+                      : 'bg-gray-100/80 hover:bg-gray-200/80 text-gray-700'
+                  }`}
+                >
+                  <span>{cat === 'all' ? 'All' : cat}</span>
+                  <span className={`text-[10px] px-1 py-0.2 rounded-full font-mono ${
+                    isSelected ? 'bg-white/20 text-white' : 'text-gray-500'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+
+            {(searchQuery || selectedCategory !== 'all' || sortBy !== 'default') && (
+              <button
+                onClick={handleClearFilters}
+                className="text-xs font-bold text-[#840038] hover:underline whitespace-nowrap ml-2 px-1 py-1 flex-shrink-0"
+              >
+                Reset ✕
+              </button>
+            )}
+          </div>
+
+          {showRightArrow && (
+            <button
+              type="button"
+              onClick={() => scrollDockBy(220)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white shadow-md border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-[#840038] hover:text-white transition-all active:scale-95"
+              aria-label="Scroll categories right"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           )}
         </div>
@@ -222,37 +302,45 @@ export default function TradeCatalogPage() {
         </div>
       ) : (
         /* Product Cards Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((p) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredProducts.map((p, idx) => {
             const qty = quantities[p.sku] || (p.priceLine === 'jaba' ? 11 : 6);
             const isJaba = p.priceLine === 'jaba';
 
             return (
               <div
                 key={p.sku || p.id}
-                className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow"
+                style={{ animationDelay: `${Math.min(idx * 35, 350)}ms` }}
+                className="group bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:border-[#840038]/30 hover:-translate-y-1 animate-card-rise"
               >
-                <div className="space-y-3">
-                  <div className="flex gap-4 items-start">
-                    <img
-                      src={p.image || '/images/bottle-placeholder.png'}
-                      alt={p.name}
-                      className="w-16 h-20 object-contain bg-gray-50 rounded-2xl p-1 border border-gray-100 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[10px] font-bold uppercase text-[#840038] tracking-widest block truncate">
-                        {p.categoryName || 'Spirits'}
-                      </span>
-                      <h3 className="text-sm font-bold text-gray-900 leading-snug">{p.name}</h3>
-                      <span className="text-[10px] font-mono text-gray-400 block mt-0.5">{p.sku}</span>
-                    </div>
+                {/* Full-width, prominent product image — same image-forward
+                    treatment as the retail ProductCard. */}
+                <div className="relative h-44 sm:h-52 bg-gray-50 border-b border-gray-100 overflow-hidden">
+                  <img
+                    src={p.image || '/images/bottle-placeholder.png'}
+                    alt={p.name}
+                    className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+
+                <div className="p-5 space-y-3 flex-1 flex flex-col">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase text-[#840038] tracking-widest block truncate">
+                      {p.categoryName || 'Spirits'}
+                    </span>
+                    <h3 className="text-sm font-bold text-gray-900 leading-snug">{p.name}</h3>
+                    <span className="text-[10px] font-mono text-gray-400 block mt-0.5">{p.sku}</span>
                   </div>
 
-                  {/* Tier Ladder Matrix */}
+                  {/* Tier Ladder Matrix — Jaba is priced and published
+                      ex-VAT (VAT added at invoice); spirits are inc-VAT.
+                      Showing Jaba's inc-VAT figure under an unlabelled
+                      "price" reads as wrong next to the 800/750/700/650/600
+                      the price list actually quotes. */}
                   <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100 space-y-1.5 text-xs">
                     <div className="flex justify-between text-[10px] uppercase font-bold text-gray-400 border-b border-gray-200 pb-1">
                       <span>Volume Band</span>
-                      <span>Unit Price (Inc-VAT)</span>
+                      <span>Unit Price ({isJaba ? 'Ex-VAT' : 'Inc-VAT'})</span>
                     </div>
                     {p.tierPrices && Object.entries(p.tierPrices).map(([tierKey, data]) => (
                       <div key={tierKey} className="flex justify-between items-center py-0.5">
@@ -260,15 +348,14 @@ export default function TradeCatalogPage() {
                           {tierKey} ({data.band})
                         </span>
                         <span className="font-mono font-bold text-gray-900">
-                          KES {data.unitPriceIncVat?.toLocaleString()}
+                          KES {(isJaba ? data.unitPriceExVat : data.unitPriceIncVat)?.toLocaleString()}
                         </span>
                       </div>
                     ))}
                   </div>
-                </div>
 
                 {/* Add to Cart Bar */}
-                <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
+                <div className="pt-2 mt-auto border-t border-gray-100 flex items-center gap-2">
                   <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
                     <button
                       type="button"
@@ -299,6 +386,7 @@ export default function TradeCatalogPage() {
                   >
                     Add {qty} btls
                   </button>
+                </div>
                 </div>
               </div>
             );

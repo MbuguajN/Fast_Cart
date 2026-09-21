@@ -129,3 +129,19 @@ export function IconSave({ className = 'w-4 h-4', strokeWidth = 2 }) {
     </svg>
   );
 }
+
+export function IconClock({ className = 'w-4 h-4', strokeWidth = 2 }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={strokeWidth} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+export function IconRestore({ className = 'w-4 h-4', strokeWidth = 2 }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={strokeWidth} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 109-9 9 9 0 00-6.364 2.636M3 12V6m0 6h6" />
+    </svg>
+  );
+}

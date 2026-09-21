@@ -26,7 +26,7 @@ export default function TradeCartPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#231F20]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-[#231F20] animate-page-enter">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-4">
         <div>
@@ -189,8 +189,27 @@ export default function TradeCartPage() {
 
           {/* Minimum Order Check Alert */}
           {!cartPricing.minOrderCheck.passed ? (
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold space-y-1">
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold space-y-2.5">
               <span className="font-bold block">⚠️ Minimum Order Rule</span>
+
+              {/* Measured against goods value ex-VAT/delivery, NOT the grand
+                  total above — shown explicitly so the two numbers never
+                  look like a contradiction. */}
+              <div className="bg-white/60 rounded-xl border border-amber-200/70 divide-y divide-amber-200/70 text-[11px]">
+                <div className="flex justify-between items-center px-3 py-1.5">
+                  <span>Bottles</span>
+                  <span className="font-mono font-bold">
+                    {cartPricing.minOrderCheck.totalBottles} / {cartPricing.minOrderCheck.minBottles}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center px-3 py-1.5">
+                  <span>Goods Value (Ex-VAT, before delivery)</span>
+                  <span className="font-mono font-bold">
+                    KES {cartPricing.minOrderCheck.goodsValueExVat.toLocaleString()} / {cartPricing.minOrderCheck.minGoodsValueExVat.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
               <p>{cartPricing.minOrderCheck.message}</p>
             </div>
           ) : (

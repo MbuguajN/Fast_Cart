@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTradeProducts, updateTradeProduct, getInventoryLogs } from '@/lib/trade/trade-store.js';
+import { getTradeProducts, updateTradeProduct, createTradeProduct, getInventoryLogs } from '@/lib/trade/trade-store.js';
 import { adminGuard } from '@/lib/api-guard';
 
 /**
@@ -59,7 +59,7 @@ export async function PUT(request) {
 
   try {
     const body = await request.json();
-    const { sku, stockQuantity, reason, priceOverride } = body;
+    const { sku, stockQuantity, reason, priceOverride, name, imageUrl, brand, categoryName, isActive } = body;
 
     if (!sku) {
       return NextResponse.json({ error: 'Product SKU or ID is required' }, { status: 400 });
@@ -74,6 +74,11 @@ export async function PUT(request) {
       patch.stockQuantity = qty;
     }
     if (reason) patch.reason = reason;
+    if (name !== undefined) patch.name = name;
+    if (imageUrl !== undefined) patch.imageUrl = imageUrl;
+    if (brand !== undefined) patch.brand = brand;
+    if (categoryName !== undefined) patch.categoryName = categoryName;
+    if (isActive !== undefined) patch.isActive = isActive;
 
     let updated = null;
     if (Object.keys(patch).length > 0) {
@@ -113,5 +118,30 @@ export async function PUT(request) {
     });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Failed to update trade product' }, { status: 500 });
+  }
+}
+
+/**
+ * Adds a trade-only product — one that may have no retail counterpart at
+ * all (see createTradeProduct). The admin UI's image field either uploads a
+ * new file (via /api/admin/upload) or copies a URL borrowed from an
+ * existing retail product; either way this route just stores whatever URL
+ * it's given.
+ */
+export async function POST(request) {
+  const denied = await adminGuard(request);
+  if (denied) return denied;
+
+  try {
+    const body = await request.json();
+    const product = await createTradeProduct(body, 'Admin');
+
+    return NextResponse.json({
+      success: true,
+      product,
+      message: `Product ${product.sku} added to the trade catalogue`,
+    });
+  } catch (error) {
+    return NextResponse.json({ error: error.message || 'Failed to create trade product' }, { status: 400 });
   }
 }

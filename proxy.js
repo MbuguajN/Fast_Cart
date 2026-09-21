@@ -25,6 +25,11 @@ const PRE_AUTH_PATHS = new Set([
   '/api/admin/auth/check',
   '/api/trade/auth',
   '/api/trade/apply',
+  // Wholesale catalogue browsing and checkout are public — no trade login
+  // required. The in-handler code honours an authenticated session when
+  // present (existing accounts, credit terms) but never requires one.
+  '/api/trade/catalog',
+  '/api/trade/checkout',
 ]);
 
 const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

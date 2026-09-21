@@ -2,93 +2,68 @@
 
 import Link from 'next/link';
 
-function CocktailIcon(props) {
+function ScaleIcon(props) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16l-7 8.5v6.5" />
-      <path d="M9 19h6" />
-      <path d="M12 12.5 5.5 4.5" />
+      <path d="M12 3v18M5 7l-3 7a4 4 0 008 0l-3-7M19 7l-3 7a4 4 0 008 0l-3-7M5 7h14" />
     </svg>
   );
 }
 
-function OfficeIcon(props) {
+function TruckIcon(props) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="3" width="10" height="18" />
-      <rect x="14" y="9" width="6" height="12" />
-      <path d="M7.5 7h1M11 7h1M7.5 11h1M11 11h1M7.5 15h1M11 15h1M16.5 12.5h1M16.5 16h1" />
+      <path d="M3 16V6a1 1 0 011-1h9a1 1 0 011 1v10M14 9h4l3 3v4a1 1 0 01-1 1h-2" />
+      <circle cx="7" cy="17.5" r="1.8" />
+      <circle cx="17" cy="17.5" r="1.8" />
     </svg>
   );
 }
 
-function EventIcon(props) {
+function CardIcon(props) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M3 10h18M8 3v4M16 3v4" />
-      <path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01" />
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
     </svg>
   );
 }
 
-function StoreIcon(props) {
+function DocumentIcon(props) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 9V4h16v5" />
-      <path d="M3 9h18l-1 3a3 3 0 0 1-5.5 1.7A3 3 0 0 1 12 15a3 3 0 0 1-2.5-1.3A3 3 0 0 1 4 12l-1-3Z" />
-      <path d="M5 13v8h14v-8" />
-      <path d="M10 21v-5h4v5" />
-    </svg>
-  );
-}
-
-function HomeIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 11.5 12 4l8 7.5" />
-      <path d="M6 10v10h12V10" />
-      <path d="M10 20v-6h4v6" />
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <path d="M14 2v6h6M9 13h6M9 17h6" />
     </svg>
   );
 }
 
 export default function TradeLandingPage() {
-  const segments = [
+  const features = [
     {
-      title: 'HORECA & Bars',
-      desc: 'Hotels, cocktail lounges, and rooftop venues enjoying Tier 3 volume rates, scheduled receiving dock drops, and monthly credit settlement.',
-      Icon: CocktailIcon,
-      badge: 'Hotels & Nightlife',
+      title: 'Volume Tier Pricing',
+      desc: 'Every bottle is priced on the quantity you order — from a trial single bottle up to bulk case rates. No negotiation.',
+      Icon: ScaleIcon,
     },
     {
-      title: 'Corporate Offices',
-      desc: 'Friday happy hours, boardroom entertainment, client gifting, and celebration restocks with itemized KRA VAT invoices for tax deductions.',
-      Icon: OfficeIcon,
-      badge: 'Enterprises',
+      title: 'Same-Day Nairobi Delivery',
+      desc: 'Order before 12:00 EAT and receive it that afternoon. Rest of Kenya in 2-3 business days.',
+      Icon: TruckIcon,
     },
     {
-      title: 'Events & Caterers',
-      desc: 'High-volume festival and wedding procurement with pre-event consignment terms, chilled delivery vans, and 1-click quote approvals.',
-      Icon: EventIcon,
-      badge: 'Festivals & Catering',
+      title: 'M-Pesa & Bank Transfer',
+      desc: 'Pay on order, no account required. Approved partners can apply separately for Net 14 credit terms.',
+      Icon: CardIcon,
     },
     {
-      title: 'Retail & Stockists',
-      desc: 'Liquor stores, high-end grocers, and specialty merchants sourcing authentic Pernod Ricard spirits and artisanal Jaba elixirs.',
-      Icon: StoreIcon,
-      badge: 'Stockists',
-    },
-    {
-      title: 'Private Residences',
-      desc: 'Embassy residences, country estates, and collector cellars receiving discreet temperature-controlled private deliveries.',
-      Icon: HomeIcon,
-      badge: 'Diplomatic & Estates',
+      title: 'VAT-Compliant Invoicing',
+      desc: 'Every order gets a proper KRA VAT invoice — itemized, sequential, and ready for your books.',
+      Icon: DocumentIcon,
     },
   ];
 
   return (
-    <div className="space-y-16 py-8 sm:py-12 text-[#231F20]">
+    <div className="space-y-16 py-8 sm:py-12 text-[#231F20] animate-page-enter">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
@@ -105,119 +80,77 @@ export default function TradeLandingPage() {
             </div>
 
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-tight font-sans">
-              Direct Wholesale Spirits &amp; Craft Juices for Kenyan Trade
+              Wholesale Spirits &amp; Craft Juices, Priced by the Bottle
             </h1>
 
             <p className="text-sm sm:text-base text-gray-300 font-medium leading-relaxed">
-              Serving hotels, restaurants, bars, enterprises, and caterers across Nairobi Metro and regional Kenya. Transparent quantity tiers, Net 14 credit terms, gapless KRA VAT invoices, and rapid delivery.
+              Browse real wholesale pricing and order today — no account, no vetting, no waiting. From a single
+              trial bottle to a full bar restock, the more you buy per SKU, the less you pay per bottle.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
               <Link
-                href="/trade/apply"
+                href="/trade/catalog"
                 className="w-full sm:w-auto px-8 py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 text-center"
               >
-                Apply for Trade Account →
+                Browse Wholesale Catalog →
               </Link>
               <Link
-                href="/trade/login"
+                href="/trade/how-it-works"
                 className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white text-xs font-black uppercase tracking-wider rounded-2xl border border-white/20 transition-all active:scale-95 text-center"
               >
-                Sign In to Trade Portal
+                See How It Works
               </Link>
             </div>
+
+            <p className="text-[11px] text-gray-400 pt-1">
+              Ordering for a licensed venue or expect to reorder often?{' '}
+              <Link href="/trade/apply" className="font-bold text-pink-300 hover:underline">
+                Apply for a credit account →
+              </Link>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Segment Strips */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="text-center sm:text-left">
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#840038]">
-            Tailored Commercial Terms
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#231F20] mt-1">
-            Built for Every Trade Sector
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {segments.map((seg) => (
+      {/* Feature Strip */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((f) => (
             <div
-              key={seg.title}
-              className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-4 hover:shadow-md transition-shadow"
+              key={f.title}
+              className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-3"
             >
-              <div className="flex justify-between items-center">
-                <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center">
-                  <seg.Icon className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-50 text-[#840038]">
-                  {seg.badge}
-                </span>
+              <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center">
+                <f.Icon className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black uppercase text-gray-900">{seg.title}</h3>
-              <p className="text-xs text-gray-600 leading-relaxed">{seg.desc}</p>
+              <h3 className="text-sm font-black uppercase text-gray-900">{f.title}</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 4-Step Process */}
-      <section className="bg-white py-16 border-y border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#840038]">
-              Seamless Procurement
+      {/* Minimum Order / Fine Print Strip */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-pink-50 border border-pink-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#840038] block mb-1">
+              Minimum Order
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#231F20]">
-              How the Trade Portal Works
-            </h2>
+            <p className="text-xs text-gray-700 font-medium">
+              12 bottles across all SKUs, or KES 10,000 goods value — whichever is higher. Curious how the tiers
+              and rules work? <Link href="/trade/how-it-works" className="font-bold text-[#840038] hover:underline">Read the full breakdown →</Link>
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center font-black text-sm">
-                01
-              </div>
-              <h4 className="text-sm font-bold uppercase text-gray-900">Apply &amp; Verify</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Submit business credentials (KRA PIN, liquor licence). Verified within 2 business hours.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center font-black text-sm">
-                02
-              </div>
-              <h4 className="text-sm font-bold uppercase text-gray-900">Unlock Live Pricing</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Access wholesale quantity ladders (+10%, +7%, +4% markups) on bulk order pad.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center font-black text-sm">
-                03
-              </div>
-              <h4 className="text-sm font-bold uppercase text-gray-900">Same-Day Dispatch</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Orders placed by 12:00 EAT delivered same afternoon across Nairobi Metro in dedicated vans.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center font-black text-sm">
-                04
-              </div>
-              <h4 className="text-sm font-bold uppercase text-gray-900">Net 14 Settlement</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Gapless KRA VAT invoices with 14-day credit terms, Paybill integration, and statement ledger.
-              </p>
-            </div>
-          </div>
+          <Link
+            href="/trade/catalog"
+            className="shrink-0 px-6 py-3 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow transition-all active:scale-95"
+          >
+            Start Shopping →
+          </Link>
         </div>
       </section>
     </div>
   );
 }
-

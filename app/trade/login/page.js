@@ -139,7 +139,7 @@ export default function TradeLoginPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-12 sm:py-16 space-y-8 text-[#231F20]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+    <div className="max-w-lg mx-auto px-4 py-12 sm:py-16 space-y-8 text-[#231F20] animate-page-enter" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       {/* Header & Logo */}
       <div className="text-center space-y-3">
         {logo ? (
