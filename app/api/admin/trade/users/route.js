@@ -1,6 +1,8 @@
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { adminGuard } from '@/lib/api-guard';
 import { query, ensureTradeDb } from '@/lib/trade/trade-pg.js';
+import { rateLimitRequest } from '@/lib/rate-limit';
 
 /**
  * Defined seat types and their access scopes — used for validation and UI labels.
@@ -12,10 +14,53 @@ const SEAT_TYPES = {
 };
 
 /**
+ * Simple audit log — writes admin actions to trade_audit_log table.
+ * Creates the table on first use.
+ */
+let auditTableChecked = false;
+async function auditLog(adminEmail, action, targetId, details = {}) {
+  try {
+    if (!auditTableChecked) {
+      await query(`
+        CREATE TABLE IF NOT EXISTS trade_audit_log (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          admin_email VARCHAR(255) NOT NULL,
+          action VARCHAR(100) NOT NULL,
+          target_id VARCHAR(255),
+          details JSONB,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      auditTableChecked = true;
+    }
+    await query(
+      'INSERT INTO trade_audit_log (admin_email, action, target_id, details) VALUES ($1, $2, $3, $4)',
+      [adminEmail || 'unknown', action, targetId, JSON.stringify(details)]
+    );
+  } catch (e) {
+    // Audit logging is best-effort — never block the action
+    console.warn('Audit log write failed:', e.message);
+  }
+}
+
+/** Extract admin email from the JWT in the request cookie for audit logging. */
+async function getAdminEmail(request) {
+  try {
+    const { verifyToken, ADMIN_COOKIE } = await import('@/lib/auth.js');
+    const token = request.cookies.get(ADMIN_COOKIE)?.value;
+    if (token) {
+      const payload = await verifyToken(token);
+      return payload?.email || 'unknown';
+    }
+  } catch { /* non-critical */ }
+  return 'unknown';
+}
+
+/**
  * GET /api/admin/trade/users
  *
- * Returns all trade users from Postgres with their account trading name and
- * account manager info. This is the source of truth for user management.
+ * Returns all trade users from Postgres with their account trading name.
+ * This is the source of truth for user management.
  */
 export async function GET(request) {
   const denied = await adminGuard(request);
@@ -38,8 +83,7 @@ export async function GET(request) {
         u.locked_until,
         u.created_at,
         a.trading_name,
-        a.status AS account_status,
-        a.account_manager
+        a.status AS account_status
       FROM trade_users u
       LEFT JOIN trade_accounts a ON a.id = u.account_id
       ORDER BY a.trading_name ASC, u.seat_type ASC, u.name ASC
@@ -61,7 +105,6 @@ export async function GET(request) {
       createdAt: r.created_at,
       tradingName: r.trading_name || 'Unknown Account',
       accountStatus: r.account_status || 'unknown',
-      accountManager: r.account_manager || null,
     }));
 
     return NextResponse.json({ success: true, users, seatTypes: SEAT_TYPES });
@@ -107,7 +150,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'A trade user with this email already exists' }, { status: 409 });
     }
 
-    const userId = `usr_${Date.now()}`;
+    // Collision-free user ID
+    const userId = `usr_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
     const { hashPassword, generateTemporaryPassword } = await import('@/lib/trade/trade-password.js');
     const tempPassword = generateTemporaryPassword();
     const passwordHash = await hashPassword(tempPassword);
@@ -141,9 +185,15 @@ export async function POST(request) {
         mustChangePassword: true,
       });
     } catch (e) {
-      // JSON sync is best-effort — Postgres is authoritative
       console.warn('JSON store sync failed (non-fatal):', e.message);
     }
+
+    const adminEmail = await getAdminEmail(request);
+    await auditLog(adminEmail, 'create-user', userId, {
+      email: data.email.trim().toLowerCase(),
+      accountId: data.accountId,
+      seatType,
+    });
 
     return NextResponse.json({
       success: true,
@@ -167,65 +217,37 @@ export async function POST(request) {
 /**
  * PUT /api/admin/trade/users
  *
- * Actions: unlock, reset-password, update (fields), set-account-manager.
+ * Rate-limited to prevent brute-force temp password generation.
+ * Actions: unlock, reset-password, update (fields).
  */
 export async function PUT(request) {
   const denied = await adminGuard(request);
   if (denied) return denied;
 
+  // Rate limit password-sensitive mutations (10 per 5 minutes)
+  const rl = await rateLimitRequest(request, {
+    maxRequests: 10,
+    windowMs: 300_000,
+    prefix: 'admin-trade-user-put',
+  });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 });
+  }
+
   try {
     const { userId, action, ...updates } = await request.json();
 
-    await ensureTradeDb();
-
-    // ── Set account manager from an existing user ────────────────────────
-    if (action === 'set-account-manager') {
-      const { accountId, name, phone, avatar, role } = updates;
-      if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
-
-      const manager = {
-        id: userId || null,
-        name: name || null,
-        phone: phone || null,
-        avatar: avatar || null,
-        role: role || 'Account Manager',
-      };
-
-      // If userId provided, pull their email for the manager object
-      if (userId) {
-        const userRes = await query('SELECT email FROM trade_users WHERE id = $1', [userId]);
-        if (userRes.rows.length > 0) {
-          manager.email = userRes.rows[0].email;
-        }
-      }
-
-      await query(
-        'UPDATE trade_accounts SET account_manager = $1 WHERE id = $2',
-        [JSON.stringify(manager), accountId]
-      );
-
-      // Also update JSON store
-      try {
-        const { upsertTradeAccount, getTradeAccountById } = await import('@/lib/trade/trade-store.js');
-        const acc = await getTradeAccountById(accountId);
-        if (acc) {
-          await upsertTradeAccount({ ...acc, accountManager: manager });
-        }
-      } catch (e) {
-        console.warn('JSON store sync failed (non-fatal):', e.message);
-      }
-
-      return NextResponse.json({ success: true, accountManager: manager });
-    }
-
-    // ── Per-user actions ─────────────────────────────────────────────────
     if (!userId) return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+
+    await ensureTradeDb();
+    const adminEmail = await getAdminEmail(request);
 
     if (action === 'unlock') {
       await query(
         'UPDATE trade_users SET failed_attempts = 0, locked_until = NULL WHERE id = $1',
         [userId]
       );
+      await auditLog(adminEmail, 'unlock-user', userId);
       return NextResponse.json({ success: true, message: 'User unlocked' });
     }
 
@@ -237,6 +259,7 @@ export async function PUT(request) {
         'UPDATE trade_users SET password_hash = $1, must_change_password = TRUE, failed_attempts = 0, locked_until = NULL WHERE id = $2',
         [hash, userId]
       );
+      await auditLog(adminEmail, 'reset-password', userId);
       return NextResponse.json({ success: true, temporaryPassword: tempPassword });
     }
 
@@ -252,17 +275,17 @@ export async function PUT(request) {
     const sets = [];
     const vals = [];
     let idx = 1;
+    const changedFields = {};
 
     for (const [jsKey, pgCol] of Object.entries(fieldMap)) {
       if (updates[jsKey] !== undefined) {
-        // Validate seat type
         if (jsKey === 'seatType' && !SEAT_TYPES[updates[jsKey]]) {
           return NextResponse.json({ error: `Invalid seat type. Must be one of: ${Object.keys(SEAT_TYPES).join(', ')}` }, { status: 400 });
         }
-        // Normalize email
         const val = jsKey === 'email' ? String(updates[jsKey]).trim().toLowerCase() : updates[jsKey];
         sets.push(`${pgCol} = $${idx}`);
         vals.push(val);
+        changedFields[jsKey] = val;
         idx++;
       }
     }
@@ -270,6 +293,7 @@ export async function PUT(request) {
     if (sets.length > 0) {
       vals.push(userId);
       await query(`UPDATE trade_users SET ${sets.join(', ')} WHERE id = $${idx}`, vals);
+      await auditLog(adminEmail, 'update-user', userId, changedFields);
     }
 
     return NextResponse.json({ success: true });

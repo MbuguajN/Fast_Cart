@@ -163,10 +163,11 @@ export default function AdminTradePage() {
   const [userSearch, setUserSearch] = useState('');
   const [userAccountFilter, setUserAccountFilter] = useState('all');
   const [showNewUserModal, setShowNewUserModal] = useState(false);
-  const [newUserForm, setNewUserForm] = useState({ accountId: '', name: '', email: '', phone: '', role: 'Business Owner', seatType: 'buyer' });
+  const [newUserForm, setNewUserForm] = useState({ accountId: '', name: '', email: '', phone: '', role: 'Staff', seatType: 'buyer' });
   const [creatingUser, setCreatingUser] = useState(false);
   const [tempPasswordDisplay, setTempPasswordDisplay] = useState(null);
   const [resettingUserId, setResettingUserId] = useState(null);
+  const [amAvatarUploading, setAmAvatarUploading] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setNotification({ msg, type });
@@ -2931,14 +2932,7 @@ export default function AdminTradePage() {
         const seatTypeLabels = { owner: 'Owner / Director', buyer: 'Buyer', viewer: 'Viewer / Auditor' };
         const seatTypeColors = { owner: 'bg-purple-100 text-purple-700', buyer: 'bg-blue-100 text-blue-700', viewer: 'bg-gray-100 text-gray-600' };
 
-        // Group users by account for the account manager section
-        const accountsWithUsers = {};
-        tradeUsers.forEach((u) => {
-          if (!accountsWithUsers[u.accountId]) {
-            accountsWithUsers[u.accountId] = { tradingName: u.tradingName, accountId: u.accountId, accountManager: u.accountManager, users: [] };
-          }
-          accountsWithUsers[u.accountId].users.push(u);
-        });
+        const currentAM = config?.accountManager || null;
 
         return (
         <div className="space-y-4">
@@ -3167,88 +3161,118 @@ export default function AdminTradePage() {
             )}
           </div>
 
-          {/* ── Account Manager Assignment ── */}
+          {/* ── App-Wide Account Manager / WhatsApp Contact ── */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
             <div>
               <h3 className="text-sm font-bold text-gray-900">Account Manager / WhatsApp Contact</h3>
-              <p className="text-[10px] text-gray-500">Set the contact person shown on each account's dashboard with 1-Tap WhatsApp and call buttons.</p>
+              <p className="text-[10px] text-gray-500">This contact is shown on every trade account's dashboard with 1-Tap WhatsApp and call buttons.</p>
             </div>
 
-            <div className="space-y-3">
-              {Object.values(accountsWithUsers).map((grp) => (
-                <div key={grp.accountId} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                  <div className="min-w-[160px]">
-                    <div className="font-bold text-xs text-gray-900">{grp.tradingName}</div>
-                    {grp.accountManager?.name && (
-                      <div className="flex items-center gap-2 mt-1">
-                        {grp.accountManager.avatar && (
-                          <img src={grp.accountManager.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-gray-200" />
-                        )}
-                        <span className="text-[10px] text-emerald-700 font-semibold">
-                          ✓ {grp.accountManager.name} — {grp.accountManager.phone || 'No phone'}
-                        </span>
-                      </div>
-                    )}
-                    {!grp.accountManager?.name && (
-                      <span className="text-[10px] text-red-500 font-semibold">⚠ No manager assigned</span>
-                    )}
+            {currentAM?.name && (
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                {currentAM.avatar ? (
+                  <img src={currentAM.avatar} alt="" className="w-14 h-14 rounded-2xl object-cover border-2 border-pink-200 shadow" />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400 text-lg font-bold border-2 border-gray-300">
+                    {currentAM.name?.[0] || '?'}
                   </div>
-
-                  <div className="flex flex-wrap items-center gap-2 flex-1">
-                    <input
-                      type="text"
-                      placeholder="Manager name"
-                      defaultValue={grp.accountManager?.name || ''}
-                      id={`am-name-${grp.accountId}`}
-                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs flex-1 min-w-[120px]"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="+254 7..."
-                      defaultValue={grp.accountManager?.phone || ''}
-                      id={`am-phone-${grp.accountId}`}
-                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs w-[140px]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Title (e.g. Account Director)"
-                      defaultValue={grp.accountManager?.role || ''}
-                      id={`am-role-${grp.accountId}`}
-                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs flex-1 min-w-[140px]"
-                    />
-                    <input
-                      type="url"
-                      placeholder="Photo URL"
-                      defaultValue={grp.accountManager?.avatar || ''}
-                      id={`am-avatar-${grp.accountId}`}
-                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs flex-1 min-w-[160px]"
-                    />
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        const name = document.getElementById(`am-name-${grp.accountId}`)?.value?.trim();
-                        const phone = document.getElementById(`am-phone-${grp.accountId}`)?.value?.trim();
-                        const role = document.getElementById(`am-role-${grp.accountId}`)?.value?.trim();
-                        const avatar = document.getElementById(`am-avatar-${grp.accountId}`)?.value?.trim();
-                        if (!name) { showToast('Manager name is required', 'error'); return; }
-                        try {
-                          const res = await fetch('/api/admin/trade/users', {
-                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: 'set-account-manager', accountId: grp.accountId, name, phone, role: role || 'Account Manager', avatar }),
-                          });
-                          if (!res.ok) throw new Error((await res.json()).error);
-                          showToast(`Account manager updated for ${grp.tradingName}`);
-                          loadAllAdminData();
-                        } catch (err) { showToast(err.message, 'error'); }
-                      }}
-                      className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[#840038] text-white hover:bg-[#6b002c] transition-all whitespace-nowrap"
-                    >
-                      Save
-                    </button>
-                  </div>
+                )}
+                <div>
+                  <div className="font-bold text-sm text-gray-900">{currentAM.name}</div>
+                  <div className="text-[10px] text-gray-500">{currentAM.role || 'Account Manager'}</div>
+                  <div className="text-[10px] text-emerald-700 font-semibold">📞 {currentAM.phone || 'No phone set'}</div>
+                  {currentAM.email && <div className="text-[10px] text-gray-400">{currentAM.email}</div>}
                 </div>
-              ))}
+              </div>
+            )}
+            {!currentAM?.name && (
+              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-semibold">
+                ⚠ No account manager set. Trade users will see a placeholder on their dashboard.
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Full Name *</label>
+                <input type="text" id="am-global-name" defaultValue={currentAM?.name || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" placeholder="e.g. Paulette Chege" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Phone / WhatsApp *</label>
+                <input type="tel" id="am-global-phone" defaultValue={currentAM?.phone || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" placeholder="+254 711 234 567" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Title / Role</label>
+                <input type="text" id="am-global-role" defaultValue={currentAM?.role || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" placeholder="e.g. Key Account Director" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Email</label>
+                <input type="email" id="am-global-email" defaultValue={currentAM?.email || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" placeholder="manager@myhappyhour.co.ke" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Photo</label>
+                <div className="flex items-center gap-3">
+                  {currentAM?.avatar && (
+                    <img src={currentAM.avatar} alt="" className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
+                  )}
+                  <label className="cursor-pointer px-3 py-2 rounded-xl border border-dashed border-gray-300 hover:border-[#840038] text-xs text-gray-500 hover:text-[#840038] transition-all">
+                    {amAvatarUploading ? 'Uploading...' : '📷 Upload Photo'}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      disabled={amAvatarUploading}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setAmAvatarUploading(true);
+                        try {
+                          const fd = new FormData();
+                          fd.append('file', file);
+                          const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error);
+                          // Update the hidden field with the uploaded URL
+                          document.getElementById('am-global-avatar').value = data.url;
+                          showToast('Photo uploaded successfully');
+                        } catch (err) { showToast(err.message, 'error'); }
+                        finally { setAmAvatarUploading(false); e.target.value = ''; }
+                      }}
+                    />
+                  </label>
+                  <input type="hidden" id="am-global-avatar" defaultValue={currentAM?.avatar || ''} />
+                  <span className="text-[9px] text-gray-400">PNG, JPG, or WebP — max 5 MB</span>
+                </div>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={async () => {
+                const name = document.getElementById('am-global-name')?.value?.trim();
+                const phone = document.getElementById('am-global-phone')?.value?.trim();
+                const role = document.getElementById('am-global-role')?.value?.trim();
+                const email = document.getElementById('am-global-email')?.value?.trim();
+                const avatar = document.getElementById('am-global-avatar')?.value?.trim();
+                if (!name) { showToast('Manager name is required', 'error'); return; }
+                if (!phone) { showToast('Phone number is required for WhatsApp', 'error'); return; }
+                try {
+                  const res = await fetch('/api/admin/trade/config', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountManager: { name, phone, role: role || 'Account Manager', email, avatar } }),
+                  });
+                  if (!res.ok) throw new Error((await res.json()).error);
+                  showToast('Account manager saved — all trade accounts will see this contact');
+                  loadAllAdminData();
+                } catch (err) { showToast(err.message, 'error'); }
+              }}
+              className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#840038] text-white hover:bg-[#6b002c] transition-all"
+            >
+              Save Account Manager
+            </button>
           </div>
 
           {/* New User Modal */}

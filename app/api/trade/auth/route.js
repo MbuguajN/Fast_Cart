@@ -5,6 +5,7 @@ import {
   recordTradeLoginAttempt,
   isTradeUserLocked,
   toPublicTradeUser,
+  readTradeStore,
 } from '@/lib/trade/trade-store.js';
 import { signTradeToken, getTradeAuthFromRequest, tradeCookieOptions, TRADE_COOKIE } from '@/lib/trade/trade-auth.js';
 import { verifyPassword, hasPassword } from '@/lib/trade/trade-password.js';
@@ -37,10 +38,19 @@ export async function GET(request) {
     if (!auth) {
       return NextResponse.json({ authenticated: false });
     }
+
+    // App-wide account manager from trade config overrides per-account data
+    const store = readTradeStore();
+    const globalAM = store.config?.accountManager;
+    const account = { ...auth.account };
+    if (globalAM && globalAM.name) {
+      account.accountManager = globalAM;
+    }
+
     return NextResponse.json({
       authenticated: true,
       user: toPublicTradeUser(auth.user),
-      account: auth.account,
+      account,
     });
   } catch (error) {
     console.error('Trade session check failed:', error.message);
