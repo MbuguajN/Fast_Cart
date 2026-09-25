@@ -3,11 +3,19 @@ import { adminGuard } from '@/lib/api-guard';
 import { query, ensureTradeDb } from '@/lib/trade/trade-pg.js';
 
 /**
+ * Defined seat types and their access scopes — used for validation and UI labels.
+ */
+const SEAT_TYPES = {
+  owner: { label: 'Owner / Director', scope: 'Full account control, credit, statements, all seats' },
+  buyer: { label: 'Buyer', scope: 'Place orders, view catalogue, subject to ceiling' },
+  viewer: { label: 'Viewer / Auditor', scope: 'Read-only: invoices, statements, order history' },
+};
+
+/**
  * GET /api/admin/trade/users
  *
- * Returns all trade users from Postgres with their account trading name.
- * This is the source of truth for user management — the JSON store may be
- * stale or missing users created via direct Postgres insertion.
+ * Returns all trade users from Postgres with their account trading name and
+ * account manager info. This is the source of truth for user management.
  */
 export async function GET(request) {
   const denied = await adminGuard(request);
@@ -30,7 +38,8 @@ export async function GET(request) {
         u.locked_until,
         u.created_at,
         a.trading_name,
-        a.status AS account_status
+        a.status AS account_status,
+        a.account_manager
       FROM trade_users u
       LEFT JOIN trade_accounts a ON a.id = u.account_id
       ORDER BY a.trading_name ASC, u.seat_type ASC, u.name ASC
@@ -52,9 +61,10 @@ export async function GET(request) {
       createdAt: r.created_at,
       tradingName: r.trading_name || 'Unknown Account',
       accountStatus: r.account_status || 'unknown',
+      accountManager: r.account_manager || null,
     }));
 
-    return NextResponse.json({ success: true, users });
+    return NextResponse.json({ success: true, users, seatTypes: SEAT_TYPES });
   } catch (error) {
     console.error('Failed to fetch trade users:', error.message);
     return NextResponse.json({ error: error.message || 'Failed to fetch trade users' }, { status: 500 });
@@ -77,6 +87,11 @@ export async function POST(request) {
     if (!data.accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     if (!data.name) return NextResponse.json({ error: 'name is required' }, { status: 400 });
     if (!data.email) return NextResponse.json({ error: 'email is required' }, { status: 400 });
+
+    const seatType = data.seatType || 'buyer';
+    if (!SEAT_TYPES[seatType]) {
+      return NextResponse.json({ error: `Invalid seat type. Must be one of: ${Object.keys(SEAT_TYPES).join(', ')}` }, { status: 400 });
+    }
 
     await ensureTradeDb();
 
@@ -106,8 +121,8 @@ export async function POST(request) {
       data.name.trim(),
       data.email.trim().toLowerCase(),
       (data.phone || '').trim(),
-      data.role || 'Business Owner',
-      data.seatType || 'buyer',
+      data.role || 'Staff',
+      seatType,
       passwordHash,
     ]);
 
@@ -120,8 +135,8 @@ export async function POST(request) {
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
         phone: (data.phone || '').trim(),
-        role: data.role || 'Business Owner',
-        seatType: data.seatType || 'buyer',
+        role: data.role || 'Staff',
+        seatType,
         passwordHash,
         mustChangePassword: true,
       });
@@ -138,8 +153,8 @@ export async function POST(request) {
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
         phone: (data.phone || '').trim(),
-        role: data.role || 'Business Owner',
-        seatType: data.seatType || 'buyer',
+        role: data.role || 'Staff',
+        seatType,
       },
       temporaryPassword: tempPassword,
     });
@@ -152,7 +167,7 @@ export async function POST(request) {
 /**
  * PUT /api/admin/trade/users
  *
- * Unlock a user / update basic details / reset failed attempts.
+ * Actions: unlock, reset-password, update (fields), set-account-manager.
  */
 export async function PUT(request) {
   const denied = await adminGuard(request);
@@ -160,9 +175,51 @@ export async function PUT(request) {
 
   try {
     const { userId, action, ...updates } = await request.json();
-    if (!userId) return NextResponse.json({ error: 'userId is required' }, { status: 400 });
 
     await ensureTradeDb();
+
+    // ── Set account manager from an existing user ────────────────────────
+    if (action === 'set-account-manager') {
+      const { accountId, name, phone, avatar, role } = updates;
+      if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
+
+      const manager = {
+        id: userId || null,
+        name: name || null,
+        phone: phone || null,
+        avatar: avatar || null,
+        role: role || 'Account Manager',
+      };
+
+      // If userId provided, pull their email for the manager object
+      if (userId) {
+        const userRes = await query('SELECT email FROM trade_users WHERE id = $1', [userId]);
+        if (userRes.rows.length > 0) {
+          manager.email = userRes.rows[0].email;
+        }
+      }
+
+      await query(
+        'UPDATE trade_accounts SET account_manager = $1 WHERE id = $2',
+        [JSON.stringify(manager), accountId]
+      );
+
+      // Also update JSON store
+      try {
+        const { upsertTradeAccount, getTradeAccountById } = await import('@/lib/trade/trade-store.js');
+        const acc = await getTradeAccountById(accountId);
+        if (acc) {
+          await upsertTradeAccount({ ...acc, accountManager: manager });
+        }
+      } catch (e) {
+        console.warn('JSON store sync failed (non-fatal):', e.message);
+      }
+
+      return NextResponse.json({ success: true, accountManager: manager });
+    }
+
+    // ── Per-user actions ─────────────────────────────────────────────────
+    if (!userId) return NextResponse.json({ error: 'userId is required' }, { status: 400 });
 
     if (action === 'unlock') {
       await query(
@@ -183,17 +240,29 @@ export async function PUT(request) {
       return NextResponse.json({ success: true, temporaryPassword: tempPassword });
     }
 
-    // General field updates (name, role, seatType, phone)
-    const allowed = ['name', 'role', 'seat_type', 'phone'];
-    const fieldMap = { name: 'name', role: 'role', seatType: 'seat_type', phone: 'phone' };
+    // ── General field updates (name, role, seatType, phone, email) ────
+    const fieldMap = {
+      name: 'name',
+      role: 'role',
+      seatType: 'seat_type',
+      phone: 'phone',
+      email: 'email',
+    };
+
     const sets = [];
     const vals = [];
     let idx = 1;
 
     for (const [jsKey, pgCol] of Object.entries(fieldMap)) {
-      if (updates[jsKey] !== undefined && allowed.includes(pgCol)) {
+      if (updates[jsKey] !== undefined) {
+        // Validate seat type
+        if (jsKey === 'seatType' && !SEAT_TYPES[updates[jsKey]]) {
+          return NextResponse.json({ error: `Invalid seat type. Must be one of: ${Object.keys(SEAT_TYPES).join(', ')}` }, { status: 400 });
+        }
+        // Normalize email
+        const val = jsKey === 'email' ? String(updates[jsKey]).trim().toLowerCase() : updates[jsKey];
         sets.push(`${pgCol} = $${idx}`);
-        vals.push(updates[jsKey]);
+        vals.push(val);
         idx++;
       }
     }

@@ -2927,21 +2927,44 @@ export default function AdminTradePage() {
       )}
 
       {/* ═══════ USERS & SEATS TAB ═══════ */}
-      {activeTab === 'users' && (
+      {activeTab === 'users' && (() => {
+        const seatTypeLabels = { owner: 'Owner / Director', buyer: 'Buyer', viewer: 'Viewer / Auditor' };
+        const seatTypeColors = { owner: 'bg-purple-100 text-purple-700', buyer: 'bg-blue-100 text-blue-700', viewer: 'bg-gray-100 text-gray-600' };
+
+        // Group users by account for the account manager section
+        const accountsWithUsers = {};
+        tradeUsers.forEach((u) => {
+          if (!accountsWithUsers[u.accountId]) {
+            accountsWithUsers[u.accountId] = { tradingName: u.tradingName, accountId: u.accountId, accountManager: u.accountManager, users: [] };
+          }
+          accountsWithUsers[u.accountId].users.push(u);
+        });
+
+        return (
         <div className="space-y-4">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-gray-900">Trade Users & Seats</h2>
-              <p className="text-xs text-gray-500">Manage login credentials, unlock accounts, and provision new seats.</p>
+              <p className="text-xs text-gray-500">Manage credentials, roles, seat types, and account manager contacts.</p>
             </div>
             <button
               type="button"
-              onClick={() => { setShowNewUserModal(true); setNewUserForm({ accountId: '', name: '', email: '', phone: '', role: 'Business Owner', seatType: 'buyer' }); }}
+              onClick={() => { setShowNewUserModal(true); setNewUserForm({ accountId: '', name: '', email: '', phone: '', role: 'Staff', seatType: 'buyer' }); }}
               className="px-4 py-2.5 bg-[#840038] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm hover:bg-[#6b002c] transition-all active:scale-95"
             >
               + New User Seat
             </button>
+          </div>
+
+          {/* Seat Type Legend */}
+          <div className="flex flex-wrap gap-3 text-[10px]">
+            {Object.entries(seatTypeLabels).map(([key, label]) => (
+              <div key={key} className="flex items-center gap-1.5">
+                <span className={`px-1.5 py-0.5 rounded-full font-bold uppercase ${seatTypeColors[key]}`}>{key}</span>
+                <span className="text-gray-500">{label}</span>
+              </div>
+            ))}
           </div>
 
           {/* Filters */}
@@ -2996,7 +3019,8 @@ export default function AdminTradePage() {
                   <tr className="bg-gray-50 border-b border-gray-200 text-[10px] font-bold uppercase text-gray-500 tracking-wider">
                     <th className="text-left px-4 py-3">User</th>
                     <th className="text-left px-4 py-3">Account</th>
-                    <th className="text-left px-4 py-3">Seat</th>
+                    <th className="text-left px-4 py-3">Role / Title</th>
+                    <th className="text-left px-4 py-3">Seat Type</th>
                     <th className="text-left px-4 py-3">Status</th>
                     <th className="text-right px-4 py-3">Actions</th>
                   </tr>
@@ -3025,12 +3049,49 @@ export default function AdminTradePage() {
                           }`}>{u.accountStatus}</span>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-medium text-gray-800">{u.role}</div>
-                          <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                            u.seatType === 'owner' ? 'bg-purple-100 text-purple-700'
-                            : u.seatType === 'buyer' ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-600'
-                          }`}>{u.seatType}</span>
+                          <input
+                            type="text"
+                            defaultValue={u.role}
+                            onBlur={async (e) => {
+                              const newRole = e.target.value.trim();
+                              if (newRole && newRole !== u.role) {
+                                try {
+                                  const res = await fetch('/api/admin/trade/users', {
+                                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ userId: u.id, role: newRole }),
+                                  });
+                                  if (!res.ok) throw new Error((await res.json()).error);
+                                  showToast(`Role updated to "${newRole}"`);
+                                  loadAllAdminData();
+                                } catch (err) { showToast(err.message, 'error'); }
+                              }
+                            }}
+                            className="w-full min-w-[120px] px-2 py-1 rounded-lg border border-transparent hover:border-gray-300 focus:border-[#840038] focus:ring-1 focus:ring-[#840038]/30 text-xs font-medium text-gray-800 outline-none transition-all"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <select
+                            defaultValue={u.seatType}
+                            onChange={async (e) => {
+                              const newSeat = e.target.value;
+                              if (newSeat !== u.seatType) {
+                                try {
+                                  const res = await fetch('/api/admin/trade/users', {
+                                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ userId: u.id, seatType: newSeat }),
+                                  });
+                                  if (!res.ok) throw new Error((await res.json()).error);
+                                  showToast(`Seat type changed to ${seatTypeLabels[newSeat]}`);
+                                  loadAllAdminData();
+                                } catch (err) { showToast(err.message, 'error'); }
+                              }
+                            }}
+                            className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full cursor-pointer border-0 outline-none ${seatTypeColors[u.seatType] || 'bg-gray-100 text-gray-600'}`}
+                          >
+                            <option value="owner">Owner</option>
+                            <option value="buyer">Buyer</option>
+                            <option value="viewer">Viewer</option>
+                          </select>
                         </td>
                         <td className="px-4 py-3">
                           <div className="space-y-1">
@@ -3046,7 +3107,7 @@ export default function AdminTradePage() {
                               <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 block w-fit">Temp Password</span>
                             )}
                             {u.failedAttempts > 0 && (
-                              <span className="text-[9px] text-gray-500">{u.failedAttempts} failed attempt{u.failedAttempts !== 1 ? 's' : ''}</span>
+                              <span className="text-[9px] text-gray-500">{u.failedAttempts} failed</span>
                             )}
                           </div>
                         </td>
@@ -3059,8 +3120,7 @@ export default function AdminTradePage() {
                                 setResettingUserId(u.id);
                                 try {
                                   const res = await fetch('/api/admin/trade/users', {
-                                    method: 'PUT',
-                                    headers: { 'Content-Type': 'application/json' },
+                                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ userId: u.id, action: 'reset-password' }),
                                   });
                                   const data = await res.json();
@@ -3068,16 +3128,13 @@ export default function AdminTradePage() {
                                   setTempPasswordDisplay({ password: data.temporaryPassword, name: u.name, email: u.email });
                                   showToast(`Password reset for ${u.name}`);
                                   loadAllAdminData();
-                                } catch (err) {
-                                  showToast(err.message, 'error');
-                                } finally {
-                                  setResettingUserId(null);
-                                }
+                                } catch (err) { showToast(err.message, 'error'); }
+                                finally { setResettingUserId(null); }
                               }}
-                              className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-all"
+                              className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-all"
                               title="Generate a new temporary password"
                             >
-                              {resettingUserId === u.id ? '...' : '🔑 Reset'}
+                              {resettingUserId === u.id ? '...' : '🔑'}
                             </button>
                             {u.isLocked && (
                               <button
@@ -3085,21 +3142,17 @@ export default function AdminTradePage() {
                                 onClick={async () => {
                                   try {
                                     const res = await fetch('/api/admin/trade/users', {
-                                      method: 'PUT',
-                                      headers: { 'Content-Type': 'application/json' },
+                                      method: 'PUT', headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify({ userId: u.id, action: 'unlock' }),
                                     });
-                                    const data = await res.json();
-                                    if (!res.ok) throw new Error(data.error);
+                                    if (!res.ok) throw new Error((await res.json()).error);
                                     showToast(`${u.name} unlocked`);
                                     loadAllAdminData();
-                                  } catch (err) {
-                                    showToast(err.message, 'error');
-                                  }
+                                  } catch (err) { showToast(err.message, 'error'); }
                                 }}
-                                className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-all"
+                                className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-all"
                               >
-                                🔓 Unlock
+                                🔓
                               </button>
                             )}
                           </div>
@@ -3112,6 +3165,90 @@ export default function AdminTradePage() {
             {tradeUsers.length === 0 && (
               <div className="text-center py-12 text-gray-400 text-xs">No trade users found.</div>
             )}
+          </div>
+
+          {/* ── Account Manager Assignment ── */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-gray-900">Account Manager / WhatsApp Contact</h3>
+              <p className="text-[10px] text-gray-500">Set the contact person shown on each account's dashboard with 1-Tap WhatsApp and call buttons.</p>
+            </div>
+
+            <div className="space-y-3">
+              {Object.values(accountsWithUsers).map((grp) => (
+                <div key={grp.accountId} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="min-w-[160px]">
+                    <div className="font-bold text-xs text-gray-900">{grp.tradingName}</div>
+                    {grp.accountManager?.name && (
+                      <div className="flex items-center gap-2 mt-1">
+                        {grp.accountManager.avatar && (
+                          <img src={grp.accountManager.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-gray-200" />
+                        )}
+                        <span className="text-[10px] text-emerald-700 font-semibold">
+                          ✓ {grp.accountManager.name} — {grp.accountManager.phone || 'No phone'}
+                        </span>
+                      </div>
+                    )}
+                    {!grp.accountManager?.name && (
+                      <span className="text-[10px] text-red-500 font-semibold">⚠ No manager assigned</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 flex-1">
+                    <input
+                      type="text"
+                      placeholder="Manager name"
+                      defaultValue={grp.accountManager?.name || ''}
+                      id={`am-name-${grp.accountId}`}
+                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs flex-1 min-w-[120px]"
+                    />
+                    <input
+                      type="tel"
+                      placeholder="+254 7..."
+                      defaultValue={grp.accountManager?.phone || ''}
+                      id={`am-phone-${grp.accountId}`}
+                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs w-[140px]"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Title (e.g. Account Director)"
+                      defaultValue={grp.accountManager?.role || ''}
+                      id={`am-role-${grp.accountId}`}
+                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs flex-1 min-w-[140px]"
+                    />
+                    <input
+                      type="url"
+                      placeholder="Photo URL"
+                      defaultValue={grp.accountManager?.avatar || ''}
+                      id={`am-avatar-${grp.accountId}`}
+                      className="px-2 py-1.5 rounded-lg border border-gray-200 text-xs flex-1 min-w-[160px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const name = document.getElementById(`am-name-${grp.accountId}`)?.value?.trim();
+                        const phone = document.getElementById(`am-phone-${grp.accountId}`)?.value?.trim();
+                        const role = document.getElementById(`am-role-${grp.accountId}`)?.value?.trim();
+                        const avatar = document.getElementById(`am-avatar-${grp.accountId}`)?.value?.trim();
+                        if (!name) { showToast('Manager name is required', 'error'); return; }
+                        try {
+                          const res = await fetch('/api/admin/trade/users', {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'set-account-manager', accountId: grp.accountId, name, phone, role: role || 'Account Manager', avatar }),
+                          });
+                          if (!res.ok) throw new Error((await res.json()).error);
+                          showToast(`Account manager updated for ${grp.tradingName}`);
+                          loadAllAdminData();
+                        } catch (err) { showToast(err.message, 'error'); }
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[#840038] text-white hover:bg-[#6b002c] transition-all whitespace-nowrap"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* New User Modal */}
@@ -3152,17 +3289,17 @@ export default function AdminTradePage() {
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Role</label>
+                      <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Role / Title</label>
                       <input type="text" value={newUserForm.role} onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+                        className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" placeholder="e.g. Beverage Manager" />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Seat Type</label>
+                      <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Seat Type *</label>
                       <select value={newUserForm.seatType} onChange={(e) => setNewUserForm({ ...newUserForm, seatType: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs">
-                        <option value="owner">Owner</option>
-                        <option value="buyer">Buyer</option>
-                        <option value="viewer">Viewer / Auditor</option>
+                        <option value="buyer">Buyer (can place orders)</option>
+                        <option value="owner">Owner / Director (full control)</option>
+                        <option value="viewer">Viewer / Auditor (read-only)</option>
                       </select>
                     </div>
                   </div>
@@ -3178,8 +3315,7 @@ export default function AdminTradePage() {
                       setCreatingUser(true);
                       try {
                         const res = await fetch('/api/admin/trade/users', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
+                          method: 'POST', headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify(newUserForm),
                         });
                         const data = await res.json();
@@ -3188,11 +3324,8 @@ export default function AdminTradePage() {
                         showToast(`User ${data.user.name} created successfully`);
                         setShowNewUserModal(false);
                         loadAllAdminData();
-                      } catch (err) {
-                        showToast(err.message, 'error');
-                      } finally {
-                        setCreatingUser(false);
-                      }
+                      } catch (err) { showToast(err.message, 'error'); }
+                      finally { setCreatingUser(false); }
                     }}
                     className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#840038] text-white disabled:opacity-50"
                   >
@@ -3203,7 +3336,8 @@ export default function AdminTradePage() {
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
 
       </div>
     </div>
