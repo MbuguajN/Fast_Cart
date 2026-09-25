@@ -37,6 +37,7 @@ async function verifyWordPressCredentials(username, password) {
     const res = await fetch(`${wpUrl}/wp-json/wp/v2/users/me?context=edit`, {
       headers: {
         'Authorization': `Basic ${credentials}`,
+        'User-Agent': 'FastCart/1.0 (Admin Auth; +https://myhappyhour.co.ke)',
       },
     });
 
