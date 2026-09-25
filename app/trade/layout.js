@@ -180,7 +180,7 @@ function TradePortalShell({ children }) {
                 href="/trade/apply"
                 className={`hidden sm:inline transition-colors ${pathname === '/trade/apply' ? 'text-pink-300 font-bold' : 'text-gray-300 hover:text-white'}`}
               >
-                Credit Account
+                Business Account
               </Link>
 
               <Link

@@ -72,7 +72,7 @@ export async function POST(request) {
       }
       if (paymentMethod === 'pay_on_account') {
         return NextResponse.json(
-          { error: 'Pay-on-account is only available to approved credit accounts. Sign in, or apply for a trade credit account.' },
+          { error: 'Pay-on-account is only available to approved business accounts. Sign in, or apply for a trade business account.' },
           { status: 403 }
         );
       }

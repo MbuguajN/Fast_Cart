@@ -155,11 +155,11 @@ export default function TradeHowItWorksPage() {
           <div className="space-y-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#840038]">For Repeat & Larger Buyers</span>
             <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-[#231F20]">
-              The Credit Account Track
+              The Business Account Track
             </h2>
             <p className="text-xs text-gray-600 leading-relaxed">
               Every order above works on cash terms with no account at all. Businesses that order regularly can apply
-              separately for a trade credit account — submit your KRA PIN and liquor licence, and an approved account
+              separately for a trade business account — submit your KRA PIN and liquor licence, and an approved account
               unlocks Net 14 payment terms, a dedicated statement of account, and a named account manager. Vetting
               takes a few business hours; it never blocks you from ordering on cash terms in the meantime.
             </p>
@@ -169,7 +169,7 @@ export default function TradeHowItWorksPage() {
               href="/trade/apply"
               className="px-8 py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95"
             >
-              Apply for a Credit Account →
+              Apply for a Business Account →
             </Link>
           </div>
         </div>

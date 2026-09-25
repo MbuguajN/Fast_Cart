@@ -91,7 +91,7 @@ export default function TradeApplyPage() {
           ✓
         </div>
         <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#231F20]">
-          Credit Account Application Received
+          Business Account Application Received
         </h1>
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
           Thank you for applying for Net 14 trade credit terms. Our vetting team is reviewing your KRA PIN and licence. You will receive an SMS and email with login credentials within 2 business hours — in the meantime, you can already order and pay by M-Pesa or bank transfer without an account.
@@ -121,7 +121,7 @@ export default function TradeApplyPage() {
           ← Back to Trade Overview
         </Link>
         <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#231F20] mt-1">
-          Apply for a Trade Credit Account
+          Apply for a Trade Business Account
         </h1>
         <p className="text-xs text-gray-500 font-medium mt-1">
           No application is needed to browse the wholesale catalog or place a cash order. This form is only for
@@ -396,7 +396,7 @@ export default function TradeApplyPage() {
           disabled={submitting}
           className="w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50"
         >
-          {submitting ? 'Submitting Application...' : 'Submit Credit Account Application →'}
+          {submitting ? 'Submitting Application...' : 'Submit Business Account Application →'}
         </button>
       </form>
     </div>

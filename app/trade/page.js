@@ -106,7 +106,7 @@ export default function TradeLandingPage() {
             <p className="text-[11px] text-gray-400 pt-1">
               Ordering for a licensed venue or expect to reorder often?{' '}
               <Link href="/trade/apply" className="font-bold text-pink-300 hover:underline">
-                Apply for a credit account →
+                Apply for a business account →
               </Link>
             </p>
           </div>
