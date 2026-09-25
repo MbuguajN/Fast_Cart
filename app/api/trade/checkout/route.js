@@ -159,7 +159,7 @@ export async function POST(request) {
               { display_name: 'Account', variable_name: 'account', value: order.accountName },
             ],
           },
-          callback_url: `${siteUrl}/api/trade/paystack/callback`,
+          callback_url: `${siteUrl}/api/paystack/callback`,
         });
 
         // Store the expected reference on the order for verification

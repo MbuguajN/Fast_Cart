@@ -30,26 +30,49 @@ export async function GET(request) {
 
   try {
     const paystackData = await verifyPayment(reference);
-    const result = await settleOrderFromPayment(paystackData);
+    
+    // Check if this is a trade order by looking for trade_order_id in metadata
+    if (paystackData?.metadata?.trade_order_id) {
+      const { settleTradeOrderFromPayment } = await import('@/lib/trade/trade-payment.js');
+      const result = await settleTradeOrderFromPayment(paystackData);
 
-    if (!result.settled) {
-      console.error(`Callback could not settle order ${result.orderId ?? '?'}: ${result.reason}`);
+      if (!result.settled) {
+        console.error(`Callback could not settle trade order ${result.orderId ?? '?'}: ${result.reason}`);
 
-      // The money may well have left the customer's account — send them
-      // somewhere that says "we're checking", not "failed".
-      if (result.reason === 'amount_short' || result.reason === 'wc_update_failed') {
-        return NextResponse.redirect(
-          siteUrl(`/?payment=review&order=${encodeURIComponent(result.orderId ?? '')}`)
-        );
+        if (result.reason === 'amount_short') {
+          return NextResponse.redirect(
+            siteUrl(`/trade/orders/${encodeURIComponent(result.orderId ?? '')}?payment=review`)
+          );
+        }
+        return NextResponse.redirect(siteUrl('/trade/dashboard?payment=failed'));
       }
-      return NextResponse.redirect(siteUrl('/?payment=failed'));
-    }
 
-    const params = new URLSearchParams({
-      payment: 'success',
-      order: String(result.orderId ?? ''),
-    });
-    return NextResponse.redirect(siteUrl(`/?${params.toString()}`));
+      return NextResponse.redirect(
+        siteUrl(`/trade/orders/${encodeURIComponent(result.orderId)}?payment=success`)
+      );
+    } else {
+      // Otherwise process as a retail order
+      const result = await settleOrderFromPayment(paystackData);
+
+      if (!result.settled) {
+        console.error(`Callback could not settle retail order ${result.orderId ?? '?'}: ${result.reason}`);
+
+        // The money may well have left the customer's account — send them
+        // somewhere that says "we're checking", not "failed".
+        if (result.reason === 'amount_short' || result.reason === 'wc_update_failed') {
+          return NextResponse.redirect(
+            siteUrl(`/?payment=review&order=${encodeURIComponent(result.orderId ?? '')}`)
+          );
+        }
+        return NextResponse.redirect(siteUrl('/?payment=failed'));
+      }
+
+      const params = new URLSearchParams({
+        payment: 'success',
+        order: String(result.orderId ?? ''),
+      });
+      return NextResponse.redirect(siteUrl(`/?${params.toString()}`));
+    }
   } catch (error) {
     console.error('Paystack callback failed:', error.message);
     return NextResponse.redirect(siteUrl('/?payment=failed'));

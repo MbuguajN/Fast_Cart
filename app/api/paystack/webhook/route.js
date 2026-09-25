@@ -54,17 +54,29 @@ export async function POST(request) {
       return NextResponse.json({ received: true, ignored: 'no_reference' });
     }
 
-    // Never trust the amount or status in the webhook body itself.
+    // Re-verify against the Paystack API — never trust the webhook body amount
     const paystackData = await verifyPayment(data.reference);
-    const result = await settleOrderFromPayment(paystackData);
+    
+    // Check if this is a trade order by looking for trade_order_id in metadata
+    if (paystackData?.metadata?.trade_order_id) {
+      const { settleTradeOrderFromPayment } = await import('@/lib/trade/trade-payment.js');
+      const result = await settleTradeOrderFromPayment(paystackData);
 
-    if (!result.settled) {
-      console.error(`Webhook could not settle order ${result.orderId ?? '?'}: ${result.reason}`);
+      if (!result.settled) {
+        console.error(`Webhook could not settle trade order ${result.orderId ?? '?'}: ${result.reason}`);
+      }
+
+      return NextResponse.json({ received: true, type: 'trade', settled: result.settled, reason: result.reason });
+    } else {
+      // Otherwise process as a retail order
+      const result = await settleOrderFromPayment(paystackData);
+
+      if (!result.settled) {
+        console.error(`Webhook could not settle retail order ${result.orderId ?? '?'}: ${result.reason}`);
+      }
+
+      return NextResponse.json({ received: true, type: 'retail', settled: result.settled, reason: result.reason });
     }
-
-    // Always 200 on a validly signed event — a non-2xx makes Paystack retry,
-    // and a business-rule rejection will not resolve on retry.
-    return NextResponse.json({ received: true, settled: result.settled, reason: result.reason });
   } catch (error) {
     console.error('Paystack webhook processing failed:', error.message);
     // A genuine processing failure is worth retrying.
