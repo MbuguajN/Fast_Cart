@@ -5,7 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
 
-const DEMO_PASSWORD = 'HappyHour2026!';
+// Dev-only demo credentials — Next.js dead-code-eliminates the entire block
+// (including the string literals) from the production client bundle because
+// process.env.NODE_ENV is replaced at build time.
+const IS_DEV = process.env.NODE_ENV !== 'production';
+const DEMO_PASSWORD = IS_DEV ? 'HappyHour2026!' : '';
 
 export default function TradeLoginPage() {
   const router = useRouter();
@@ -28,72 +32,75 @@ export default function TradeLoginPage() {
       .catch(() => {});
   }, []);
 
-  const demoAccounts = [
-    {
-      id: 'usr_serena_owner',
-      label: 'Nairobi Serena Hotel (Owner / Director)',
-      contact: 'Angela Mutua · Finance Director',
-      email: 'angela.mutua@serenahotels.com',
-      note: 'Full Net 14 credit terms, high volume',
-      tier: 'Net 14 Credit (KES 500k)',
-    },
-    {
-      id: 'usr_serena_buyer',
-      label: 'Nairobi Serena Hotel (Buyer Seat)',
-      contact: 'David Kimani · Beverage Manager',
-      email: 'david.kimani@serenahotels.com',
-      note: 'Subject to purchase ceiling approval',
-      tier: 'Ceiling KES 250k',
-    },
-    {
-      id: 'usr_serena_viewer',
-      label: 'Nairobi Serena Hotel (Auditor / Viewer)',
-      contact: 'Grace Wanjiku · Internal Auditor',
-      email: 'grace.wanjiku@serenahotels.com',
-      note: 'Read-only invoices, statements and audit ledger',
-      tier: 'Audit Seat',
-    },
-    {
-      id: 'usr_sankara_owner',
-      label: 'Sankara Hotel (Tier 2 Contract Override)',
-      contact: 'Kelvin Mwangi · Director of Procurement',
-      email: 'kelvin.mwangi@sankaranairobi.com',
-      note: 'Pinned Tier 2 wholesale pricing ladder',
-      tier: 'Tier 2 Contract',
-    },
-    {
-      id: 'usr_capital_owner',
-      label: 'Capital Club East Africa (VIP Lounge)',
-      contact: 'Michael Ndungu · Director of F&B',
-      email: 'michael.ndungu@capitalclubea.com',
-      note: 'Premium single malts & champagne allocation',
-      tier: 'VIP Allocation',
-    },
-    {
-      id: 'usr_artcaffe_buyer',
-      label: 'Artcaffé Grand (Restaurant Group)',
-      contact: 'Sarah Njoroge · Central Beverage Manager',
-      email: 'sarah.njoroge@artcaffe.co.ke',
-      note: 'High mixer & craft Jaba cocktail volume',
-      tier: 'High-volume HORECA',
-    },
-    {
-      id: 'usr_westlands_buyer',
-      label: 'The Alchemist Westlands (Expiring Licence Warning)',
-      contact: 'Eric Omondi · Bar Manager',
-      email: 'eric@alchemist.co.ke',
-      note: 'Demonstrates liquor licence renewal alert banner',
-      tier: 'Prepayment / Cash',
-    },
-    {
-      id: 'usr_acme_buyer',
-      label: 'Acme Advisory (Corporate / No Liquor Licence)',
-      contact: 'Faith Chebet · Office Operations',
-      email: 'faith.chebet@acmeadvisory.co.ke',
-      note: 'Alcohol restricted, craft Jaba juices enabled',
-      tier: 'Corporate Non-Liquor',
-    },
-  ];
+  // Demo accounts — only populated in development builds
+  const demoAccounts = IS_DEV
+    ? [
+        {
+          id: 'usr_serena_owner',
+          label: 'Nairobi Serena Hotel (Owner / Director)',
+          contact: 'Angela Mutua · Finance Director',
+          email: 'angela.mutua@serenahotels.com',
+          note: 'Full Net 14 credit terms, high volume',
+          tier: 'Net 14 Credit (KES 500k)',
+        },
+        {
+          id: 'usr_serena_buyer',
+          label: 'Nairobi Serena Hotel (Buyer Seat)',
+          contact: 'David Kimani · Beverage Manager',
+          email: 'david.kimani@serenahotels.com',
+          note: 'Subject to purchase ceiling approval',
+          tier: 'Ceiling KES 250k',
+        },
+        {
+          id: 'usr_serena_viewer',
+          label: 'Nairobi Serena Hotel (Auditor / Viewer)',
+          contact: 'Grace Wanjiku · Internal Auditor',
+          email: 'grace.wanjiku@serenahotels.com',
+          note: 'Read-only invoices, statements and audit ledger',
+          tier: 'Audit Seat',
+        },
+        {
+          id: 'usr_sankara_owner',
+          label: 'Sankara Hotel (Tier 2 Contract Override)',
+          contact: 'Kelvin Mwangi · Director of Procurement',
+          email: 'kelvin.mwangi@sankaranairobi.com',
+          note: 'Pinned Tier 2 wholesale pricing ladder',
+          tier: 'Tier 2 Contract',
+        },
+        {
+          id: 'usr_capital_owner',
+          label: 'Capital Club East Africa (VIP Lounge)',
+          contact: 'Michael Ndungu · Director of F&B',
+          email: 'michael.ndungu@capitalclubea.com',
+          note: 'Premium single malts & champagne allocation',
+          tier: 'VIP Allocation',
+        },
+        {
+          id: 'usr_artcaffe_buyer',
+          label: 'Artcaffé Grand (Restaurant Group)',
+          contact: 'Sarah Njoroge · Central Beverage Manager',
+          email: 'sarah.njoroge@artcaffe.co.ke',
+          note: 'High mixer & craft Jaba cocktail volume',
+          tier: 'High-volume HORECA',
+        },
+        {
+          id: 'usr_westlands_buyer',
+          label: 'The Alchemist Westlands (Expiring Licence Warning)',
+          contact: 'Eric Omondi · Bar Manager',
+          email: 'eric@alchemist.co.ke',
+          note: 'Demonstrates liquor licence renewal alert banner',
+          tier: 'Prepayment / Cash',
+        },
+        {
+          id: 'usr_acme_buyer',
+          label: 'Acme Advisory (Corporate / No Liquor Licence)',
+          contact: 'Faith Chebet · Office Operations',
+          email: 'faith.chebet@acmeadvisory.co.ke',
+          note: 'Alcohol restricted, craft Jaba juices enabled',
+          tier: 'Corporate Non-Liquor',
+        },
+      ]
+    : [];
 
   const handleLogin = async (idToUse, passwordToUse) => {
     try {
@@ -221,7 +228,7 @@ export default function TradeLoginPage() {
             type="text"
             required
             autoComplete="username"
-            placeholder="e.g. david.kimani@serenahotels.com or usr_serena_buyer"
+            placeholder="e.g. your-email@company.com"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
@@ -233,14 +240,17 @@ export default function TradeLoginPage() {
             <label className="block text-xs font-bold uppercase text-gray-700">
               Password
             </label>
-            <button
-              type="button"
-              onClick={copyDemoPassword}
-              className="text-[10px] text-[#840038] hover:underline font-bold"
-              title="Click to copy standard demo password"
-            >
-              {copiedPassword ? '✓ Copied Demo Password' : 'Demo Password: HappyHour2026!'}
-            </button>
+            {/* Dev-only: demo password copy button */}
+            {IS_DEV && (
+              <button
+                type="button"
+                onClick={copyDemoPassword}
+                className="text-[10px] text-[#840038] hover:underline font-bold"
+                title="Click to copy standard demo password"
+              >
+                {copiedPassword ? '✓ Copied Demo Password' : 'Demo Password: HappyHour2026!'}
+              </button>
+            )}
           </div>
 
           <div className="relative">
@@ -289,53 +299,55 @@ export default function TradeLoginPage() {
         </button>
       </form>
 
-      {/* 1-Click Demo Switcher */}
-      <div className="bg-pink-50/60 p-6 rounded-3xl border border-pink-200 space-y-4 shadow-xs">
-        <div className="text-center space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#840038] block">
-            ⚡ 1-Click Test Account Switcher
-          </span>
-          <p className="text-[11px] text-gray-600">
-            Click any trade test seat below to authenticate immediately into that profile.
-          </p>
-        </div>
+      {/* 1-Click Demo Switcher — development only */}
+      {IS_DEV && demoAccounts.length > 0 && (
+        <div className="bg-pink-50/60 p-6 rounded-3xl border border-pink-200 space-y-4 shadow-xs">
+          <div className="text-center space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#840038] block">
+              ⚡ 1-Click Test Account Switcher (Dev Only)
+            </span>
+            <p className="text-[11px] text-gray-600">
+              Click any trade test seat below to authenticate immediately into that profile.
+            </p>
+          </div>
 
-        <div className="space-y-2.5">
-          {demoAccounts.map((d) => {
-            const isSelected = activeDemoId === d.id;
-            return (
-              <button
-                key={d.id}
-                type="button"
-                disabled={loading}
-                onClick={() => handleDemoSelect(d)}
-                className={`w-full text-left p-3.5 rounded-2xl bg-white border transition-all text-xs group cursor-pointer ${
-                  isSelected
-                    ? 'border-[#840038] ring-2 ring-[#840038]/30 shadow-md'
-                    : 'border-pink-100 hover:border-[#840038] hover:shadow-sm'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="font-bold text-gray-900 group-hover:text-[#840038] transition-colors leading-snug">
-                    {d.label}
+          <div className="space-y-2.5">
+            {demoAccounts.map((d) => {
+              const isSelected = activeDemoId === d.id;
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleDemoSelect(d)}
+                  className={`w-full text-left p-3.5 rounded-2xl bg-white border transition-all text-xs group cursor-pointer ${
+                    isSelected
+                      ? 'border-[#840038] ring-2 ring-[#840038]/30 shadow-md'
+                      : 'border-pink-100 hover:border-[#840038] hover:shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="font-bold text-gray-900 group-hover:text-[#840038] transition-colors leading-snug">
+                      {d.label}
+                    </div>
+                    <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-100 text-[#840038]">
+                      {isSelected ? 'Signing in...' : d.tier}
+                    </span>
                   </div>
-                  <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-100 text-[#840038]">
-                    {isSelected ? 'Signing in...' : d.tier}
-                  </span>
-                </div>
 
-                <div className="text-[11px] text-gray-600 mt-1 font-medium">
-                  {d.contact}
-                </div>
-                <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
-                  <span>{d.note}</span>
-                  <span className="font-mono text-gray-500 group-hover:text-[#840038]">1-Click Sign In →</span>
-                </div>
-              </button>
-            );
-          })}
+                  <div className="text-[11px] text-gray-600 mt-1 font-medium">
+                    {d.contact}
+                  </div>
+                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
+                    <span>{d.note}</span>
+                    <span className="font-mono text-gray-500 group-hover:text-[#840038]">1-Click Sign In →</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="text-center text-xs text-gray-500">
         Don&apos;t have an active trade account?{' '}
