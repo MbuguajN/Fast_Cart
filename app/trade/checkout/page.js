@@ -9,7 +9,7 @@ export default function TradeCheckoutPage() {
   const router = useRouter();
   const { cart, cartPricing, account, user, selectedAddress, setSelectedAddress, clearCart, showNotification } = useTrade();
 
-  const [paymentMethod, setPaymentMethod] = useState(account?.creditEnabled ? 'pay_on_account' : 'mpesa_paybill');
+  const [paymentMethod, setPaymentMethod] = useState(account?.creditEnabled ? 'pay_on_account' : 'paystack');
   const [deliveryDate, setDeliveryDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [poReference, setPoReference] = useState('');
   const [notes, setNotes] = useState('');
@@ -102,6 +102,13 @@ export default function TradeCheckoutPage() {
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to place trade order');
+      }
+
+      // Paystack redirect flow
+      if (data.paystack?.authorization_url) {
+        showNotification('Redirecting to secure payment...', 'info');
+        window.location.href = data.paystack.authorization_url;
+        return; // Don't clear cart — let the callback handle it
       }
 
       clearCart();
@@ -338,6 +345,38 @@ export default function TradeCheckoutPage() {
               )}
 
               <div
+                onClick={() => setPaymentMethod('paystack')}
+                className={`p-5 rounded-2xl border cursor-pointer transition-all ${
+                  paymentMethod === 'paystack'
+                    ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-900 uppercase block">
+                        Pay Now — Card / M-Pesa
+                      </span>
+                      <span className="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">
+                        Instant
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Pay securely via Visa, Mastercard, or M-Pesa. Order confirmed immediately upon payment.
+                    </p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'paystack'}
+                    onChange={() => setPaymentMethod('paystack')}
+                    className="mt-1 text-[#840038] focus:ring-[#840038]"
+                  />
+                </div>
+              </div>
+
+              <div
                 onClick={() => setPaymentMethod('mpesa_paybill')}
                 className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                   paymentMethod === 'mpesa_paybill'
@@ -348,10 +387,10 @@ export default function TradeCheckoutPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="text-xs font-bold text-gray-900 uppercase block">
-                      M-Pesa Corporate Paybill (Immediate)
+                      M-Pesa Corporate Paybill (Manual)
                     </span>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Paybill: <strong>400200</strong> · Account: <strong>HAPPYHOUR</strong>
+                      Paybill: <strong>400200</strong> · Account: <strong>HAPPYHOUR</strong> · Confirmed after reconciliation
                     </p>
                   </div>
                   <input
@@ -460,7 +499,9 @@ export default function TradeCheckoutPage() {
               disabled={submitting}
               className="w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50"
             >
-              {submitting ? 'Placing Trade Order...' : 'Confirm & Place Trade Order →'}
+              {submitting
+                ? (paymentMethod === 'paystack' ? 'Initializing Payment...' : 'Placing Trade Order...')
+                : (paymentMethod === 'paystack' ? 'Pay & Place Trade Order →' : 'Confirm & Place Trade Order →')}
             </button>
           </div>
         </div>

@@ -114,6 +114,12 @@ export async function POST(request) {
       return NextResponse.json({ error: resolutionError.message }, { status: 400 });
     }
 
+    // Determine the effective payment method stored on the order.
+    // 'paystack' means the buyer pays NOW via card/mobile money — the order
+    // starts as pending_payment until the callback or webhook settles it.
+    const ALLOWED_METHODS = ['pay_on_account', 'mpesa_paybill', 'bank_transfer', 'paystack'];
+    const effectiveMethod = ALLOWED_METHODS.includes(paymentMethod) ? paymentMethod : 'mpesa_paybill';
+
     const order = await createTradeOrder({
       account,
       user,
@@ -122,10 +128,68 @@ export async function POST(request) {
       deliveryDate,
       poReference: sanitizeText(poReference, 60),
       notes: sanitizeText(notes, 500),
-      paymentMethod: paymentMethod === 'pay_on_account' ? 'pay_on_account' : 'mpesa_paybill',
+      paymentMethod: effectiveMethod,
       source: auth ? 'portal' : 'portal_guest',
       ageConfirmed: ageConfirmed === true,
     });
+
+    // If Paystack, initialize the payment and return the authorization URL
+    if (effectiveMethod === 'paystack') {
+      try {
+        const { initializePayment, generateReference } = await import('@/lib/paystack.js');
+
+        const buyerEmail = auth?.user?.email || body.buyerEmail;
+        if (!buyerEmail) {
+          return NextResponse.json({ error: 'Email is required for card payment' }, { status: 400 });
+        }
+
+        const reference = generateReference(order.id);
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+        const paystackResult = await initializePayment({
+          email: buyerEmail,
+          amount: order.grandTotal,
+          reference,
+          metadata: {
+            trade_order_id: order.id,
+            order_number: order.orderNumber,
+            account_name: order.accountName,
+            custom_fields: [
+              { display_name: 'Order Number', variable_name: 'order_number', value: order.orderNumber },
+              { display_name: 'Account', variable_name: 'account', value: order.accountName },
+            ],
+          },
+          callback_url: `${siteUrl}/api/trade/paystack/callback`,
+        });
+
+        // Store the expected reference on the order for verification
+        const { query: pgQuery, ensureTradeDb } = await import('@/lib/trade/trade-pg.js');
+        await ensureTradeDb();
+        await pgQuery(
+          'UPDATE trade_orders SET paystack_reference = $1, status = $2 WHERE id = $3',
+          [reference, 'pending_payment', order.id]
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: 'Redirecting to payment...',
+          order: stripEconomics(order, user),
+          paystack: {
+            authorization_url: paystackResult.authorization_url,
+            reference: paystackResult.reference,
+          },
+        });
+      } catch (paystackError) {
+        console.error('Paystack initialization failed for trade order:', paystackError.message);
+        // The order was already created — mark it and tell the buyer
+        return NextResponse.json({
+          success: true,
+          message: 'Order created but payment initialization failed. You can retry payment from your order page.',
+          order: stripEconomics(order, user),
+          paystack: null,
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,
