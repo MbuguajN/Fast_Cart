@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/trade/ScrollToTop.js';
+import TradeFloatingCart from '@/components/trade/TradeFloatingCart.js';
 import { TradeProvider, useTrade } from '@/lib/trade/trade-context.js';
 
 function TradePortalShell({ children }) {
@@ -223,6 +224,7 @@ function TradePortalShell({ children }) {
         <Footer />
         <TradeNotificationToast />
         <ScrollToTop />
+        <TradeFloatingCart />
       </div>
     );
   }
@@ -453,6 +455,7 @@ function TradePortalShell({ children }) {
         <Footer />
         <TradeNotificationToast />
         <ScrollToTop />
+        <TradeFloatingCart />
       </div>
     </div>
   );
@@ -469,7 +472,7 @@ function TradeNotificationToast() {
   }[notification.type] || { bg: 'bg-[#840038]', icon: 'ℹ' };
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 flex justify-center sm:justify-end animate-slide-up">
+    <div className="fixed top-20 left-4 right-4 sm:left-auto sm:right-6 z-50 flex justify-center sm:justify-end animate-slide-up">
       <div
         className={`${config.bg} text-white px-5 py-4 rounded-2xl shadow-2xl ring-4 ring-black/5 flex items-start gap-3 text-sm font-bold border-2 border-white/25 w-full sm:w-auto sm:max-w-md`}
       >

@@ -21,7 +21,7 @@ export default function ScrollToTop({ threshold = 600 }) {
   };
 
   return (
-    // Sits above the bottom-right notification toast so the two never overlap.
+    // Sits above the floating cart pill (bottom-6) so the two never overlap.
     <button
       type="button"
       onClick={scrollUp}
