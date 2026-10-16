@@ -3275,6 +3275,77 @@ export default function AdminTradePage() {
             </button>
           </div>
 
+          {/* ── Checkout payment settings: stock hold + bank transfer ── */}
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-gray-900">Checkout Payment Settings</h3>
+              <p className="text-[10px] text-gray-500">
+                Pay-now (Paystack) orders reserve stock while the buyer pays, then are cancelled and released.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Stock hold (minutes)</label>
+                <input type="number" min="1" max="1440" id="pay-hold-minutes"
+                  defaultValue={config?.stockHoldMinutes ?? 15}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                  <input type="checkbox" id="pay-bank-enabled" defaultChecked={config?.bankTransfer?.enabled === true} />
+                  Offer bank transfer at checkout
+                </label>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Bank name</label>
+                <input type="text" id="pay-bank-name" defaultValue={config?.bankTransfer?.bankName || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Account name</label>
+                <input type="text" id="pay-bank-account-name" defaultValue={config?.bankTransfer?.accountName || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Account number</label>
+                <input type="text" id="pay-bank-account-number" defaultValue={config?.bankTransfer?.accountNumber || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">Branch (optional)</label>
+                <input type="text" id="pay-bank-branch" defaultValue={config?.bankTransfer?.branch || ''}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                const val = (id) => document.getElementById(id)?.value?.trim() || '';
+                try {
+                  const res = await fetch('/api/admin/trade/config', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      stockHoldMinutes: val('pay-hold-minutes'),
+                      bankTransfer: {
+                        enabled: document.getElementById('pay-bank-enabled')?.checked === true,
+                        bankName: val('pay-bank-name'),
+                        accountName: val('pay-bank-account-name'),
+                        accountNumber: val('pay-bank-account-number'),
+                        branch: val('pay-bank-branch'),
+                      },
+                    }),
+                  });
+                  if (!res.ok) throw new Error((await res.json()).error);
+                  showToast('Checkout payment settings saved');
+                  loadAllAdminData();
+                } catch (err) { showToast(err.message, 'error'); }
+              }}
+              className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#840038] text-white hover:bg-[#6b002c] transition-all"
+            >
+              Save Payment Settings
+            </button>
+          </div>
+
           {/* New User Modal */}
           {showNewUserModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

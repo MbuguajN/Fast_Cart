@@ -30,6 +30,8 @@ const PRE_AUTH_PATHS = new Set([
   // present (existing accounts, credit terms) but never requires one.
   '/api/trade/catalog',
   '/api/trade/checkout',
+  // Non-secret checkout settings (hold minutes, bank details only when enabled).
+  '/api/trade/checkout-options',
 ]);
 
 const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
