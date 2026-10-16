@@ -21,12 +21,12 @@ export default function TradeProductCard({ product: p, index = 0 }) {
     >
       {/* Full-width, prominent product image — same image-forward
           treatment as the retail ProductCard. */}
-      <div className="relative h-44 sm:h-52 bg-gray-50 border-b border-gray-100 overflow-hidden">
+      <div className="relative h-44 sm:h-52 bg-white border-b border-gray-100 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={p.image || '/images/bottle-placeholder.png'}
           alt={p.name}
-          className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-contain p-5 mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
         />
       </div>
 
