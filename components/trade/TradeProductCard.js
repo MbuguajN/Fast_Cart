@@ -22,11 +22,21 @@ export default function TradeProductCard({ product: p, index = 0 }) {
       {/* Full-width, prominent product image — same image-forward
           treatment as the retail ProductCard. */}
       <div className="relative h-44 sm:h-52 bg-white border-b border-gray-100 overflow-hidden">
+        {/* Blurred copy of the photo fills the area behind it: white-background
+            bottle shots stay white, while lifestyle photos (smaller than the
+            area) blend into their own colours instead of floating on white. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={p.image || '/images/bottle-placeholder.png'}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl opacity-60"
+        />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={p.image || '/images/bottle-placeholder.png'}
           alt={p.name}
-          className="absolute inset-0 w-full h-full object-contain p-5 mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
         />
       </div>
 
