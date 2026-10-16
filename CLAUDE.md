@@ -19,7 +19,7 @@ Two storefronts in one Next.js 16 app (App Router, JS not TS, Tailwind 4, `@/` a
 ## Trade architecture
 
 - **Storage is dual**: Postgres (`lib/trade/trade-pg.js`, `DATABASE_URL`, tables created by `ensureTradeDb()`) plus a JSON store (`lib/trade/trade-store.js`, 3000 lines, mirrored on writes). Keep both in sync when changing order/account state. Payment settlement does this in `lib/trade/trade-payment.js`.
-- **Auth**: `lib/trade/trade-auth.js` (cookie `trade_token`, audience-scoped JWT via `lib/crypto-tokens.js`); admin uses `admin_token`. `proxy.js` is only a defence-in-depth gate (Next 16 "proxy" replaced middleware and is not an authorisation boundary). Every route handler must run its own guard. `PRE_AUTH_PATHS` in `proxy.js` lists the public trade endpoints (`/api/trade/auth`, `apply`, `catalog`, `checkout`). A new admin or trade route fails closed by default.
+- **Auth**: `lib/trade/trade-auth.js` (cookie `trade_token`, audience-scoped JWT via `lib/crypto-tokens.js`); admin uses `admin_token`. `proxy.js` is only a defence-in-depth gate (Next 16 "proxy" replaced middleware and is not an authorisation boundary). Every route handler must run its own guard. `PRE_AUTH_PATHS` in `proxy.js` lists the public trade endpoints (`/api/trade/auth`, `apply`, `catalog`, `checkout`, `checkout-options`). A new admin or trade route fails closed by default.
 - **Pricing is server-authoritative**: `lib/trade/pricing-engine.js`, `trade-catalog.js#resolveTradeLineItems`. The client sends only identifier + quantity; never trust prices, costs or tiers from the request body. `pricing-visibility.js#stripEconomics` removes cost/margin from responses. Spirits margins are thin: a pricing bug is a loss-making order.
 - **Accounts** (`buildTradeAccount`): have `status` (pending/approved…), `creditEnabled`, `creditLimit`, `creditUsed`, `creditTerms` (days), `cleanOrders`, addresses, users with `seatType` (`viewer` cannot order). The UI calls these "Business Accounts" (the old "Credit Account" name was renamed in commit 6e37c7d).
 - **Guest trade checkout is allowed**: `/api/trade/checkout` is public; guests are find-or-created as lightweight accounts (`findOrCreateGuestTradeAccount`). Guests may not use credit.
@@ -55,4 +55,4 @@ Methods accepted by `/api/trade/checkout` (`PAYMENT_METHODS` in `lib/trade/payme
 
 ## Keeping this file current
 
-When you change trade payments, account/credit rules, auth guards, storage or env vars, update the matching section in the same change. Move items out of "Planned" when they ship, and date the section header.
+When you change trade payments, account/credit rules, auth guards, storage or env vars, update the matching section in the same change. Date the section header.
