@@ -136,9 +136,15 @@
 - [ ] **Step 3: Fix each real finding test-first.** Run `npm test` and the script `--attacks` — all pass.
 - [ ] **Step 4: Commit** per fix; final `chore(trade): security sweep results`.
 
-### Task 7: Nirvana option — BLOCKED until the owner answers spec §9
+### Task 7: Nirvana option
 
-**Do not start.** The owner decided: anyone may use it, instructions must be clear, **no stock hold and no order hold**. Still open: what choosing it does ((a) instructions + contact only; (b) record an enquiry for the dedicated contact, no order/stock; (c) other) and whether guests are included. When answered, add the plan for this task here (likely: a read-only info panel with the eligibility list — original logbook, copy of national ID, KRA PIN, valuation by Nirvana's assessors, colour passport-size photo — and the dedicated contact; no link to Nirvana's application), then execute.
+Owner decisions: anyone may use it but **an account (login) is required first**; guests see the option with a notice to create an account and cannot select it. No stock hold, no order, no payment. Designer's call (owner did not pick between (a)/(b)): **(a) information only** — selecting it shows the instructions and the dedicated-contact details, creates nothing, and "Place order" is disabled while it is selected.
+
+**Files:** Modify `app/trade/checkout/page.js`; add a `nirvanaContact` field (`name`, `phone`, `email`) to the allow-listed config and admin settings card (Task 2 files), exposed via `checkout-options`.
+
+- [ ] **Step 1:** Add `nirvana` as a UI-only choice (NOT in `PAYMENT_METHODS`; the API keeps rejecting it). Logged-in: panel lists the requirements (original logbook, copy of national ID, KRA PIN, valuation by Nirvana's assessors, colour passport-size photo), explains that Nirvana vets and funds the purchase, shows the contact from options, and states nothing is charged or reserved. Guest: same label with a "Create an account first" notice linking to `/trade/apply`, no selectable panel. No link to Nirvana's application.
+- [ ] **Step 2:** Extend the browser script: guest sees notice and cannot select; account sees instructions; a direct POST with `paymentMethod: 'nirvana'` → 400.
+- [ ] **Step 3: Commit** `feat(trade): Nirvana logbook-loan information option`.
 
 ### Task 8: Docs and go-live checklist
 

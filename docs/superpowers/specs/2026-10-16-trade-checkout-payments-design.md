@@ -196,3 +196,6 @@ approach (after asking the owner), and the order of fixes within 5.1.
   else. Also whether guests are included now ("anyone") or still need an
   account first. Work packages 5.1, 5.2, 5.3, 5.5 proceed without this.
 - Credit stays restricted to credit-approved logged-in accounts (unchanged).
+
+## 10. Nirvana resolved (2026-10-16)
+Guests must create an account first to use Nirvana. Handling is information only (designer's call): instructions + dedicated contact, no order, no enquiry record, no stock effect. Supersedes the "STILL TO CONFIRM" bullet in §9.
