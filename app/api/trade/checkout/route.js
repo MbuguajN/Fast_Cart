@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getTradeAuthFromRequest } from '@/lib/trade/trade-auth.js';
-import { createTradeOrder, findOrCreateGuestTradeAccount } from '@/lib/trade/trade-store.js';
+import { createTradeOrder, findOrCreateGuestTradeAccount, readTradeStore } from '@/lib/trade/trade-store.js';
 import { resolveTradeLineItems } from '@/lib/trade/trade-catalog.js';
 import { stripEconomics } from '@/lib/trade/pricing-visibility.js';
+import { assertPaymentMethodAllowed } from '@/lib/trade/payment-methods.js';
 import { rateLimitRequest } from '@/lib/rate-limit';
 
 /**
@@ -42,6 +43,21 @@ export async function POST(request) {
     let user;
     let address;
 
+    // Validate the method before any account is created or touched. Guests
+    // (no session) are never credit accounts, whatever the body claims.
+    let effectiveMethod;
+    try {
+      effectiveMethod = assertPaymentMethodAllowed({
+        method: paymentMethod,
+        account: auth?.account,
+        isGuest: !auth,
+        config: readTradeStore().config,
+      });
+    } catch (methodError) {
+      const status = paymentMethod === 'pay_on_account' ? 403 : 400;
+      return NextResponse.json({ error: methodError.message }, { status });
+    }
+
     if (auth) {
       // Only buyers with an ordering seat may place orders.
       if (auth.user.seatType === 'viewer') {
@@ -70,13 +86,6 @@ export async function POST(request) {
       if (!deliveryAddress?.addressLine || !deliveryAddress?.city) {
         return NextResponse.json({ error: 'A delivery address is required' }, { status: 400 });
       }
-      if (paymentMethod === 'pay_on_account') {
-        return NextResponse.json(
-          { error: 'Pay-on-account is only available to approved business accounts. Sign in, or apply for a trade business account.' },
-          { status: 403 }
-        );
-      }
-
       const buyerNameClean = sanitizeText(buyerName, 120);
       const buyerPhoneClean = sanitizeText(buyerPhone, 30);
       const addressLineClean = sanitizeText(deliveryAddress.addressLine, 200);
@@ -113,12 +122,6 @@ export async function POST(request) {
     } catch (resolutionError) {
       return NextResponse.json({ error: resolutionError.message }, { status: 400 });
     }
-
-    // Determine the effective payment method stored on the order.
-    // 'paystack' means the buyer pays NOW via card/mobile money — the order
-    // starts as pending_payment until the callback or webhook settles it.
-    const ALLOWED_METHODS = ['pay_on_account', 'mpesa_paybill', 'bank_transfer', 'paystack'];
-    const effectiveMethod = ALLOWED_METHODS.includes(paymentMethod) ? paymentMethod : 'mpesa_paybill';
 
     const order = await createTradeOrder({
       account,
