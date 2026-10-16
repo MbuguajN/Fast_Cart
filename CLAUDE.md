@@ -27,19 +27,22 @@ Two storefronts in one Next.js 16 app (App Router, JS not TS, Tailwind 4, `@/` a
 
 ## Payments (trade) — as of 2026-10-16
 
-Methods accepted by `/api/trade/checkout` (`ALLOWED_METHODS`): `pay_on_account`, `mpesa_paybill`, `bank_transfer`, `paystack`.
+Methods accepted by `/api/trade/checkout` (`PAYMENT_METHODS` in `lib/trade/payment-methods.js`): `paystack`, `pay_on_account`, `bank_transfer`. Anything else (including the removed `mpesa_paybill`) is rejected with 400. `assertPaymentMethodAllowed` is the single rule set, used by the route; `createTradeOrder` keeps its own credit backstop.
 
-- **Paystack**: `lib/paystack.js` (init/verify, CSPRNG reference, raw-body HMAC-SHA512 webhook check). Flow: checkout creates the order, initialises Paystack, stores `paystack_reference`, sets `pending_payment`. `/api/paystack/callback` (browser) and `/api/paystack/webhook` (server) both settle through `settleTradeOrderFromPayment` (idempotent, reference-, amount- and currency-checked) when metadata has `trade_order_id`; otherwise retail settlement. Needs `PAYSTACK_SECRET_KEY` and `PAYSTACK_WEBHOOK_SECRET` — **not present in `.env.local` as of this date**, so it cannot work locally until set.
-- **Pay on account** (`pay_on_account`): only for logged-in, `creditEnabled` accounts; enforced in the checkout route and again in `createTradeOrder`. Limit check is `creditUsed + total <= creditLimit`.
+- **Paystack** (`lib/paystack.js`): checkout creates the order, initialises Paystack, then `markAwaitingPayment` (`lib/trade/trade-hold.js`) sets `pending_payment`, stores the reference and starts the **stock hold** (`stockHoldMinutes`, default 15, admin-editable in Admin → Trade settings). `/api/paystack/callback` (browser) and `/api/paystack/webhook` (server) settle via `settleTradeOrderFromPayment` (idempotent; reference/amount/currency checked; the final UPDATE is conditional so it cannot race the expiry sweep). Needs `PAYSTACK_SECRET_KEY` and `PAYSTACK_WEBHOOK_SECRET` in `.env.local`.
+- **Hold expiry**: `expireUnpaidHolds()` cancels (and restocks) unpaid Paystack orders past `hold_expires_at`. Triggered by `GET/POST /api/cron/trade-holds` (header `x-cron-secret` = `CRON_SECRET`; schedule every minute) and lazily on the admin orders list. A payment that arrives after expiry is **not** confirmed: the order gets `payment_status = 'paid_after_expiry'` for staff to refund/reinstate. If Paystack init fails, the order is cancelled and restocked.
+- **Pay on account**: only logged-in, `creditEnabled` accounts; hidden from everyone else; limit check `creditUsed + total <= creditLimit`.
+- **Bank transfer**: off by default; admin switch + details stored in trade config (`bankTransfer`), cannot be enabled without bank name/account name/account number. No bank details in source.
+- **Nirvana Africa logbook loan**: UI-only information option on the checkout page (never sent to the API). Guests see it with a "create an account" notice; logged-in users see the requirements and the dedicated contact (`nirvanaContact` in config). No order, no payment, no stock effect.
+- **Config**: `PUT /api/admin/trade/config` goes through `sanitizeConfigPatch` (allow-list in `lib/trade/trade-config.js`). Public, non-secret slice for the checkout page: `GET /api/trade/checkout-options`.
+- **Public application** (`/api/trade/apply`): rate-limited; `cleanApplication` is an allow-list so applicants cannot set credit/tier/id fields.
+- **Schema init** (`ensureTradeDb`) skips the DDL when `SCHEMA_SENTINEL` (last added column) exists; **move the sentinel when you append to the schema script**, or new DDL will not run on existing databases.
 
-### Planned (agreed in brainstorming, not built)
+### Testing the trade checkout
 
-1. Real-browser test of trade checkout as guest and as logged-in user; patch any security gaps found.
-2. Make Paystack the "pay now" option and prove it works end to end.
-3. **Nirvana Africa logbook-loan** option: trade only. Manual process with no API. Visible to guests with a notice that an account is required; selecting it takes no payment up front. Only logged-in, admin-approved businesses can place it; order is held pending until staff mark it paid/cancelled after Nirvana funds. Show Nirvana's eligibility requirements (original logbook, ID copy, KRA PIN, valuation, passport photo) for information only — no link to Nirvana's application; a dedicated contact handles these.
-4. **Credit** option (was called "LPO"): same mechanism as `pay_on_account`; shown only to credit-approved businesses, hidden from everyone else.
-
-Update this section as each item ships.
+- `npm test` (about 60 s; the retail OTP test is occasionally flaky).
+- Real browser: `node scripts/seed-test-trade-accounts.mjs seed`, `node scripts/e2e-trade-checkout.mjs [--attacks]`, then `... cleanup`. Needs a running dev server. Paystack scenarios are skipped unless `PAYSTACK_SECRET_KEY` is set (use the **test** key).
+- Go-live steps: `docs/go-live-trade-payments.md`.
 
 ## Gotchas
 
