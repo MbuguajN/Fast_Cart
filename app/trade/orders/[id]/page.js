@@ -357,8 +357,33 @@ export default function SingleTradeOrderDetailPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Payment Status</span>
-              <span className="font-bold uppercase text-emerald-700">{order.paymentStatus}</span>
+              <span
+                className={`font-bold uppercase ${
+                  order.paymentStatus === 'paid'
+                    ? 'text-emerald-700'
+                    : ['expired', 'underpaid', 'paid_after_expiry'].includes(order.paymentStatus)
+                      ? 'text-red-700'
+                      : 'text-amber-700'
+                }`}
+              >
+                {String(order.paymentStatus || '').replace(/_/g, ' ')}
+              </span>
             </div>
+            {order.status === 'pending_payment' && (
+              <p className="text-[11px] text-amber-700 pt-1">
+                Waiting for your payment. If it is not completed in time, this order is cancelled and the stock released.
+              </p>
+            )}
+            {order.paymentStatus === 'expired' && (
+              <p className="text-[11px] text-red-700 pt-1">
+                Payment was not completed in time, so this order was cancelled. Please place a new order.
+              </p>
+            )}
+            {order.paymentStatus === 'paid_after_expiry' && (
+              <p className="text-[11px] text-red-700 pt-1">
+                Your payment arrived after the order expired. Our team will contact you to refund or reinstate it.
+              </p>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-500">Payment Due Date</span>
               <span className="font-mono font-bold text-gray-800">{order.dueDate}</span>

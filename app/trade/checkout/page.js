@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTrade } from '@/lib/trade/trade-context.js';
@@ -13,6 +13,7 @@ export default function TradeCheckoutPage() {
   const [deliveryDate, setDeliveryDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [poReference, setPoReference] = useState('');
   const [notes, setNotes] = useState('');
+  const [options, setOptions] = useState({ stockHoldMinutes: 15, bankTransfer: { enabled: false } });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -24,6 +25,15 @@ export default function TradeCheckoutPage() {
   const [guestAddressLine, setGuestAddressLine] = useState('');
   const [guestCity, setGuestCity] = useState('Nairobi');
   const [ageConfirmed, setAgeConfirmed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/trade/checkout-options')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data && !cancelled) setOptions(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const hasSpirits = cart.some((i) => i.priceLine === 'spirits');
   const deliveryCity = account ? selectedAddress?.city : guestCity;
@@ -74,7 +84,7 @@ export default function TradeCheckoutPage() {
     }
 
     if (paymentMethod === 'pay_on_account' && isCreditExceeded) {
-      setError(`Credit limit exceeded by KES ${creditShortfall.toLocaleString()}. Please choose M-Pesa or Bank Transfer for this order.`);
+      setError(`Credit limit exceeded by KES ${creditShortfall.toLocaleString()}. Please choose Pay Now for this order.`);
       return;
     }
 
@@ -363,7 +373,7 @@ export default function TradeCheckoutPage() {
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Pay securely via Visa, Mastercard, or M-Pesa. Order confirmed immediately upon payment.
+                      Pay securely via Visa, Mastercard, or M-Pesa. Order confirmed immediately upon payment. Your stock is reserved for {options.stockHoldMinutes} minutes while you pay.
                     </p>
                   </div>
                   <input
@@ -376,59 +386,36 @@ export default function TradeCheckoutPage() {
                 </div>
               </div>
 
-              <div
-                onClick={() => setPaymentMethod('mpesa_paybill')}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all ${
-                  paymentMethod === 'mpesa_paybill'
-                    ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
-                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 uppercase block">
-                      M-Pesa Corporate Paybill (Manual)
-                    </span>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Paybill: <strong>400200</strong> · Account: <strong>HAPPYHOUR</strong> · Confirmed after reconciliation
-                    </p>
+              {options.bankTransfer?.enabled && (
+                <div
+                  onClick={() => setPaymentMethod('bank_transfer')}
+                  className={`p-5 rounded-2xl border cursor-pointer transition-all ${
+                    paymentMethod === 'bank_transfer'
+                      ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-xs font-bold text-gray-900 uppercase block">
+                        Direct Bank Transfer (RTGS / Electronic Funds Transfer)
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {options.bankTransfer.bankName} · {options.bankTransfer.accountName} · Acc No:{' '}
+                        <strong>{options.bankTransfer.accountNumber}</strong>
+                        {options.bankTransfer.branch ? ` · ${options.bankTransfer.branch}` : ''} · Dispatched upon confirmation.
+                      </p>
+                    </div>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === 'bank_transfer'}
+                      onChange={() => setPaymentMethod('bank_transfer')}
+                      className="mt-1 text-[#840038] focus:ring-[#840038]"
+                    />
                   </div>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === 'mpesa_paybill'}
-                    onChange={() => setPaymentMethod('mpesa_paybill')}
-                    className="mt-1 text-[#840038] focus:ring-[#840038]"
-                  />
                 </div>
-              </div>
-
-              <div
-                onClick={() => setPaymentMethod('bank_transfer')}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all ${
-                  paymentMethod === 'bank_transfer'
-                    ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
-                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 uppercase block">
-                      Direct Bank Transfer (RTGS / Electronic Funds Transfer)
-                    </span>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Standard Chartered Bank Kenya · Acc No: 0108099221100 · Dispatched upon confirmation.
-                    </p>
-                  </div>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === 'bank_transfer'}
-                    onChange={() => setPaymentMethod('bank_transfer')}
-                    className="mt-1 text-[#840038] focus:ring-[#840038]"
-                  />
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
