@@ -140,6 +140,30 @@ await scenario('credit account sees credit, hits the limit, and can place an on-
   await page.waitForURL(/\/trade\/orders\/ord_tr_/, { timeout: 20000 });
 });
 
+await scenario('Nirvana: guest sees an account-required notice and cannot select it', async ({ page, context }) => {
+  await loadCheckout(page, context, [cartItem(jaba, 15)]);
+  const opt = page.getByTestId('nirvana-option');
+  assert(/Nirvana/i.test(await opt.innerText()), 'Nirvana option missing for guest');
+  assert(/need a trade account/i.test(await opt.innerText()), 'account-required notice missing');
+  assert((await opt.locator('input[type=radio]').count()) === 0, 'guest can select Nirvana');
+  await opt.click();
+  assert(!/Original vehicle logbook/i.test(await body(page)), 'instructions shown to guest');
+  assert(!/nirvana\.presta\.africa/i.test(await page.content()), 'link to Nirvana application must not be shown');
+});
+
+await scenario('Nirvana: account sees instructions, nothing can be placed', async ({ page, context }) => {
+  await login(context, 'plain');
+  await loadCheckout(page, context, [cartItem(jaba, 15)]);
+  await page.getByTestId('nirvana-option').click();
+  const text = await body(page);
+  for (const needle of ['Original vehicle logbook', 'KRA PIN', 'national ID', 'passport-size photo', 'No stock is reserved|no stock is reserved']) {
+    assert(new RegExp(needle, 'i').test(text), `missing: ${needle}`);
+  }
+  assert(await page.getByRole('button', { name: /Contact us to arrange funding/i }).isDisabled(), 'submit not disabled for Nirvana');
+  assert(!/nirvana\.presta\.africa/i.test(await page.content()), 'link to Nirvana application must not be shown');
+  await page.screenshot({ path: `${SHOTS}/nirvana-account.png`, fullPage: true });
+});
+
 await scenario('non-credit account does not see credit', async ({ page, context }) => {
   await login(context, 'plain');
   await loadCheckout(page, context, [cartItem(jaba, 15)]);

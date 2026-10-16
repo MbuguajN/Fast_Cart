@@ -13,7 +13,7 @@ export default function TradeCheckoutPage() {
   const [deliveryDate, setDeliveryDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [poReference, setPoReference] = useState('');
   const [notes, setNotes] = useState('');
-  const [options, setOptions] = useState({ stockHoldMinutes: 15, bankTransfer: { enabled: false } });
+  const [options, setOptions] = useState({ stockHoldMinutes: 15, nirvanaContact: {}, bankTransfer: { enabled: false } });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -58,6 +58,9 @@ export default function TradeCheckoutPage() {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+
+    // Nirvana is information only — nothing to place.
+    if (paymentMethod === 'nirvana') return;
 
     if (!account) {
       if (!buyerName.trim() || !buyerPhone.trim() || !buyerEmail.trim()) {
@@ -386,6 +389,76 @@ export default function TradeCheckoutPage() {
                 </div>
               </div>
 
+              {/* Nirvana Africa logbook loan — information only. No order, no payment,
+                  no stock movement: Nirvana vets and funds it off-site. Never sent to
+                  /api/trade/checkout (the API rejects it). */}
+              <div
+                data-testid="nirvana-option"
+                onClick={() => { if (account) setPaymentMethod('nirvana'); }}
+                className={`p-5 rounded-2xl border transition-all ${
+                  account ? 'cursor-pointer' : 'cursor-default'
+                } ${
+                  paymentMethod === 'nirvana'
+                    ? 'bg-pink-50/50 border-[#840038] ring-2 ring-[#840038]'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-900 uppercase block">
+                        Logbook Loan — Nirvana Africa
+                      </span>
+                      <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">
+                        Stock funding
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Need to fund a large order, such as stock for an event? Nirvana Africa can finance it against your vehicle logbook.
+                    </p>
+                    {!account && (
+                      <p className="text-xs text-amber-800 mt-2">
+                        You need a trade account to use this option.{' '}
+                        <Link href="/trade/apply" className="font-bold text-[#840038] hover:underline">Create an account</Link>
+                        {' '}or{' '}
+                        <Link href="/trade/login" className="font-bold text-[#840038] hover:underline">sign in</Link>.
+                      </p>
+                    )}
+                    {account && paymentMethod === 'nirvana' && (
+                      <div className="mt-3 space-y-2 text-xs text-gray-700">
+                        <p className="font-bold uppercase text-[10px] text-gray-600">What Nirvana will ask for</p>
+                        <ul className="list-disc pl-5 space-y-0.5">
+                          <li>Original vehicle logbook</li>
+                          <li>Copy of your national ID</li>
+                          <li>KRA PIN</li>
+                          <li>Valuation of the vehicle by Nirvana&apos;s assessors</li>
+                          <li>Colour passport-size photo</li>
+                        </ul>
+                        <p>
+                          Nirvana vets and approves each application, which takes longer than a normal order.
+                          <strong> Nothing is charged and no stock is reserved</strong> until it is arranged.
+                        </p>
+                        <p>
+                          To get started, contact{' '}
+                          <strong>{options.nirvanaContact?.name || 'your Happy Hour account manager'}</strong>
+                          {options.nirvanaContact?.phone ? <> on <strong>{options.nirvanaContact.phone}</strong></> : null}
+                          {options.nirvanaContact?.email ? <> or <strong>{options.nirvanaContact.email}</strong></> : null}.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {account && (
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === 'nirvana'}
+                      onChange={() => setPaymentMethod('nirvana')}
+                      className="mt-1 text-[#840038] focus:ring-[#840038]"
+                    />
+                  )}
+                </div>
+              </div>
+
               {options.bankTransfer?.enabled && (
                 <div
                   onClick={() => setPaymentMethod('bank_transfer')}
@@ -483,12 +556,14 @@ export default function TradeCheckoutPage() {
           <div className="pt-2">
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || paymentMethod === 'nirvana'}
               className="w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50"
             >
               {submitting
                 ? (paymentMethod === 'paystack' ? 'Initializing Payment...' : 'Placing Trade Order...')
-                : (paymentMethod === 'paystack' ? 'Pay & Place Trade Order →' : 'Confirm & Place Trade Order →')}
+                : paymentMethod === 'nirvana'
+                  ? 'Contact us to arrange funding'
+                  : (paymentMethod === 'paystack' ? 'Pay & Place Trade Order →' : 'Confirm & Place Trade Order →')}
             </button>
           </div>
         </div>

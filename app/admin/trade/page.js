@@ -3317,6 +3317,17 @@ export default function AdminTradePage() {
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs" />
               </div>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-gray-100">
+              <div className="sm:col-span-3 text-[10px] font-bold uppercase text-gray-600">
+                Nirvana logbook-loan contact (shown to buyers)
+              </div>
+              <input type="text" id="pay-nirvana-name" placeholder="Name" defaultValue={config?.nirvanaContact?.name || ''}
+                className="px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              <input type="tel" id="pay-nirvana-phone" placeholder="Phone / WhatsApp" defaultValue={config?.nirvanaContact?.phone || ''}
+                className="px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+              <input type="email" id="pay-nirvana-email" placeholder="Email" defaultValue={config?.nirvanaContact?.email || ''}
+                className="px-3 py-2 rounded-xl border border-gray-200 text-xs" />
+            </div>
             <button
               type="button"
               onClick={async () => {
@@ -3326,6 +3337,7 @@ export default function AdminTradePage() {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       stockHoldMinutes: val('pay-hold-minutes'),
+                      nirvanaContact: { name: val('pay-nirvana-name'), phone: val('pay-nirvana-phone'), email: val('pay-nirvana-email') },
                       bankTransfer: {
                         enabled: document.getElementById('pay-bank-enabled')?.checked === true,
                         bankName: val('pay-bank-name'),

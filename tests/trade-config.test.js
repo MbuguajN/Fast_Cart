@@ -50,11 +50,18 @@ test('bank detail strings are trimmed, tag-stripped and length-capped', () => {
 
 test('public checkout options never leak other config or disabled bank details', () => {
   const cfg = { stockHoldMinutes: 20, gmFloorPercent: 4, bankTransfer: { enabled: false, ...details } };
-  assert.deepEqual(publicCheckoutOptions(cfg), { stockHoldMinutes: 20, bankTransfer: { enabled: false } });
+  assert.deepEqual(publicCheckoutOptions(cfg), { stockHoldMinutes: 20, nirvanaContact: { name: '', phone: '', email: '' }, bankTransfer: { enabled: false } });
 });
 
 test('public checkout options default to 15 minutes and show details only when enabled', () => {
   assert.equal(publicCheckoutOptions({}).stockHoldMinutes, 15);
   const on = publicCheckoutOptions({ bankTransfer: { enabled: true, ...details, branch: 'CBD' } });
   assert.deepEqual(on.bankTransfer, { enabled: true, ...details, branch: 'CBD' });
+});
+
+test('nirvanaContact is allow-listed, cleaned, and exposed publicly', () => {
+  const out = sanitizeConfigPatch({ nirvanaContact: { name: ' <i>Wanjiru</i> ', phone: '+254700', email: 'n@x.test', junk: 1 } }, {});
+  assert.deepEqual(out.nirvanaContact, { name: 'iWanjiru/i', phone: '+254700', email: 'n@x.test' });
+  assert.deepEqual(publicCheckoutOptions({ nirvanaContact: out.nirvanaContact }).nirvanaContact, out.nirvanaContact);
+  assert.deepEqual(publicCheckoutOptions({}).nirvanaContact, { name: '', phone: '', email: '' });
 });
