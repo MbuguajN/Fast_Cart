@@ -75,7 +75,7 @@ export default function TradeHowItWorksPage() {
     },
     {
       title: 'Retail & Stockists',
-      desc: 'Liquor stores, high-end grocers, and specialty merchants sourcing authentic Pernod Ricard spirits and artisanal Jaba elixirs.',
+      desc: 'Liquor stores, high-end grocers, and specialty merchants sourcing 100% original spirits and artisanal Jaba elixirs.',
       Icon: StoreIcon,
       badge: 'Stockists',
     },

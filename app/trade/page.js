@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { pickFeaturedProducts, priceSummary } from '@/lib/trade/landing-featured.js';
 
 function ScaleIcon(props) {
   return (
@@ -38,28 +40,51 @@ function DocumentIcon(props) {
   );
 }
 
+function ShieldIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  );
+}
+
+const kes = (n) => `KES ${Number(n).toLocaleString('en-KE')}`;
+
 export default function TradeLandingPage() {
-  const features = [
+  const [featured, setFeatured] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/trade/catalog')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (!cancelled) setFeatured(pickFeaturedProducts(data?.products, 8)); })
+      .catch(() => { if (!cancelled) setFeatured([]); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const benefits = [
     {
-      title: 'Volume Tier Pricing',
-      desc: 'Every bottle is priced on the quantity you order — from a trial single bottle up to bulk case rates. No negotiation.',
+      title: 'Honest Wholesale Pricing',
+      desc: 'Prices are online, no calling for a quote. Every bottle gets cheaper as you order more of it.',
       Icon: ScaleIcon,
     },
     {
-      title: 'Same-Day Nairobi Delivery',
-      desc: 'Order before 12:00 EAT and receive it that afternoon. Rest of Kenya in 2-3 business days.',
+      title: 'Fast Delivery',
+      desc: 'Order before 12:00 EAT and receive it the same afternoon in Nairobi. Rest of Kenya in 2-3 business days.',
       Icon: TruckIcon,
     },
     {
-      title: 'M-Pesa & Bank Transfer',
-      desc: 'Pay on order, no account required. Approved partners can apply separately for Net 14 credit terms.',
-      Icon: CardIcon,
+      title: '100% Original',
+      desc: 'Sealed, genuine bottles, and every order backed by a KRA VAT invoice. Never counterfeit.',
+      Icon: ShieldIcon,
     },
-    {
-      title: 'VAT-Compliant Invoicing',
-      desc: 'Every order gets a proper KRA VAT invoice — itemized, sequential, and ready for your books.',
-      Icon: DocumentIcon,
-    },
+  ];
+
+  const ways = [
+    { title: 'Pay now', desc: 'Card or M-Pesa at checkout. No account needed.', Icon: CardIcon },
+    { title: 'Credit for approved businesses', desc: 'Apply for Net 14 terms and order on account.', Icon: DocumentIcon },
+    { title: 'Funding for large orders', desc: 'Need help financing a big order? Sign in for the options.', Icon: ScaleIcon },
   ];
 
   return (
@@ -76,16 +101,16 @@ export default function TradeLandingPage() {
         >
           <div className="max-w-2xl space-y-4 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#840038] text-white text-xs font-black uppercase tracking-widest border border-pink-400/30">
-              <span>★ Pernod Ricard Wholesale Partner · Nairobi</span>
+              <span>100% original · Sealed bottles · VAT invoice with every order</span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-tight font-sans">
-              Wholesale Spirits &amp; Craft Juices, Priced by the Bottle
+              Original Spirits at Wholesale Prices, Delivered Fast
             </h1>
 
             <p className="text-sm sm:text-base text-gray-300 font-medium leading-relaxed">
-              Browse real wholesale pricing and order today — no account, no vetting, no waiting. From a single
-              trial bottle to a full bar restock, the more you buy per SKU, the less you pay per bottle.
+              See real wholesale prices and order today. No account, no vetting, no waiting. From a single
+              trial bottle to a full bar restock, the more you buy of each bottle, the less you pay per bottle.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
@@ -113,19 +138,85 @@ export default function TradeLandingPage() {
         </div>
       </section>
 
-      {/* Feature Strip */}
+      {/* Shelf: live products and prices */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#840038] block">On the shelf today</span>
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-gray-900">Popular with bars and venues</h2>
+          </div>
+          <Link href="/trade/catalog" className="text-xs font-bold text-[#840038] hover:underline shrink-0">
+            See the full catalogue →
+          </Link>
+        </div>
+
+        {featured === null ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" aria-hidden="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-56 rounded-3xl bg-gray-100 animate-pulse" />
+            ))}
+          </div>
+        ) : featured.length === 0 ? (
+          <p className="text-xs text-gray-500">
+            Browse everything we stock in the <Link href="/trade/catalog" className="font-bold text-[#840038] hover:underline">wholesale catalogue</Link>.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {featured.map((product) => {
+              const price = priceSummary(product);
+              return (
+                <Link
+                  key={product.sku}
+                  href="/trade/catalog"
+                  className="group bg-white rounded-3xl border border-gray-200 shadow-sm p-4 flex flex-col gap-3 hover:border-[#840038] transition-colors"
+                >
+                  <div className="aspect-square rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-contain p-2 group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-black text-gray-900 leading-snug line-clamp-2">{product.name}</h3>
+                    <p className="text-sm font-black text-[#840038]">{kes(price.from)}<span className="text-[10px] font-bold text-gray-500"> / bottle</span></p>
+                    {price.to && (
+                      <p className="text-[11px] text-emerald-700 font-bold">Down to {kes(price.to)} at volume</p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+        <p className="text-[10px] text-gray-500">Prices include VAT. Minimum order applies.</p>
+      </section>
+
+      {/* Why us */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-3"
-            >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {benefits.map((f) => (
+            <div key={f.title} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-3">
               <div className="w-10 h-10 rounded-2xl bg-[#840038] text-white flex items-center justify-center">
                 <f.Icon className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-black uppercase text-gray-900">{f.title}</h3>
               <p className="text-xs text-gray-600 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Ways to pay */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-gray-900">Ways to pay</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {ways.map((w) => (
+            <div key={w.title} className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+              <div className="w-8 h-8 shrink-0 rounded-xl bg-white border border-gray-200 text-[#840038] flex items-center justify-center">
+                <w.Icon className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black uppercase text-gray-900">{w.title}</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">{w.desc}</p>
+              </div>
             </div>
           ))}
         </div>

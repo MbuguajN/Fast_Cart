@@ -46,6 +46,7 @@ Methods accepted by `/api/trade/checkout` (`PAYMENT_METHODS` in `lib/trade/payme
 
 ## Gotchas
 
+- **Never name the supplier (Pernod Ricard) on any public page.** The partnership is confidential. The catalog API blanks it via `lib/trade/public-brand.js`; the landing page features products via `lib/trade/landing-featured.js`. Say "100% original" instead. Admin screens may still use internal names.
 - Past commits shipped truncated JSX that caused 500s. After any UI edit, smoke-test the route.
 - Don't `pkill` by pattern: check for an existing dev server first.
 - A "broken" browser API (geolocation etc.) may be blocked by `Permissions-Policy` in `next.config.mjs`.

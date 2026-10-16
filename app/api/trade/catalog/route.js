@@ -4,6 +4,7 @@ import { getSegmentTemplates } from '@/lib/trade/trade-store.js';
 import { resolveLineTier } from '@/lib/trade/pricing-engine.js';
 import { getTradeProductsFromDb } from '@/lib/trade/trade-catalog.js';
 import { attachPriceOverrides } from '@/lib/trade/trade-costing.js';
+import { publicBrandName } from '@/lib/trade/public-brand.js';
 
 /**
  * Wholesale catalogue is public — no login required to browse or price.
@@ -69,8 +70,8 @@ export async function GET(request) {
           name: p.name,
           slug: p.slug,
           image: p.image || '/images/bottle-placeholder.png',
-          categoryName: p.categoryName || (isJaba ? 'Happy Hour Jaba Juice' : 'Pernod Ricard Spirits'),
-          brandName: p.brandName || (isJaba ? 'Jaba' : 'Pernod Ricard'),
+          categoryName: p.categoryName || (isJaba ? 'Happy Hour Jaba Juice' : 'Spirits'),
+          brandName: publicBrandName(p.brandName, isJaba),
           priceLine,
           inStock: p.inStock && p.stockQuantity > 0,
           stockQuantity: p.stockQuantity,

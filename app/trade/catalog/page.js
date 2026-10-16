@@ -146,7 +146,7 @@ export default function TradeCatalogPage() {
             Wholesale Trade Pricing
           </span>
           <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#231F20] mt-1">
-            Pernod Ricard &amp; Craft Spirits Catalog
+            Wholesale Spirits &amp; Craft Juice Catalog
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
             Tier-discounted pricing automatically calculated based on bottle volumes per order.
