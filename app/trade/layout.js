@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
+import ScrollToTop from '@/components/trade/ScrollToTop.js';
 import { TradeProvider, useTrade } from '@/lib/trade/trade-context.js';
 
 function TradePortalShell({ children }) {
@@ -221,6 +222,7 @@ function TradePortalShell({ children }) {
 
         <Footer />
         <TradeNotificationToast />
+        <ScrollToTop />
       </div>
     );
   }
@@ -450,6 +452,7 @@ function TradePortalShell({ children }) {
 
         <Footer />
         <TradeNotificationToast />
+        <ScrollToTop />
       </div>
     </div>
   );
