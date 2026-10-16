@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getTradeAuthFromRequest } from '@/lib/trade/trade-auth.js';
-import { createTradeOrder, findOrCreateGuestTradeAccount, readTradeStore } from '@/lib/trade/trade-store.js';
+import { createTradeOrder, findOrCreateGuestTradeAccount, readTradeStore, updateTradeOrderStatus } from '@/lib/trade/trade-store.js';
 import { resolveTradeLineItems } from '@/lib/trade/trade-catalog.js';
 import { stripEconomics } from '@/lib/trade/pricing-visibility.js';
 import { assertPaymentMethodAllowed } from '@/lib/trade/payment-methods.js';
+import { markAwaitingPayment } from '@/lib/trade/trade-hold.js';
+import { publicCheckoutOptions } from '@/lib/trade/trade-config.js';
 import { rateLimitRequest } from '@/lib/rate-limit';
 
 /**
@@ -123,6 +125,13 @@ export async function POST(request) {
       return NextResponse.json({ error: resolutionError.message }, { status: 400 });
     }
 
+    // Paystack needs an email; check before the order exists so a missing one
+    // cannot leave stock reserved.
+    const buyerEmail = auth?.user?.email || body.buyerEmail;
+    if (effectiveMethod === 'paystack' && !buyerEmail) {
+      return NextResponse.json({ error: 'Email is required for card payment' }, { status: 400 });
+    }
+
     const order = await createTradeOrder({
       account,
       user,
@@ -140,11 +149,6 @@ export async function POST(request) {
     if (effectiveMethod === 'paystack') {
       try {
         const { initializePayment, generateReference } = await import('@/lib/paystack.js');
-
-        const buyerEmail = auth?.user?.email || body.buyerEmail;
-        if (!buyerEmail) {
-          return NextResponse.json({ error: 'Email is required for card payment' }, { status: 400 });
-        }
 
         const reference = generateReference(order.id);
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -165,13 +169,12 @@ export async function POST(request) {
           callback_url: `${siteUrl}/api/paystack/callback`,
         });
 
-        // Store the expected reference on the order for verification
-        const { query: pgQuery, ensureTradeDb } = await import('@/lib/trade/trade-pg.js');
-        await ensureTradeDb();
-        await pgQuery(
-          'UPDATE trade_orders SET paystack_reference = $1, status = $2 WHERE id = $3',
-          [reference, 'pending_payment', order.id]
-        );
+        // Record the reference and start the stock hold.
+        await markAwaitingPayment({
+          orderId: order.id,
+          reference,
+          holdMinutes: publicCheckoutOptions(readTradeStore().config).stockHoldMinutes,
+        });
 
         return NextResponse.json({
           success: true,
@@ -184,13 +187,17 @@ export async function POST(request) {
         });
       } catch (paystackError) {
         console.error('Paystack initialization failed for trade order:', paystackError.message);
-        // The order was already created — mark it and tell the buyer
-        return NextResponse.json({
-          success: true,
-          message: 'Order created but payment initialization failed. You can retry payment from your order page.',
-          order: stripEconomics(order, user),
-          paystack: null,
-        });
+        // Never leave a confirmed, unpaid order holding stock: cancel it
+        // (which restocks) and let the buyer try again.
+        try {
+          await updateTradeOrderStatus(order.id, 'cancelled');
+        } catch (cancelError) {
+          console.error(`Could not cancel order ${order.id} after Paystack failure:`, cancelError.message);
+        }
+        return NextResponse.json(
+          { error: 'We could not start the payment. Nothing was charged and your order was not placed. Please try again.' },
+          { status: 502 }
+        );
       }
     }
 

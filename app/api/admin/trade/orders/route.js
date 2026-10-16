@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminGuard } from '@/lib/api-guard';
 import { getTradeOrders } from '@/lib/trade/trade-store.js';
+import { expireUnpaidHolds } from '@/lib/trade/trade-hold.js';
 
 export async function GET(request) {
   const denied = await adminGuard(request);
@@ -11,6 +12,10 @@ export async function GET(request) {
     const status = searchParams.get('status');
     const accountId = searchParams.get('accountId');
     const search = searchParams.get('search');
+
+    // Best-effort sweep so an unscheduled deployment still converges; the
+    // cron route is the primary path.
+    await expireUnpaidHolds().catch((e) => console.error('Lazy hold expiry failed:', e.message));
 
     const orders = await getTradeOrders({
       status: status || undefined,
