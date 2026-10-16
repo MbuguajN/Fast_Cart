@@ -149,3 +149,31 @@ test('payment arriving after expiry is flagged for refund and does not re-confir
   assert.equal(rows[0].payment_status, 'paid_after_expiry');
   assert.equal(await stockOf(p.sku), before, 'stock stays released');
 });
+
+test('settlement racing the expiry sweep never leaves an inconsistent order', async () => {
+  const p = await pickProduct();
+  for (let i = 0; i < 6; i += 1) {
+    const before = await stockOf(p.sku);
+    const order = await placePaystackOrder(p.sku, 12);
+    const ref = `TEST_race_${i}`;
+    await markAwaitingPayment({ orderId: order.id, reference: ref, holdMinutes: 15 });
+    await expireNow(order.id);
+
+    await Promise.all([
+      settleTradeOrderFromPayment({
+        status: 'success', reference: ref, id: 999100 + i, amount: order.grandTotal * 100,
+        currency: 'KES', channel: 'card', metadata: { trade_order_id: order.id },
+      }),
+      expireUnpaidHolds(),
+    ]);
+
+    const { rows } = await query('SELECT status, payment_status FROM trade_orders WHERE id = $1', [order.id]);
+    const { status, payment_status: pay } = rows[0];
+    const stock = await stockOf(p.sku);
+    const paidOutcome = status === 'confirmed' && pay === 'paid' && stock === before - 12;
+    const expiredOutcome = status === 'cancelled' && pay === 'paid_after_expiry' && stock === before;
+    assert.ok(paidOutcome || expiredOutcome, `inconsistent end state: ${status}/${pay}/stock ${stock} (before ${before})`);
+    // Return the stock so later iterations (and other tests) are not starved.
+    if (status !== 'cancelled') await updateTradeOrderStatus(order.id, 'cancelled');
+  }
+});
