@@ -11,4 +11,4 @@ Tick each before switching trade checkout to real money.
 - [ ] **Nirvana contact**: enter the dedicated contact's name, phone and email in the same card (checkout shows "your Happy Hour account manager" until then).
 - [ ] **Credit accounts**: confirm which businesses have credit enabled and their limits (Admin → Trade → Accounts).
 - [ ] **One real test payment** of a small amount on the live keys, from a guest and from an account, then refund it in the Paystack dashboard.
-- [ ] **Paid-after-expiry**: know where to look — orders with payment status `paid after expiry` need a manual refund or reinstatement.
+- [ ] **Paid-after-expiry**: know where to look — orders with payment status `paid after expiry` need a manual refund (a cancelled order cannot be reopened; place a new order for the buyer if they still want the goods).

@@ -268,15 +268,18 @@ export default function TradeVatInvoicePage() {
             <span className="font-bold uppercase tracking-wider text-gray-700 block">
               Settlement &amp; Bank Instructions (Net 14)
             </span>
-            <p className="text-gray-600">
-              Corporate M-Pesa Paybill: <strong>{invoice.supplier.paybill}</strong> · Account: <strong>{invoice.invoiceNumber}</strong>
-            </p>
-            <div className="text-gray-600 space-y-0.5 border-t border-gray-200 pt-2">
-              <p>Bank: <strong>{invoice.supplier.bankDetails.bank}</strong> ({invoice.supplier.bankDetails.branch})</p>
-              <p>Account Name: <strong>{invoice.supplier.bankDetails.accountName}</strong></p>
-              <p>Account No: <strong className="font-mono">{invoice.supplier.bankDetails.accountNumber}</strong></p>
-              <p>Swift Code: <strong className="font-mono">{invoice.supplier.bankDetails.swiftCode}</strong></p>
-            </div>
+            {invoice.supplier.bankDetails?.accountNumber ? (
+              <div className="text-gray-600 space-y-0.5 pt-1">
+                <p>Bank: <strong>{invoice.supplier.bankDetails.bank}</strong>{invoice.supplier.bankDetails.branch ? ` (${invoice.supplier.bankDetails.branch})` : ''}</p>
+                <p>Account Name: <strong>{invoice.supplier.bankDetails.accountName}</strong></p>
+                <p>Account No: <strong className="font-mono">{invoice.supplier.bankDetails.accountNumber}</strong></p>
+                <p>Reference: <strong>{invoice.invoiceNumber}</strong></p>
+              </div>
+            ) : (
+              <p className="text-gray-600">
+                Your account manager will confirm payment details for invoice <strong>{invoice.invoiceNumber}</strong>.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2 text-xs">

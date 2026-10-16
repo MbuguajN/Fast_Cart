@@ -4,7 +4,7 @@ import { createTradeOrder, findOrCreateGuestTradeAccount, readTradeStore, update
 import { resolveTradeLineItems } from '@/lib/trade/trade-catalog.js';
 import { stripEconomics } from '@/lib/trade/pricing-visibility.js';
 import { assertPaymentMethodAllowed } from '@/lib/trade/payment-methods.js';
-import { markAwaitingPayment } from '@/lib/trade/trade-hold.js';
+import { markAwaitingPayment, openHoldCount } from '@/lib/trade/trade-hold.js';
 import { publicCheckoutOptions } from '@/lib/trade/trade-config.js';
 import { rateLimitRequest } from '@/lib/rate-limit';
 
@@ -82,7 +82,7 @@ export async function POST(request) {
       }
     } else {
       const { buyerName, buyerPhone, buyerEmail } = body;
-      if (!buyerName || !buyerPhone || !buyerEmail) {
+      if ([buyerName, buyerPhone, buyerEmail].some((v) => typeof v !== 'string' || !v.trim())) {
         return NextResponse.json({ error: 'Name, phone and email are required to place an order' }, { status: 400 });
       }
       if (!deliveryAddress?.addressLine || !deliveryAddress?.city) {
@@ -127,9 +127,21 @@ export async function POST(request) {
 
     // Paystack needs an email; check before the order exists so a missing one
     // cannot leave stock reserved.
-    const buyerEmail = auth?.user?.email || body.buyerEmail;
+    const buyerEmail = auth?.user?.email || (typeof body.buyerEmail === 'string' ? body.buyerEmail.trim() : '');
     if (effectiveMethod === 'paystack' && !buyerEmail) {
       return NextResponse.json({ error: 'Email is required for card payment' }, { status: 400 });
+    }
+
+    // Guest pay-now orders reserve stock for a while without any payment, so
+    // bound how many one client can open: per IP, and per guest account.
+    if (!auth && effectiveMethod === 'paystack') {
+      const holdLimit = await rateLimitRequest(request, { scope: 'trade-guest-holds', maxRequests: 5, windowMs: 10 * 60 * 1000 });
+      if (!holdLimit.allowed || (await openHoldCount(account.id)) >= 3) {
+        return NextResponse.json(
+          { error: 'You already have payments in progress. Please complete them, or wait a few minutes and try again.' },
+          { status: 429 }
+        );
+      }
     }
 
     const order = await createTradeOrder({

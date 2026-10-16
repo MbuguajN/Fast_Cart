@@ -33,23 +33,13 @@ export async function GET(request) {
     
     // Check if this is a trade order by looking for trade_order_id in metadata
     if (paystackData?.metadata?.trade_order_id) {
-      const { settleTradeOrderFromPayment } = await import('@/lib/trade/trade-payment.js');
+      const { settleTradeOrderFromPayment, settlementRedirectPath } = await import('@/lib/trade/trade-payment.js');
       const result = await settleTradeOrderFromPayment(paystackData);
 
       if (!result.settled) {
         console.error(`Callback could not settle trade order ${result.orderId ?? '?'}: ${result.reason}`);
-
-        if (result.reason === 'amount_short') {
-          return NextResponse.redirect(
-            siteUrl(`/trade/orders/${encodeURIComponent(result.orderId ?? '')}?payment=review`)
-          );
-        }
-        return NextResponse.redirect(siteUrl('/trade/dashboard?payment=failed'));
       }
-
-      return NextResponse.redirect(
-        siteUrl(`/trade/orders/${encodeURIComponent(result.orderId)}?payment=success`)
-      );
+      return NextResponse.redirect(siteUrl(settlementRedirectPath(result)));
     } else {
       // Otherwise process as a retail order
       const result = await settleOrderFromPayment(paystackData);

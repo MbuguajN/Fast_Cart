@@ -381,7 +381,7 @@ export default function SingleTradeOrderDetailPage() {
             )}
             {order.paymentStatus === 'paid_after_expiry' && (
               <p className="text-[11px] text-red-700 pt-1">
-                Your payment arrived after the order expired. Our team will contact you to refund or reinstate it.
+                Your payment arrived after the order expired. Our team will contact you to refund it.
               </p>
             )}
             <div className="flex justify-between">

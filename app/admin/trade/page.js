@@ -924,6 +924,15 @@ export default function AdminTradePage() {
             </span>
           </div>
 
+          {(() => {
+            const needsAttention = orders.filter((o) => ['paid_after_expiry', 'underpaid'].includes(o.paymentStatus)).length;
+            return needsAttention > 0 ? (
+              <div className="mx-4 mb-3 p-3 rounded-2xl bg-red-50 border border-red-200 text-xs font-bold text-red-800">
+                {needsAttention} order{needsAttention === 1 ? '' : 's'} with a payment problem (paid after expiry or underpaid) — refund or contact the buyer.
+              </div>
+            ) : null;
+          })()}
+
           <div className="overflow-x-auto">
             {filteredOrdersList.length === 0 ? (
               <div className="p-12 text-center text-gray-500">
@@ -971,6 +980,11 @@ export default function AdminTradePage() {
                           <div className="text-[10px] text-gray-400 font-sans font-normal uppercase">
                             {o.paymentMethod === 'pay_on_account' ? 'On Account' : 'Prepaid'}
                           </div>
+                          {['paid_after_expiry', 'underpaid', 'expired'].includes(o.paymentStatus) && (
+                            <div className="mt-1 text-[10px] font-sans font-bold uppercase text-red-700">
+                              {o.paymentStatus === 'paid_after_expiry' ? 'Paid after expiry — refund needed' : o.paymentStatus === 'underpaid' ? 'Underpaid — review' : 'Payment expired'}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-center">
                           <span

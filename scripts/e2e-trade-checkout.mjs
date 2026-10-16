@@ -227,6 +227,15 @@ if (args.includes('--attacks')) {
       assert(r.status() === 400, `${JSON.stringify(items)} got ${r.status()}`);
     }
   });
+  await scenario('attack: guests cannot open unlimited stock holds', async ({ context }) => {
+    // Paystack keys may be absent: the order is then created and cancelled on init failure, which still counts.
+    const statuses = [];
+    for (let i = 0; i < 8; i += 1) {
+      const r = await post(context.request, { ...guest, buyerEmail: `test.hold.${Date.now()}.${i}@example.test`, items: line(), paymentMethod: 'paystack' });
+      statuses.push(r.status());
+    }
+    assert(statuses.includes(429), `no 429 in ${statuses.join(',')}`);
+  });
   await scenario('attack: checkout is rate limited', async ({ context }) => {
     let limited = false;
     for (let i = 0; i < 30 && !limited; i += 1) {
@@ -236,7 +245,7 @@ if (args.includes('--attacks')) {
   });
   await scenario('attack: public application endpoints are rate limited and reject bad links', async ({ context }) => {
     const bad = await context.request.post(`${BASE}/api/trade/apply`, { data: { tradingName: 'TEST Apply', contactName: 'x', email: 'test.apply@example.test', phone: '1', licenceDocumentUrl: 'javascript:alert(1)' } });
-    assert(bad.status() === 400, `bad licence URL got ${bad.status()}`);
+    assert([400, 429].includes(bad.status()), `bad licence URL got ${bad.status()}`); // 429 if a previous run already used this IP's quota (validation is unit-tested)
     let limited = false;
     for (let i = 0; i < 12 && !limited; i += 1) {
       limited = (await context.request.post(`${BASE}/api/trade/apply`, { data: {} })).status() === 429;
