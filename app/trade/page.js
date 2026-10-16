@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { pickFeaturedProducts, priceSummary } from '@/lib/trade/landing-featured.js';
+import { pickFeaturedProducts } from '@/lib/trade/landing-featured.js';
+import TradeProductCard from '@/components/trade/TradeProductCard.js';
 
 function ScaleIcon(props) {
   return (
@@ -48,8 +49,6 @@ function ShieldIcon(props) {
     </svg>
   );
 }
-
-const kes = (n) => `KES ${Number(n).toLocaleString('en-KE')}`;
 
 export default function TradeLandingPage() {
   const [featured, setFeatured] = useState(null);
@@ -151,9 +150,9 @@ export default function TradeLandingPage() {
         </div>
 
         {featured === null ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" aria-hidden="true">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-56 rounded-3xl bg-gray-100 animate-pulse" />
+              <div key={i} className="h-96 rounded-3xl bg-gray-100 animate-pulse" />
             ))}
           </div>
         ) : featured.length === 0 ? (
@@ -161,29 +160,10 @@ export default function TradeLandingPage() {
             Browse everything we stock in the <Link href="/trade/catalog" className="font-bold text-[#840038] hover:underline">wholesale catalogue</Link>.
           </p>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {featured.map((product) => {
-              const price = priceSummary(product);
-              return (
-                <Link
-                  key={product.sku}
-                  href="/trade/catalog"
-                  className="group bg-white rounded-3xl border border-gray-200 shadow-sm p-4 flex flex-col gap-3 hover:border-[#840038] transition-colors"
-                >
-                  <div className="aspect-square rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-contain p-2 group-hover:scale-105 transition-transform" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-xs font-black text-gray-900 leading-snug line-clamp-2">{product.name}</h3>
-                    <p className="text-sm font-black text-[#840038]">{kes(price.from)}<span className="text-[10px] font-bold text-gray-500"> / bottle</span></p>
-                    {price.to && (
-                      <p className="text-[11px] text-emerald-700 font-bold">Down to {kes(price.to)} at volume</p>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {featured.map((product, idx) => (
+              <TradeProductCard key={product.sku} product={product} index={idx} />
+            ))}
           </div>
         )}
         <p className="text-[10px] text-gray-500">Prices include VAT. Minimum order applies.</p>
