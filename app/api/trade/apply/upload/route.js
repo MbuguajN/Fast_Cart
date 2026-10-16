@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import { rateLimitRequest } from '@/lib/rate-limit';
 
 const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
@@ -13,6 +14,12 @@ const ALLOWED_MIME_TYPES = new Set([
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request) {
+  // Unauthenticated and writes to disk: bound how fast one client can fill it.
+  const rl = await rateLimitRequest(request, { maxRequests: 10, windowMs: 10 * 60 * 1000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many uploads. Please try again later.' }, { status: 429 });
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get('file');

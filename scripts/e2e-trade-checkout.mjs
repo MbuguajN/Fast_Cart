@@ -154,6 +154,83 @@ await scenario('viewer seat cannot place an order (403)', async ({ context }) =>
   assert(res.status() === 403, `expected 403, got ${res.status()}`);
 });
 
+if (args.includes('--attacks')) {
+  const post = (ctx, data) => ctx.post(`${BASE}/api/trade/checkout`, { data });
+  const guest = { buyerName: 'TEST Attacker', buyerPhone: '0700000777', buyerEmail: `test.attack.${Date.now()}@example.test`, deliveryAddress: { addressLine: 'x', city: 'Nairobi' } };
+  const line = (q = 15) => [{ sku: jaba.sku, quantity: q }];
+
+  await scenario('attack: guest cannot pay on account (403)', async ({ context }) => {
+    const r = await post(context.request, { ...guest, items: line(), paymentMethod: 'pay_on_account' });
+    assert(r.status() === 403, `got ${r.status()}`);
+  });
+  await scenario('attack: non-credit account cannot pay on account', async ({ context }) => {
+    await login(context, 'plain');
+    const r = await post(context.request, { items: line(), paymentMethod: 'pay_on_account' });
+    assert([400, 403].includes(r.status()), `got ${r.status()}`);
+  });
+  await scenario('attack: removed / unknown / disabled payment methods are refused', async ({ context }) => {
+    for (const m of ['mpesa_paybill', 'nirvana', 'bank_transfer', '', null, 12345, { $ne: 1 }]) {
+      const r = await post(context.request, { ...guest, items: line(), paymentMethod: m });
+      assert(r.status() === 400, `method ${JSON.stringify(m)} got ${r.status()}`);
+    }
+  });
+  await scenario('attack: tampered cost/price fields do not change the price', async ({ context }) => {
+    await login(context, 'credit2');
+    const honest = await (await post(context.request, { items: line(), paymentMethod: 'pay_on_account' })).json();
+    const tampered = await (await post(context.request, {
+      items: [{ sku: jaba.sku, quantity: 15, prkCostIncVat: 1, priceLine: 'spirits', unitPriceIncVat: 1, priceOverrides: { T0: 1 } }],
+      paymentMethod: 'pay_on_account',
+    })).json();
+    assert(honest.order && tampered.order, `orders not created: ${JSON.stringify(honest).slice(0, 120)} / ${JSON.stringify(tampered).slice(0, 120)}`);
+    assert(honest.order.grandTotal === tampered.order.grandTotal, `price changed: ${honest.order.grandTotal} vs ${tampered.order.grandTotal}`);
+  });
+  await scenario('attack: another account\'s address id is refused', async ({ context }) => {
+    await login(context, 'credit2');
+    const r = await post(context.request, { items: line(), paymentMethod: 'pay_on_account', deliveryAddress: { id: 'addr_belongs_to_someone_else' } });
+    assert(r.status() === 400, `got ${r.status()}`);
+  });
+  await scenario('attack: oversized notes are truncated, markup stripped', async ({ context }) => {
+    await login(context, 'credit2');
+    const r = await post(context.request, { items: line(), paymentMethod: 'pay_on_account', notes: '<script>alert(1)</script>' + 'x'.repeat(100000) });
+    const j = await r.json();
+    assert(j.order, `not created: ${r.status()}`);
+    assert(!String(j.order.notes).includes('<'), 'markup kept');
+    assert(String(j.order.notes).length <= 500, `notes ${String(j.order.notes).length} chars`);
+  });
+  await scenario('attack: unknown SKU, zero/negative/fractional quantity are refused', async ({ context }) => {
+    for (const items of [[{ sku: 'nope', quantity: 1 }], [{ sku: jaba.sku, quantity: 0 }], [{ sku: jaba.sku, quantity: -5 }], [{ sku: jaba.sku, quantity: 'abc' }], []]) {
+      const r = await post(context.request, { ...guest, items, paymentMethod: 'paystack' });
+      assert(r.status() === 400, `${JSON.stringify(items)} got ${r.status()}`);
+    }
+  });
+  await scenario('attack: checkout is rate limited', async ({ context }) => {
+    let limited = false;
+    for (let i = 0; i < 30 && !limited; i += 1) {
+      limited = (await post(context.request, { items: [], paymentMethod: 'paystack' })).status() === 429;
+    }
+    assert(limited, 'no 429 after 30 rapid requests');
+  });
+  await scenario('attack: public application endpoints are rate limited and reject bad links', async ({ context }) => {
+    const bad = await context.request.post(`${BASE}/api/trade/apply`, { data: { tradingName: 'TEST Apply', contactName: 'x', email: 'test.apply@example.test', phone: '1', licenceDocumentUrl: 'javascript:alert(1)' } });
+    assert(bad.status() === 400, `bad licence URL got ${bad.status()}`);
+    let limited = false;
+    for (let i = 0; i < 12 && !limited; i += 1) {
+      limited = (await context.request.post(`${BASE}/api/trade/apply`, { data: {} })).status() === 429;
+    }
+    assert(limited, 'no 429 on /api/trade/apply');
+  });
+  await scenario('attack: webhook rejects a missing/forged signature', async ({ context }) => {
+    const r = await context.request.post(`${BASE}/api/paystack/webhook`, { data: { event: 'charge.success', data: { reference: 'x' } }, headers: { 'x-paystack-signature': 'deadbeef' } });
+    assert([401, 500].includes(r.status()), `got ${r.status()} (must never be 200)`);
+  });
+  await scenario('attack: trade/admin routes refuse anonymous callers', async ({ context }) => {
+    for (const path of ['/api/trade/orders', '/api/trade/invoices/x', '/api/admin/trade/orders', '/api/admin/trade/accounts', '/api/admin/trade/config']) {
+      const r = await context.request.get(`${BASE}${path}`);
+      assert(r.status() === 401, `${path} got ${r.status()}`);
+    }
+  });
+}
+
 await browser.close();
 const width = Math.max(...results.map((r) => r.name.length));
 for (const r of results) console.log(`${r.status.padEnd(4)}  ${r.name.padEnd(width)}${r.note ? `  — ${r.note}` : ''}`);

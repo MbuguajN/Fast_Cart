@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
 import { buildTradeAccount, upsertTradeAccount, addTradeUser } from '@/lib/trade/trade-store.js';
 import { sendTradeApplicationEmails } from '@/lib/trade/trade-email.js';
+import { cleanApplication } from '@/lib/trade/trade-application.js';
+import { rateLimitRequest } from '@/lib/rate-limit';
 
 export async function POST(request) {
-  try {
-    const data = await request.json();
+  // Public and each hit sends emails and creates a pending account.
+  const rl = await rateLimitRequest(request, { maxRequests: 5, windowMs: 10 * 60 * 1000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many applications. Please try again later.' }, { status: 429 });
+  }
 
-    if (!data.tradingName || !data.contactName || !data.email || !data.phone) {
-      return NextResponse.json({ error: 'Missing required business or contact fields' }, { status: 400 });
+  try {
+    let data;
+    try {
+      data = cleanApplication(await request.json());
+    } catch (validationError) {
+      return NextResponse.json({ error: validationError.message }, { status: 400 });
     }
 
     let newAccount;

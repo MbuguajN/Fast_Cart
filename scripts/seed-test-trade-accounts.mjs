@@ -16,6 +16,8 @@ import { query, ensureTradeDb, getPgPool } from '../lib/trade/trade-pg.js';
 export const TEST_PASSWORD = 'TestPass-2345-Checkout';
 export const TEST_USERS = {
   credit: { email: 'test.credit@example.test', accountId: 'acc_TEST_credit' },
+  // Large limit: used by the attack scenarios, which create several credit orders.
+  credit2: { email: 'test.credit2@example.test', accountId: 'acc_TEST_credit2' },
   plain: { email: 'test.plain@example.test', accountId: 'acc_TEST_plain' },
   viewer: { email: 'test.viewer@example.test', accountId: 'acc_TEST_plain' },
 };
@@ -26,6 +28,7 @@ async function seed() {
 
   const accounts = [
     { id: 'acc_TEST_credit', tradingName: 'TEST Credit Co', creditEnabled: true, creditLimit: 50000, creditTerms: 14 },
+    { id: 'acc_TEST_credit2', tradingName: 'TEST Credit Two Co', creditEnabled: true, creditLimit: 5000000, creditTerms: 14 },
     { id: 'acc_TEST_plain', tradingName: 'TEST Plain Co', creditEnabled: false },
   ];
   for (const a of accounts) {
@@ -34,6 +37,7 @@ async function seed() {
 
   const users = [
     { id: 'usr_TEST_credit', ...TEST_USERS.credit, name: 'TEST Credit Owner', seatType: 'owner', phone: '0700000101' },
+    { id: 'usr_TEST_credit2', ...TEST_USERS.credit2, name: 'TEST Credit2 Owner', seatType: 'owner', phone: '0700000104' },
     { id: 'usr_TEST_plain', ...TEST_USERS.plain, name: 'TEST Plain Buyer', seatType: 'buyer', phone: '0700000102' },
     { id: 'usr_TEST_viewer', ...TEST_USERS.viewer, name: 'TEST Viewer', seatType: 'viewer', phone: '0700000103' },
   ];
