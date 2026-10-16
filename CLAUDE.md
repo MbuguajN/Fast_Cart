@@ -36,6 +36,7 @@ Methods accepted by `/api/trade/checkout` (`PAYMENT_METHODS` in `lib/trade/payme
 - **Nirvana Africa logbook loan**: UI-only information option on the checkout page (never sent to the API). Guests see it with a "create an account" notice; logged-in users see the requirements and the dedicated contact (`nirvanaContact` in config). No order, no payment, no stock effect.
 - **Config**: `PUT /api/admin/trade/config` goes through `sanitizeConfigPatch` (allow-list in `lib/trade/trade-config.js`). Public, non-secret slice for the checkout page: `GET /api/trade/checkout-options`.
 - **Public application** (`/api/trade/apply`): rate-limited; `cleanApplication` is an allow-list so applicants cannot set credit/tier/id fields.
+- **Trade hero slides**: promotions managed at Admin → Trade Hero (`/admin/trade/hero`, API `/api/admin/trade/hero-slides`, store key `heroSlides`, logic in `lib/trade/hero-slides.js`). Public list at `/api/trade/hero-slides` (live slides only, max 8). No live slides = standard hero; the message strip under the hero is always shown. `mutateTradeStore` is async: always `await` it.
 - **Schema init** (`ensureTradeDb`) skips the DDL when `SCHEMA_SENTINEL` (last added column) exists; **move the sentinel when you append to the schema script**, or new DDL will not run on existing databases.
 
 ### Testing the trade checkout

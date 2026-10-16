@@ -41,6 +41,11 @@ const NAV = [
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
     </svg>
   )},
+  { label: 'Trade Hero', href: '/admin/trade/hero', scope: 'trade', icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  )},
   { label: 'Banners', href: '/admin/slides', scope: 'retail', icon: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -122,7 +127,10 @@ export default function AdminLayout({ children }) {
 
   const role = adminInfo.role || 'owner';
   const visibleNav = NAV.filter((item) => navVisibleForRole(item, role));
-  const activeItem = NAV.find((item) => pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href)));
+  // Longest matching href wins, so /admin/trade/hero lights "Trade Hero", not "B2B Trade".
+  const activeItem = NAV
+    .filter((item) => pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href)))
+    .sort((a, b) => b.href.length - a.href.length)[0];
   const outOfScope = activeItem && !navVisibleForRole(activeItem, role);
 
   if (outOfScope) {
@@ -179,7 +187,7 @@ export default function AdminLayout({ children }) {
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
           {visibleNav.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+            const isActive = activeItem?.href === item.href;
             return (
               <Link
                 key={item.href}
@@ -245,7 +253,9 @@ export default function AdminLayout({ children }) {
             <h1 className="text-sm font-semibold text-gray-800 capitalize hidden md:block">
               {pathname === '/admin'
                 ? 'Dashboard'
-                : pathname.startsWith('/admin/trade/accounts/')
+                : pathname.startsWith('/admin/trade/hero')
+                  ? 'Trade Hero Slides'
+                  : pathname.startsWith('/admin/trade/accounts/')
                   ? 'Trade Account'
                   : pathname.split('/').pop()}
             </h1>

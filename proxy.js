@@ -32,6 +32,8 @@ const PRE_AUTH_PATHS = new Set([
   '/api/trade/checkout',
   // Non-secret checkout settings (hold minutes, bank details only when enabled).
   '/api/trade/checkout-options',
+  // Live promotional hero slides for the public landing page.
+  '/api/trade/hero-slides',
 ]);
 
 const unauthorized = () => NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { pickFeaturedProducts } from '@/lib/trade/landing-featured.js';
 import TradeProductCard from '@/components/trade/TradeProductCard.js';
+import HeroCarousel from '@/components/trade/HeroCarousel.js';
 
 function ScaleIcon(props) {
   return (
@@ -52,6 +53,17 @@ function ShieldIcon(props) {
 
 export default function TradeLandingPage() {
   const [featured, setFeatured] = useState(null);
+  // null while loading, [] when no promotion is live (standard hero is shown).
+  const [heroSlides, setHeroSlides] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/trade/hero-slides')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (!cancelled) setHeroSlides(Array.isArray(data?.slides) ? data.slides : []); })
+      .catch(() => { if (!cancelled) setHeroSlides([]); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +100,14 @@ export default function TradeLandingPage() {
 
   return (
     <div className="space-y-16 py-8 sm:py-12 text-[#231F20] animate-page-enter">
-      {/* Hero Section */}
+      {/* Hero: promotional slides when any are live, otherwise the standard hero */}
+      {heroSlides === null ? (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-hidden="true">
+          <div className="rounded-3xl bg-[#1c1917] aspect-[16/9] sm:aspect-[8/3] animate-pulse" />
+        </section>
+      ) : heroSlides.length > 0 ? (
+        <HeroCarousel slides={heroSlides} />
+      ) : (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="rounded-3xl p-6 sm:p-10 text-white text-center sm:text-left relative overflow-hidden shadow-2xl border border-white/10 bg-cover bg-center"
@@ -135,6 +154,18 @@ export default function TradeLandingPage() {
             </p>
           </div>
         </div>
+      </section>
+
+      )}
+
+      {/* Always-on message strip, under either hero */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+        <ul className="bg-[#1c1917] text-white rounded-2xl px-5 py-3 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2 text-[11px] font-bold uppercase tracking-wide">
+          <li>✔ 100% original, sealed bottles</li>
+          <li>✔ Same-day Nairobi delivery</li>
+          <li>✔ Honest wholesale prices</li>
+          <li>✔ KRA VAT invoice every order</li>
+        </ul>
       </section>
 
       {/* Shelf: live products and prices */}
