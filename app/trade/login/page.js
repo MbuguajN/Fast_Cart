@@ -491,11 +491,19 @@ export default function TradeLoginPage() {
         </div>
       )}
 
-      <div className="text-center text-xs text-gray-500">
-        Don&apos;t have an active trade account?{' '}
-        <Link href="/trade/apply" className="font-bold text-[#840038] hover:underline">
-          Apply online here
-        </Link>
+      <div className="space-y-2 text-center text-xs text-gray-500">
+        <div>
+          Don&apos;t have an account?{' '}
+          <Link href="/trade/signup" className="font-bold text-[#840038] hover:underline">
+            Sign up for wholesale purchasing →
+          </Link>
+        </div>
+        <div>
+          Need Net 14 credit terms or corporate onboarding?{' '}
+          <Link href="/trade/apply" className="font-medium text-gray-600 hover:underline">
+            Apply for business credit here
+          </Link>
+        </div>
       </div>
     </div>
   );
