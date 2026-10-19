@@ -27,3 +27,4 @@ test('cacheProductImages handles array with local and empty values', async () =>
   const res = await cacheProductImages(urls);
   assert.deepEqual(res, ['/uploads/1.webp', '']);
 });
+

@@ -116,3 +116,4 @@ main().catch((err) => {
   console.error('Fatal error during image caching:', err);
   process.exit(1);
 });
+
