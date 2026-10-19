@@ -7,6 +7,7 @@ import { assertPaymentMethodAllowed } from '@/lib/trade/payment-methods.js';
 import { markAwaitingPayment, openHoldCount } from '@/lib/trade/trade-hold.js';
 import { publicCheckoutOptions } from '@/lib/trade/trade-config.js';
 import { rateLimitRequest } from '@/lib/rate-limit';
+import { validateBotProtection } from '@/lib/trade/anti-bot.js';
 
 /**
  * POST /api/trade/checkout
@@ -35,7 +36,14 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { items, deliveryAddress, deliveryDate, poReference, notes, paymentMethod, ageConfirmed } = body;
+    const { items, deliveryAddress, deliveryDate, poReference, notes, paymentMethod, ageConfirmed, honeypot, submissionDurationMs } = body;
+
+    // Anti-bot check: honeypot + submission velocity
+    const botCheck = validateBotProtection({ honeypot, submissionDurationMs });
+    if (!botCheck.ok) {
+      console.warn(`[anti-bot] Checkout blocked: ${botCheck.reason}`);
+      return NextResponse.json({ error: botCheck.error }, { status: 400 });
+    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Order must contain at least one item' }, { status: 400 });
@@ -203,6 +211,16 @@ export async function POST(request) {
         // (which restocks) and let the buyer try again.
         try {
           await updateTradeOrderStatus(order.id, 'cancelled');
+          const { sendTradeOrderCancelledAlert } = await import('@/lib/trade/trade-email.js');
+          sendTradeOrderCancelledAlert({
+            order: {
+              ...order,
+              deliveryAddress: address,
+              orderedBy: user,
+              buyerEmail,
+            },
+            reason: paystackError.message || 'Payment start failed',
+          }).catch(() => {});
         } catch (cancelError) {
           console.error(`Could not cancel order ${order.id} after Paystack failure:`, cancelError.message);
         }

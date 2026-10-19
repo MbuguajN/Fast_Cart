@@ -25,6 +25,8 @@ export default function TradeCheckoutPage() {
   const [guestAddressLine, setGuestAddressLine] = useState('');
   const [guestCity, setGuestCity] = useState('Nairobi');
   const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [mountedAt] = useState(() => Date.now());
 
   useEffect(() => {
     let cancelled = false;
@@ -108,6 +110,8 @@ export default function TradeCheckoutPage() {
           notes,
           paymentMethod,
           ageConfirmed,
+          honeypot,
+          submissionDurationMs: Date.now() - mountedAt,
           ...(!account ? { buyerName, buyerPhone, buyerEmail } : {}),
         }),
       });
@@ -160,6 +164,20 @@ export default function TradeCheckoutPage() {
       )}
 
       <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Anti-bot honeypot field - invisible to humans, catches bots */}
+        <div className="opacity-0 absolute top-0 left-0 h-0 w-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+          <label htmlFor="company_tax_fax">Leave this field blank</label>
+          <input
+            id="company_tax_fax"
+            type="text"
+            name="company_tax_fax"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
+
         {/* Left: Form (8 cols) */}
         <div className="lg:col-span-8 space-y-8">
           {!account && (
