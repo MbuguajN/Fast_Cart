@@ -583,13 +583,20 @@ export default function TradeCheckoutPage() {
             <button
               type="submit"
               disabled={submitting || paymentMethod === 'nirvana'}
-              className="w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50"
+              className={`w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2.5 ${
+                submitting ? 'opacity-85 cursor-wait' : paymentMethod === 'nirvana' ? 'disabled:opacity-60 cursor-not-allowed' : 'cursor-pointer'
+              }`}
             >
-              {submitting
-                ? (paymentMethod === 'paystack' ? 'Initializing Payment...' : 'Placing Trade Order...')
-                : paymentMethod === 'nirvana'
-                  ? 'Contact us to arrange funding'
-                  : (paymentMethod === 'paystack' ? 'Pay & Place Trade Order →' : 'Confirm & Place Trade Order →')}
+              {submitting && (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+              )}
+              <span>
+                {submitting
+                  ? (paymentMethod === 'paystack' ? 'Connecting to Secure Payment...' : 'Processing Wholesale Order...')
+                  : paymentMethod === 'nirvana'
+                    ? 'Contact us to arrange funding'
+                    : (paymentMethod === 'paystack' ? 'Pay & Place Wholesale Order →' : 'Confirm & Place Wholesale Order →')}
+              </span>
             </button>
           </div>
         </div>

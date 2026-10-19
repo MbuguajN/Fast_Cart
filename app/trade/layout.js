@@ -160,7 +160,7 @@ function TradePortalShell({ children }) {
                   </span>
                 )}
                 <span className="bg-[#840038] text-white text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-widest border border-pink-400/30">
-                  B2B TRADE
+                  B2B PORTAL
                 </span>
               </Link>
             </div>
@@ -204,7 +204,7 @@ function TradePortalShell({ children }) {
                 href="/trade/login"
                 className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#840038] hover:bg-[#6b002c] shadow transition-all"
               >
-                Sign In →
+                Business Login →
               </Link>
               <Link
                 href="/"
@@ -260,7 +260,7 @@ function TradePortalShell({ children }) {
                 </span>
               )}
               <span className="bg-[#840038] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest border border-pink-400/30">
-                B2B TRADE
+                B2B PORTAL
               </span>
             </Link>
 

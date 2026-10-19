@@ -186,7 +186,7 @@ export default function Header({ location, onLocationSet, onSearch, cartCount = 
               }`}
               style={{ fontFamily: 'Montserrat, sans-serif' }}
             >
-              B2B Trade
+              B2B Portal
             </Link>
           </nav>
 

@@ -107,7 +107,7 @@ export default function TradeApplyPage() {
             href="/trade/login"
             className="px-6 py-3 bg-white/10 text-[#840038] border border-[#840038]/30 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-pink-50"
           >
-            Go to Trade Login →
+            Go to Business Login →
           </Link>
         </div>
       </div>
@@ -118,10 +118,10 @@ export default function TradeApplyPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 text-[#231F20] animate-page-enter">
       <div className="border-b border-gray-200 pb-4">
         <Link href="/trade" className="text-xs font-bold text-[#840038] uppercase hover:underline">
-          ← Back to Trade Overview
+          ← Back to B2B Portal
         </Link>
         <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#231F20] mt-1">
-          Apply for a Trade Business Account
+          Apply for a Business Wholesale Account
         </h1>
         <p className="text-xs text-gray-500 font-medium mt-1">
           No application is needed to browse the wholesale catalog or place a cash order. This form is only for
@@ -394,9 +394,18 @@ export default function TradeApplyPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50"
+          className={`w-full py-4 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2.5 ${
+            submitting ? 'opacity-85 cursor-wait' : 'cursor-pointer'
+          }`}
         >
-          {submitting ? 'Submitting Application...' : 'Submit Business Account Application →'}
+          {submitting ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+              <span>Submitting Application &amp; Verifying...</span>
+            </>
+          ) : (
+            <span>Submit Business Account Application →</span>
+          )}
         </button>
       </form>
     </div>

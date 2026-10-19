@@ -639,9 +639,14 @@ export default function TradeQuotesPage() {
                 <button
                   type="submit"
                   disabled={submittingRequest}
-                  className="px-6 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs disabled:opacity-50"
+                  className={`px-6 py-2.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs flex items-center gap-2 ${
+                    submittingRequest ? 'opacity-85 cursor-wait' : 'cursor-pointer'
+                  }`}
                 >
-                  {submittingRequest ? 'Submitting...' : 'Submit Quote Request →'}
+                  {submittingRequest && (
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                  )}
+                  <span>{submittingRequest ? 'Submitting Quote Request...' : 'Submit Quote Request →'}</span>
                 </button>
               </div>
             </form>

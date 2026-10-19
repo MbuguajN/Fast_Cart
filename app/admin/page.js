@@ -12,7 +12,7 @@ const KPI_CONFIGS = [
 
 const STORE_ACTIONS = [
   {
-    label: 'B2B Trade Hub',
+    label: 'B2B Portal Hub',
     href: '/admin/trade',
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
 
               <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">B2B Trade Portal</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">B2B Business Portal</p>
                   <p className="text-sm font-black text-gray-900 mt-1">Wholesale Ordering</p>
                   <p className="text-[11px] text-gray-500 mt-0.5">Browse client trade ordering pad</p>
                 </div>

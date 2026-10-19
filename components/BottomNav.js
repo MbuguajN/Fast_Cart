@@ -295,7 +295,7 @@ export default function BottomNav({ cartCount = 0, onOpenCart, onOpenAccount, us
                   </div>
                   <div>
                     <div className="text-xs font-bold text-gray-900 group-hover:text-[#840037]">
-                      B2B Trade
+                      B2B Portal
                     </div>
                     <div className="text-[10px] text-gray-500">
                       Wholesale Portal

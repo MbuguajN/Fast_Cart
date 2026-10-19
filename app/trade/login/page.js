@@ -165,7 +165,7 @@ export default function TradeLoginPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#231F20]">
-          Trade Sign In
+          Business Login
         </h1>
         <p className="text-xs text-gray-500 font-medium max-w-sm mx-auto">
           Access quantity discount ladders, KRA VAT invoices, Net 14 credit settlement, and same-day commercial dispatch.
@@ -258,7 +258,7 @@ export default function TradeLoginPage() {
               type={showPassword ? 'text' : 'password'}
               required
               autoComplete="current-password"
-              placeholder="Enter your trade portal password"
+              placeholder="Enter your business portal password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 pr-11 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
@@ -286,15 +286,17 @@ export default function TradeLoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+          className={`w-full py-3.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2.5 ${
+            loading ? 'opacity-85 cursor-wait' : 'cursor-pointer'
+          }`}
         >
           {loading ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Authenticating...</span>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+              <span>Verifying Credentials...</span>
             </>
           ) : (
-            <span>Sign In to Portal →</span>
+            <span>Sign In to Business Portal →</span>
           )}
         </button>
       </form>
