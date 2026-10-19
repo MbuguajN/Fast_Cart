@@ -138,15 +138,7 @@ UNIQUE (`product_id`, `tier_key`).
 
 ### 4.5 Config — new key
 
-**Correction from an earlier draft of this spec**: the Postgres `trade_config`
-table (`lib/trade/trade-pg.js`) is write-only dead code — it's populated once
-by `migrateFromJsonIfEmpty` and never read back anywhere. The actual,
-authoritative config store is `data/trade-store.json`'s `config` object,
-read synchronously via `readTradeStore()` and written via
-`updateTradeConfig()` (a shallow merge — `lib/trade/trade-store.js:2544`),
-already exposed at `GET/PUT /api/admin/trade/config`. `config.marginFloor` is
-a new key in that same JSON object, patched through the existing route — no
-new table, no new endpoint.
+**Authoritative config store**: The PostgreSQL `trade_config` table (`lib/trade/trade-pg.js`) is the primary, authoritative storage for system configuration (key `'main_config'`), queried via `getTradeConfig()` and mutated via `updateTradeConfig()`. File-based JSON stores (`data/trade-store.json`) are only non-fatal fallbacks. `config.marginFloor` is persisted directly to `trade_config` via `updateTradeConfig()`.
 
 Existing `config.priceBands` is untouched. New key `config.marginFloor`:
 

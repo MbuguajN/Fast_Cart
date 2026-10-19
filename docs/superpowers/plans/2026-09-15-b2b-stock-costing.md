@@ -42,9 +42,8 @@ re-justify them here.
   it keeps showing the suggested (non-overridden) price. Only server-side
   pricing (`/api/trade/pricing`, checkout, quote creation) honors overrides.
   (spec §5.4)
-- Config lives in `data/trade-store.json`'s `config` object (via
-  `readTradeStore()` / `updateTradeConfig()`), **not** the Postgres
-  `trade_config` table, which is dead/write-only. (spec §4.5)
+- Config lives in PostgreSQL table `trade_config` (key `'main_config'`) via
+  `getTradeConfig()` / `updateTradeConfig()`. File JSON stores are only non-fatal fallbacks. (spec §4.5)
 - Weighted-average cost, not FIFO. No supplier/PO tables. No multi-warehouse.
   (spec §8)
 - `case_size` defaults to 12. Receipt line `bottles` is a stored snapshot —

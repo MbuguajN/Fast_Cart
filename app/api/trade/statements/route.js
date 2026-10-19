@@ -5,7 +5,7 @@ import { getAccountStatement } from '@/lib/trade/trade-store.js';
 export async function GET(request) {
   try {
     const auth = await requireTradeAuth(request);
-    const statement = getAccountStatement(auth.account.id);
+    const statement = await getAccountStatement(auth.account.id);
 
     return NextResponse.json({
       success: true,

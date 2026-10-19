@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTradeAuthFromRequest } from '@/lib/trade/trade-auth.js';
-import { createTradeOrder, findOrCreateGuestTradeAccount, readTradeStore, updateTradeOrderStatus } from '@/lib/trade/trade-store.js';
+import { createTradeOrder, findOrCreateGuestTradeAccount, getTradeConfig, updateTradeOrderStatus } from '@/lib/trade/trade-store.js';
 import { resolveTradeLineItems } from '@/lib/trade/trade-catalog.js';
 import { stripEconomics } from '@/lib/trade/pricing-visibility.js';
 import { assertPaymentMethodAllowed } from '@/lib/trade/payment-methods.js';
@@ -53,6 +53,8 @@ export async function POST(request) {
     let user;
     let address;
 
+    const tradeConfig = await getTradeConfig();
+
     // Validate the method before any account is created or touched. Guests
     // (no session) are never credit accounts, whatever the body claims.
     let effectiveMethod;
@@ -61,7 +63,7 @@ export async function POST(request) {
         method: paymentMethod,
         account: auth?.account,
         isGuest: !auth,
-        config: readTradeStore().config,
+        config: tradeConfig,
       });
     } catch (methodError) {
       const status = paymentMethod === 'pay_on_account' ? 403 : 400;
@@ -193,7 +195,7 @@ export async function POST(request) {
         await markAwaitingPayment({
           orderId: order.id,
           reference,
-          holdMinutes: publicCheckoutOptions(readTradeStore().config).stockHoldMinutes,
+          holdMinutes: publicCheckoutOptions(tradeConfig).stockHoldMinutes,
         });
 
         return NextResponse.json({

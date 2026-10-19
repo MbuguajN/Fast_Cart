@@ -6,7 +6,7 @@
 
 **Architecture:** A small pure module decides which payment methods are allowed for a buyer; the checkout route and `createTradeOrder` both call it. Stock-hold expiry is a function plus a cron route, reusing `updateTradeOrderStatus` for cancel+restock. The checkout page reads non-secret options (bank details, hold minutes) from a public route. Browser verification is a node script that drives the local Chromium.
 
-**Tech Stack:** Next.js 16.2 App Router (JS, `@/` alias), Postgres via `lib/trade/trade-pg.js` + mirrored JSON store, Paystack REST, `node --test`, local Chromium via Playwright/puppeteer.
+**Tech Stack:** Next.js 16.2 App Router (JS, `@/` alias), Postgres via `lib/trade/trade-pg.js`, Paystack REST, `node --test`, local Chromium via Playwright/puppeteer.
 
 **Spec:** `docs/superpowers/specs/2026-10-16-trade-checkout-payments-design.md` (§9 supersedes earlier Nirvana text).
 

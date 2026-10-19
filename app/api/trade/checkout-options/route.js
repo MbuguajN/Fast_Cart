@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readTradeStore } from '@/lib/trade/trade-store.js';
+import { getTradeConfig } from '@/lib/trade/trade-store.js';
 import { publicCheckoutOptions } from '@/lib/trade/trade-config.js';
 
 /**
@@ -9,6 +9,7 @@ import { publicCheckoutOptions } from '@/lib/trade/trade-config.js';
  * for a pay-now order, and bank-transfer details when an admin has enabled it.
  */
 export async function GET() {
-  const options = publicCheckoutOptions(readTradeStore().config);
+  const config = await getTradeConfig();
+  const options = publicCheckoutOptions(config);
   return NextResponse.json(options, { headers: { 'Cache-Control': 'no-store' } });
 }

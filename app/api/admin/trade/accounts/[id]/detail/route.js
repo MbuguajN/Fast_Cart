@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Account not found' }, { status: 404 });
     }
 
-    const statement = getAccountStatement(id);
+    const statement = await getAccountStatement(id);
     const orders = await getTradeOrders({ accountId: id });
     const quotes = await getTradeQuotes({ accountId: id });
 

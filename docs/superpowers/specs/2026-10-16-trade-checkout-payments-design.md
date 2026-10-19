@@ -56,8 +56,7 @@ M-Pesa paybill is removed (no paybill exists).
   The owner has a working Paystack account (used on the retail side) and wants
   test keys used now. The owner supplies keys; they must never be pasted into
   chat or committed.
-- Order storage is dual: Postgres (`trade_orders`) plus a mirrored JSON store.
-  Both must stay consistent.
+- Order storage is PostgreSQL (`trade_orders`). PostgreSQL is the sole authoritative system of record; do not rely on or require JSON files on disk.
 - Stock is deducted at order creation. Cancel/reject restocks
   (`updateTradeOrderStatus`). A Paystack order that is never paid is not
   currently restocked (suspected gap — verify, see §5.1).

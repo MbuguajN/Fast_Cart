@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readTradeStore, updateTradeConfig } from '@/lib/trade/trade-store.js';
+import { getTradeConfig, updateTradeConfig } from '@/lib/trade/trade-store.js';
 import { adminGuard } from '@/lib/api-guard';
 import { sanitizeConfigPatch } from '@/lib/trade/trade-config.js';
 
@@ -8,8 +8,8 @@ export async function GET(request) {
   if (denied) return denied;
 
   try {
-    const store = readTradeStore();
-    return NextResponse.json({ success: true, config: store.config });
+    const config = await getTradeConfig();
+    return NextResponse.json({ success: true, config });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -23,7 +23,8 @@ export async function PUT(request) {
     const body = await request.json();
     let patch;
     try {
-      patch = sanitizeConfigPatch(body, readTradeStore().config);
+      const currentConfig = await getTradeConfig();
+      patch = sanitizeConfigPatch(body, currentConfig);
     } catch (validationError) {
       return NextResponse.json({ error: validationError.message }, { status: 400 });
     }

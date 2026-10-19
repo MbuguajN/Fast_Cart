@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireTradeOr401 } from '@/lib/api-guard';
 import { calculateTradeOrderPricingWithOverrides } from '@/lib/trade/trade-costing.js';
-import { readTradeStore } from '@/lib/trade/trade-store.js';
+import { getTradeConfig } from '@/lib/trade/trade-store.js';
 import { resolveTradeLineItems } from '@/lib/trade/trade-catalog.js';
 import { stripEconomics } from '@/lib/trade/pricing-visibility.js';
 
@@ -27,7 +27,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'items must be an array' }, { status: 400 });
     }
 
-    const store = readTradeStore();
+    const config = await getTradeConfig();
     const { account } = auth;
 
     // Never price from client-supplied cost figures. Resolution failures are
@@ -44,7 +44,7 @@ export async function POST(request) {
       tierOverride: account?.tierOverride || null,
       isNairobi: deliveryAddress?.city ? /nairobi/i.test(deliveryAddress.city) : isNairobi,
       city: deliveryAddress?.city || 'Nairobi',
-      customBands: store.config?.priceBands,
+      customBands: config?.priceBands,
       referralCredit: account?.referralCredit || 0,
     });
 

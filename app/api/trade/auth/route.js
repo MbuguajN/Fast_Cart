@@ -5,7 +5,7 @@ import {
   recordTradeLoginAttempt,
   isTradeUserLocked,
   toPublicTradeUser,
-  readTradeStore,
+  getTradeConfig,
   setTradeUserPasswordHash,
 } from '@/lib/trade/trade-store.js';
 import { signTradeToken, getTradeAuthFromRequest, tradeCookieOptions, TRADE_COOKIE } from '@/lib/trade/trade-auth.js';
@@ -41,8 +41,8 @@ export async function GET(request) {
     }
 
     // App-wide account manager from trade config overrides per-account data
-    const store = readTradeStore();
-    const globalAM = store.config?.accountManager;
+    const config = await getTradeConfig();
+    const globalAM = config?.accountManager;
     const account = { ...auth.account };
     if (globalAM && globalAM.name) {
       account.accountManager = globalAM;
