@@ -112,7 +112,15 @@ export default function TradeCheckoutPage() {
         }),
       });
 
-      const data = await res.json();
+      let data;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json().catch(() => ({}));
+      } else {
+        const text = await res.text().catch(() => '');
+        data = { error: text?.slice(0, 150) || `Server error (${res.status})` };
+      }
+
       if (!res.ok) {
         throw new Error(data.error || 'Failed to place trade order');
       }

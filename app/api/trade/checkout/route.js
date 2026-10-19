@@ -206,9 +206,14 @@ export async function POST(request) {
         } catch (cancelError) {
           console.error(`Could not cancel order ${order.id} after Paystack failure:`, cancelError.message);
         }
+        const isConfigError = paystackError.message?.includes('PAYSTACK_SECRET_KEY');
+        const userMessage = isConfigError
+          ? 'Online card payment is currently not configured or unavailable. Please contact the team to place your order.'
+          : (paystackError.message || 'We could not start the payment. Nothing was charged and your order was not placed. Please try again.');
+
         return NextResponse.json(
-          { error: 'We could not start the payment. Nothing was charged and your order was not placed. Please try again.' },
-          { status: 502 }
+          { error: userMessage },
+          { status: 400 }
         );
       }
     }
