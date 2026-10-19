@@ -22,6 +22,11 @@ export default function TradeLoginPage() {
   const [error, setError] = useState(null);
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [logo, setLogo] = useState(null);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState(null);
+  const [forgotError, setForgotError] = useState(null);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -145,6 +150,39 @@ export default function TradeLoginPage() {
     setTimeout(() => setCopiedPassword(false), 2200);
   };
 
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError(null);
+    setForgotMessage(null);
+
+    const emailToUse = forgotEmail.trim();
+    if (!emailToUse || !emailToUse.includes('@')) {
+      setForgotError('Please enter a valid business email address.');
+      return;
+    }
+
+    try {
+      setForgotSubmitting(true);
+      const res = await fetch('/api/trade/password/reset-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToUse }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to request password reset');
+      }
+      setForgotMessage(
+        data.message ||
+          'If an account exists with that email address, password reset instructions have been sent.'
+      );
+    } catch (err) {
+      setForgotError(err.message || 'Failed to send reset link. Please try again.');
+    } finally {
+      setForgotSubmitting(false);
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto px-4 py-12 sm:py-16 space-y-8 text-[#231F20] animate-page-enter" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       {/* Header & Logo */}
@@ -212,94 +250,195 @@ export default function TradeLoginPage() {
         </div>
       )}
 
-      {/* Main Login Form */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleLogin();
-        }}
-        className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-5"
-      >
-        <div>
-          <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">
-            Email, Phone or User ID
-          </label>
-          <input
-            type="text"
-            required
-            autoComplete="username"
-            placeholder="e.g. your-email@company.com"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
-          />
-        </div>
-
-        <div>
-          <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-bold uppercase text-gray-700">
-              Password
-            </label>
-            {/* Dev-only: demo password copy button */}
-            {IS_DEV && (
-              <button
-                type="button"
-                onClick={copyDemoPassword}
-                className="text-[10px] text-[#840038] hover:underline font-bold"
-                title="Click to copy standard demo password"
-              >
-                {copiedPassword ? '✓ Copied Demo Password' : 'Demo Password: HappyHour2026!'}
-              </button>
-            )}
+      {/* Forgot Password Request Form */}
+      {showForgot ? (
+        <form
+          onSubmit={handleForgotSubmit}
+          className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-5 animate-in fade-in duration-200"
+        >
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-pink-50 border border-pink-200 mb-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#840038]">
+                Self-Service Recovery
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-gray-900">Reset Your Business Password</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Enter your registered business account email below. We&apos;ll send you a secure link to reset your password.
+            </p>
           </div>
 
-          <div className="relative">
+          {forgotError && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-start gap-2">
+              <span className="shrink-0 text-sm">⚠️</span>
+              <div>{forgotError}</div>
+            </div>
+          )}
+
+          {forgotMessage && (
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-2">
+              <div className="font-bold flex items-center gap-1.5">
+                <span>✓</span> Email Dispatched
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {forgotMessage}
+              </p>
+              <p className="text-[11px] text-emerald-800 font-medium">
+                Please check your inbox (and spam/promotions folder). Links are valid for 30 minutes.
+              </p>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">
+              Registered Business Email
+            </label>
             <input
-              type={showPassword ? 'text' : 'password'}
+              type="email"
               required
-              autoComplete="current-password"
-              placeholder="Enter your business portal password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 pr-11 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
+              placeholder="e.g. buyer@company.com"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
             />
+          </div>
+
+          <button
+            type="submit"
+            disabled={forgotSubmitting}
+            className={`w-full py-3.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2.5 ${
+              forgotSubmitting ? 'opacity-85 cursor-wait' : 'cursor-pointer'
+            }`}
+          >
+            {forgotSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                <span>Sending Reset Link...</span>
+              </>
+            ) : (
+              <span>Send Password Reset Link →</span>
+            )}
+          </button>
+
+          <div className="text-center pt-2">
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 rounded transition-colors"
-              title={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => {
+                setShowForgot(false);
+                setForgotError(null);
+                setForgotMessage(null);
+              }}
+              className="text-xs text-gray-600 hover:text-gray-900 font-semibold underline cursor-pointer"
             >
-              {showPassword ? (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              )}
+              ← Back to Business Login
             </button>
           </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-3.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2.5 ${
-            loading ? 'opacity-85 cursor-wait' : 'cursor-pointer'
-          }`}
+        </form>
+      ) : (
+        /* Main Login Form */
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+          className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-5"
         >
-          {loading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
-              <span>Verifying Credentials...</span>
-            </>
-          ) : (
-            <span>Sign In to Business Portal →</span>
-          )}
-        </button>
-      </form>
+          <div>
+            <label className="block text-xs font-bold uppercase text-gray-700 mb-1.5">
+              Email, Phone or User ID
+            </label>
+            <input
+              type="text"
+              required
+              autoComplete="username"
+              placeholder="e.g. your-email@company.com"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs font-bold uppercase text-gray-700">
+                Password
+              </label>
+              <div className="flex items-center gap-3">
+                {IS_DEV && (
+                  <button
+                    type="button"
+                    onClick={copyDemoPassword}
+                    className="text-[10px] text-gray-400 hover:text-[#840038] font-bold"
+                    title="Click to copy standard demo password"
+                  >
+                    {copiedPassword ? '✓ Copied' : 'Demo Pass'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgot(true);
+                    setForgotError(null);
+                    setForgotMessage(null);
+                    if (!forgotEmail && identifier && identifier.includes('@')) {
+                      setForgotEmail(identifier.trim());
+                    }
+                  }}
+                  className="text-[11px] text-[#840038] hover:underline font-bold cursor-pointer"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            </div>
+
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                placeholder="Enter your business portal password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 pr-11 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#840038] focus:border-[#840038] outline-none transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 rounded transition-colors"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3.5 bg-[#840038] hover:bg-[#6b002c] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2.5 ${
+              loading ? 'opacity-85 cursor-wait' : 'cursor-pointer'
+            }`}
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                <span>Verifying Credentials...</span>
+              </>
+            ) : (
+              <span>Sign In to Business Portal →</span>
+            )}
+          </button>
+        </form>
+      )}
 
       {/* 1-Click Demo Switcher — development only */}
       {IS_DEV && demoAccounts.length > 0 && (

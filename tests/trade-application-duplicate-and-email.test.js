@@ -64,3 +64,4 @@ test('duplicate user handling: syncTradeUserToPg cleanly wraps trade_users_email
     }
   );
 });
+

@@ -1,0 +1,111 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+// Ensure signing secret exists in test environment
+process.env.TRADE_JWT_SECRET = 'test_trade_secret_key_with_at_least_32_bytes_of_random_data_for_unit_tests';
+process.env.CUSTOMER_SESSION_SECRET = 'test_customer_secret_key_with_at_least_32_bytes_of_random_data_for_unit_tests';
+
+import { generatePasswordResetEmailHtml } from '../lib/trade/trade-documents.js';
+import { signToken, verifyToken, AUDIENCE } from '../lib/crypto-tokens.js';
+import { hashPassword, verifyPassword, validatePasswordStrength } from '../lib/trade/trade-password.js';
+import {
+  findTradeUserByIdentifier,
+  setTradeUserPasswordHash,
+  getTradeAccounts,
+  syncTradeUserToPg,
+} from '../lib/trade/trade-store.js';
+
+test('email templates: generatePasswordResetEmailHtml includes portal branding and reset link', () => {
+  const html = generatePasswordResetEmailHtml({
+    user: {
+      name: 'James Mwangi',
+      email: 'james@serena.co.ke',
+    },
+    resetUrl: 'https://app.myhappyhour.co.ke/trade/reset-password?token=test_reset_token_xyz',
+    expiresInMinutes: 30,
+  });
+
+  assert.ok(html.includes('HAPPY HOUR B2B BUSINESS PORTAL'), 'Must include portal branding');
+  assert.ok(html.includes('Password Reset Request'), 'Must state email purpose');
+  assert.ok(html.includes('James Mwangi'), 'Must include user name');
+  assert.ok(html.includes('test_reset_token_xyz'), 'Must include the reset token URL');
+  assert.ok(html.includes('30 minutes'), 'Must state expiration period');
+});
+
+test('crypto tokens: sign and verify trade password reset token', async () => {
+  const payload = {
+    userId: 'usr_serena_owner',
+    email: 'angela.mutua@serenahotels.com',
+    purpose: 'pwd_reset',
+  };
+
+  const token = await signToken(AUDIENCE.TRADE, payload, 30 * 60 * 1000);
+  assert.ok(token && typeof token === 'string', 'Token must be generated');
+
+  const verified = await verifyToken(AUDIENCE.TRADE, token);
+  assert.ok(verified, 'Token must verify successfully');
+  assert.equal(verified.userId, payload.userId);
+  assert.equal(verified.email, payload.email);
+  assert.equal(verified.purpose, 'pwd_reset');
+
+  // Must reject wrong audience
+  const wrongAudience = await verifyToken(AUDIENCE.CUSTOMER, token);
+  assert.equal(wrongAudience, null, 'Token should fail verification for wrong audience');
+});
+
+test('password policies: validatePasswordStrength enforces 12 characters minimum and rejects weak passwords', () => {
+  assert.ok(validatePasswordStrength('short123!'), 'Must reject passwords shorter than 12 chars');
+  assert.ok(validatePasswordStrength('123456789012'), 'Must reject all-numeric passwords');
+  assert.ok(validatePasswordStrength('aaaaaaaaaaaa'), 'Must reject repeated character passwords');
+
+  const valid = validatePasswordStrength('HappyHourSecure2026!');
+  assert.equal(valid, null, 'Must accept strong 12+ character password');
+});
+
+test('password hashing: scrypt hash and verify workflow', async () => {
+  const plain = 'StrongPortalPassword2026#';
+  const hashed = await hashPassword(plain);
+  assert.ok(hashed && hashed.startsWith('scrypt$'), 'Hash must use scrypt format');
+
+  const matches = await verifyPassword(plain, hashed);
+  assert.equal(matches, true, 'Correct password must verify');
+
+  const wrongMatches = await verifyPassword('IncorrectPassword123!', hashed);
+  assert.equal(wrongMatches, false, 'Wrong password must fail verification');
+});
+
+test('e2e user management: update password hash and verify authentication cycle', async () => {
+  const accounts = await getTradeAccounts();
+  const testAccount = accounts.find((a) => a.status === 'active') || accounts[0];
+  assert.ok(testAccount, 'Requires at least one account');
+
+  const userEmail = `pwd_reset_test_${Date.now()}@myhappyhour.co.ke`;
+  const initialUser = {
+    id: `usr_pwd_test_${Date.now()}`,
+    accountId: testAccount.id,
+    name: 'Reset Test User',
+    email: userEmail,
+    phone: '0711999888',
+    role: 'Procurement Specialist',
+    seatType: 'buyer',
+  };
+
+  await syncTradeUserToPg(initialUser);
+
+  // Set new password
+  const newPassword = 'NewSecretPassword2026!';
+  const newHash = await hashPassword(newPassword);
+  await setTradeUserPasswordHash(initialUser.id, newHash, { mustChange: false });
+
+  // Re-fetch user and verify credential
+  const updatedUser = await findTradeUserByIdentifier(userEmail);
+  assert.ok(updatedUser, 'User must be found after password update');
+  assert.ok(updatedUser.passwordHash, 'User must have password hash saved');
+
+  const valid = await verifyPassword(newPassword, updatedUser.passwordHash);
+  assert.equal(valid, true, 'Updated password must verify against stored hash');
+
+  const invalid = await verifyPassword('OldOrWrongPassword123!', updatedUser.passwordHash);
+  assert.equal(invalid, false, 'Wrong password must fail verification');
+});
+
