@@ -151,3 +151,41 @@ else
 fi
 
 log_success "Update routine completed!"
+
+    for s in "${candidates[@]}"; do
+        if systemctl list-unit-files "$s" 2>/dev/null | grep -q "$s"; then
+            echo "$s"
+            return 0
+        fi
+    done
+
+    # Fallback search in systemctl for app_myhappyhour or myhappyhour
+    local found
+    found=$(systemctl list-unit-files 2>/dev/null | grep -E "app_myhappyhour|myhappyhour" | awk '{print $1}' | head -n 1 || true)
+    if [ -n "$found" ]; then
+        echo "$found"
+        return 0
+    fi
+
+    return 1
+}
+
+SERVICE_NAME=$(detect_service || true)
+
+if [ -n "$SERVICE_NAME" ]; then
+    log_info "Detected Fastpanel systemd service: ${SERVICE_NAME}"
+    log_info "Restarting ${SERVICE_NAME}..."
+    if command -v sudo >/dev/null 2>&1; then
+        sudo systemctl restart "$SERVICE_NAME" || log_warn "Could not restart automatically. Run: sudo systemctl restart ${SERVICE_NAME}"
+    else
+        systemctl restart "$SERVICE_NAME" || log_warn "Could not restart automatically. Run: systemctl restart ${SERVICE_NAME}"
+    fi
+    log_success "Service ${SERVICE_NAME} restart command issued."
+else
+    log_info "To restart the service manually:"
+    log_info "  sudo systemctl restart app_myhappyhour_co_ke"
+    log_info "  (or restart Node.js inside the Fastpanel web panel)"
+fi
+
+log_success "Update routine completed!"
+
