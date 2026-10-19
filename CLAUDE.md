@@ -13,6 +13,7 @@ Two storefronts in one Next.js 16 app (App Router, JS not TS, Tailwind 4, `@/` a
 
 - `npm run dev` / `build` / `start` / `lint`
 - `npm run migrate` (`node scripts/migrate.mjs`) — runs standalone Postgres schema migrations via `ensureTradeDb()` and closes the connection pool.
+- `npm run cache-images` (`node scripts/cache-images.mjs`) — downloads remote WooCommerce product/brand images to `public/uploads/products/` and updates store paths so images load instantly from local disk.
 - `./update.sh` — production update script: pulls `chrisupdates`, runs `npm install`, runs `npm run migrate`, runs `npm run build`, restarts Fastpanel systemd service, and verifies port 3061.
 - `npm test` (`node --test "tests/**/*.test.js"`) — retail and trade tests. Network-free; never point tests at the real WooCommerce store (`WOOCOMMERCE_STORE_URL` in `.env.local` is live).
 - Browser checks: Playwright/Chrome-DevTools MCP tools do not work here (no Google Chrome). Drive the local Playwright Chromium from a node script (see `check-browser.mjs`, `take-screenshot.mjs`).

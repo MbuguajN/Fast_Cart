@@ -13,6 +13,7 @@ import { wcFetch, wcFetchAll, wcUrl, wcAuthHeaders, WC_URL, WC_KEY, WC_SECRET } 
 import { recordEvent, timed, EVENT_KINDS, OUTCOMES } from '@/lib/event-log';
 import { ZONE_MAP } from '@/lib/zone-map';
 import { adminGuard } from '@/lib/api-guard';
+import { cacheProductImage, cacheProductImages } from '@/lib/image-cache';
 
 async function syncZones() {
   try {
@@ -129,6 +130,10 @@ export async function POST(request) {
 
     for (const p of wcProducts) {
       const primaryImage = p.images?.[0]?.src || '';
+      const localPrimaryImage = await cacheProductImage(primaryImage, `prod_${p.id}`);
+      const rawImages = (p.images || []).map((img) => img.src);
+      const localImages = await cacheProductImages(rawImages, `prod_${p.id}`);
+
       const brandAttr = p.attributes?.find(
         (a) => a.name.toLowerCase() === 'brand' || a.name.toLowerCase() === 'manufacturer'
       );
@@ -153,8 +158,8 @@ export async function POST(request) {
         salePrice: p.sale_price,
         stockStatus: p.stock_status,
         stockQuantity: p.stock_quantity,
-        image: primaryImage,
-        images: (p.images || []).map((img) => img.src),
+        image: localPrimaryImage,
+        images: localImages,
         categoryId: p.categories?.[0]?.id || null,
         categoryName: p.categories?.[0]?.name || '',
         brandId: brandName ? `brand_${brandName.toLowerCase().replace(/\s+/g, '_')}` : null,
