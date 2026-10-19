@@ -4,6 +4,8 @@ import { getPageBySlug, getAllPages } from '@/lib/pages';
 import Footer from '@/components/Footer';
 import PrivacyPolicyView from '@/components/PrivacyPolicyView';
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const pages = getAllPages();
   return Object.keys(pages).map((slug) => ({ slug }));

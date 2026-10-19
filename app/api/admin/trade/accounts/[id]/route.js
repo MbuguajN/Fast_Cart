@@ -44,14 +44,36 @@ export async function PUT(request, { params }) {
 
     if (isNewlyApproved) {
       try {
-        const store = readTradeStore();
-        const user = store.users?.find((u) => u.accountId === id);
+        let user = null;
+        try {
+          const { query } = await import('@/lib/trade/trade-pg.js');
+          const userRes = await query('SELECT * FROM trade_users WHERE account_id = $1 LIMIT 1', [id]);
+          if (userRes.rows.length > 0) {
+            const r = userRes.rows[0];
+            user = {
+              id: r.id,
+              accountId: r.account_id,
+              name: r.name,
+              email: r.email,
+              phone: r.phone,
+              passwordHash: r.password_hash,
+            };
+          }
+        } catch (dbErr) {
+          console.warn('[trade-approval] Direct PG user lookup skipped:', dbErr.message);
+        }
+
+        if (!user) {
+          const store = readTradeStore();
+          user = store.users?.find((u) => u.accountId === id);
+        }
+
         let tempPassword = null;
 
         if (user && !hasPassword(user)) {
           tempPassword = generateTemporaryPassword();
           const hash = await hashPassword(tempPassword);
-          setTradeUserPasswordHash(user.id, hash, { mustChange: true });
+          await setTradeUserPasswordHash(user.id, hash, { mustChange: true });
         }
 
         const recipientEmail = user?.email || account.contactEmail || account.billingAddress?.email;

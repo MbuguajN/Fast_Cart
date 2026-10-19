@@ -109,3 +109,21 @@ test('e2e user management: update password hash and verify authentication cycle'
   assert.equal(invalid, false, 'Wrong password must fail verification');
 });
 
+test('password verification: hasPassword and verifyPassword handle scrypt and fallback credentials', async () => {
+  const { hasPassword, verifyPassword } = await import('../lib/trade/trade-password.js');
+
+  // hasPassword checks
+  assert.equal(hasPassword({ passwordHash: null }), false, 'Null password is not set');
+  assert.equal(hasPassword({ passwordHash: '' }), false, 'Empty string password is not set');
+  assert.equal(hasPassword({ passwordHash: '   ' }), false, 'Whitespace-only password is not set');
+  assert.equal(hasPassword({ passwordHash: 'scrypt$16384$8$1$salt$hash' }), true, 'scrypt hash is set');
+  assert.equal(hasPassword({ passwordHash: 'PlaintextPassword123!' }), true, 'Plaintext string is recognized as set');
+
+  // Plaintext verification
+  const plainMatch = await verifyPassword('PlaintextPassword123!', 'PlaintextPassword123!');
+  assert.equal(plainMatch, true, 'Matching plaintext credential verifies');
+
+  const plainMismatch = await verifyPassword('WrongPassword123!', 'PlaintextPassword123!');
+  assert.equal(plainMismatch, false, 'Mismatched plaintext credential fails verification');
+});
+

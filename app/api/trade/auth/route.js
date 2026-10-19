@@ -6,9 +6,10 @@ import {
   isTradeUserLocked,
   toPublicTradeUser,
   readTradeStore,
+  setTradeUserPasswordHash,
 } from '@/lib/trade/trade-store.js';
 import { signTradeToken, getTradeAuthFromRequest, tradeCookieOptions, TRADE_COOKIE } from '@/lib/trade/trade-auth.js';
-import { verifyPassword, hasPassword } from '@/lib/trade/trade-password.js';
+import { verifyPassword, hasPassword, hashPassword } from '@/lib/trade/trade-password.js';
 import { rateLimitRequest, rateLimitIdentity } from '@/lib/rate-limit';
 
 /**
@@ -115,6 +116,17 @@ export async function POST(request) {
     if (!ok) {
       await recordTradeLoginAttempt(user.id, false);
       return invalidCredentials();
+    }
+
+    // If verified credential was not yet in scrypt format (e.g. manual operator entry),
+    // automatically migrate and upgrade it to scrypt memory-hard hash.
+    if (!user.passwordHash.startsWith('scrypt$')) {
+      try {
+        const upgradedHash = await hashPassword(password);
+        await setTradeUserPasswordHash(user.id, upgradedHash);
+      } catch (upgradeErr) {
+        console.warn('[trade-auth] Could not upgrade credential to scrypt:', upgradeErr.message);
+      }
     }
 
     const authRes = await getTradeUserWithAccount(user.id);

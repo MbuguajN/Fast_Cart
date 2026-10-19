@@ -253,12 +253,10 @@ export async function PUT(request) {
 
     if (action === 'reset-password') {
       const { hashPassword, generateTemporaryPassword } = await import('@/lib/trade/trade-password.js');
+      const { setTradeUserPasswordHash } = await import('@/lib/trade/trade-store.js');
       const tempPassword = generateTemporaryPassword();
       const hash = await hashPassword(tempPassword);
-      await query(
-        'UPDATE trade_users SET password_hash = $1, must_change_password = TRUE, failed_attempts = 0, locked_until = NULL WHERE id = $2',
-        [hash, userId]
-      );
+      await setTradeUserPasswordHash(userId, hash, { mustChange: true });
       await auditLog(adminEmail, 'reset-password', userId);
       return NextResponse.json({ success: true, temporaryPassword: tempPassword });
     }
