@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { verifyToken, readCookie, AUDIENCE } from '@/lib/crypto-tokens';
+import { NextResponse } from 'next/server.js';
+import { verifyToken, readCookie, AUDIENCE } from './lib/crypto-tokens.js';
 
 /**
  * Optimistic authorisation gate.
@@ -25,6 +25,11 @@ const PRE_AUTH_PATHS = new Set([
   '/api/admin/auth/check',
   '/api/trade/auth',
   '/api/trade/apply',
+  '/api/trade/apply/upload',
+  // Password reset endpoints for users who cannot sign in or need a credential reset
+  '/api/trade/password/reset-request',
+  '/api/trade/password/verify-token',
+  '/api/trade/password/reset',
   // Wholesale catalogue browsing and checkout are public — no trade login
   // required. The in-handler code honours an authenticated session when
   // present (existing accounts, credit terms) but never requires one.
@@ -45,7 +50,7 @@ function bearerOrCookie(request, cookieName) {
 }
 
 export async function proxy(request) {
-  const { pathname } = request.nextUrl;
+  const pathname = request.nextUrl.pathname.replace(/\/$/, '') || '/';
 
   if (PRE_AUTH_PATHS.has(pathname)) return NextResponse.next();
 

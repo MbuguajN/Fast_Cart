@@ -112,7 +112,16 @@ export async function POST(request) {
       return invalidCredentials();
     }
 
-    const ok = await verifyPassword(password, user.passwordHash);
+    let ok = await verifyPassword(password, user.passwordHash);
+    let effectivePassword = password;
+    if (!ok && typeof password === 'string' && password.trim() !== password) {
+      const trimmedOk = await verifyPassword(password.trim(), user.passwordHash);
+      if (trimmedOk) {
+        ok = true;
+        effectivePassword = password.trim();
+      }
+    }
+
     if (!ok) {
       await recordTradeLoginAttempt(user.id, false);
       return invalidCredentials();
@@ -122,7 +131,7 @@ export async function POST(request) {
     // automatically migrate and upgrade it to scrypt memory-hard hash.
     if (!user.passwordHash.startsWith('scrypt$')) {
       try {
-        const upgradedHash = await hashPassword(password);
+        const upgradedHash = await hashPassword(effectivePassword);
         await setTradeUserPasswordHash(user.id, upgradedHash);
       } catch (upgradeErr) {
         console.warn('[trade-auth] Could not upgrade credential to scrypt:', upgradeErr.message);

@@ -127,3 +127,44 @@ test('password verification: hasPassword and verifyPassword handle scrypt and fa
   assert.equal(plainMismatch, false, 'Mismatched plaintext credential fails verification');
 });
 
+test('proxy authorization gate: password reset and licence upload endpoints must remain public/pre-auth', async () => {
+  const { proxy } = await import('../proxy.js');
+
+  const testPublicPaths = [
+    '/api/trade/password/reset-request',
+    '/api/trade/password/verify-token',
+    '/api/trade/password/reset',
+    '/api/trade/apply/upload',
+    '/api/trade/auth',
+    '/api/trade/catalog',
+  ];
+
+  for (const pathname of testPublicPaths) {
+    const fakeReq = {
+      nextUrl: { pathname },
+      headers: new Headers(),
+    };
+    const res = await proxy(fakeReq);
+    assert.ok(res, `Proxy must return a response for ${pathname}`);
+    assert.notEqual(res.status, 401, `Path ${pathname} must not be blocked with 401`);
+  }
+
+  // Protected trade endpoints without token must be blocked with 401
+  const protectedPaths = [
+    '/api/trade/password',
+    '/api/trade/orders',
+    '/api/trade/invoices/123',
+  ];
+
+  for (const pathname of protectedPaths) {
+    const fakeReq = {
+      nextUrl: { pathname },
+      headers: new Headers(),
+      cookies: { get: () => undefined },
+    };
+    const res = await proxy(fakeReq);
+    assert.equal(res.status, 401, `Protected path ${pathname} must be blocked with 401 without session`);
+  }
+});
+
+

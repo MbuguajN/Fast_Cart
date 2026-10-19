@@ -113,7 +113,8 @@ export default function TradeLoginPage() {
       setError(null);
 
       const finalIdentifier = (idToUse || identifier).trim();
-      const finalPassword = passwordToUse !== undefined ? passwordToUse : password;
+      const rawPassword = passwordToUse !== undefined ? passwordToUse : password;
+      const finalPassword = typeof rawPassword === 'string' ? rawPassword.trim() : rawPassword;
 
       if (!finalIdentifier) {
         setError('Please enter your email, phone number, or User ID.');
