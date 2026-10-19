@@ -140,6 +140,21 @@ function TradePortalShell({ children }) {
         },
       ],
     },
+    {
+      title: 'Account & Administration',
+      links: [
+        {
+          href: '/trade/settings',
+          label: 'Account & Settings',
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          ),
+        },
+      ],
+    },
   ];
 
   // ----------------------------------------------------
@@ -273,12 +288,23 @@ function TradePortalShell({ children }) {
           </div>
 
           {/* Active Account Identity Card */}
-          <div className="bg-[#24211e] p-3.5 rounded-2xl border border-white/10 space-y-2">
+          <Link
+            href="/trade/settings"
+            onClick={() => setSidebarOpen(false)}
+            className="block bg-[#24211e] hover:bg-[#2c2825] p-3.5 rounded-2xl border border-white/10 space-y-2 transition-colors group cursor-pointer"
+            title="Manage Account & Settings"
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h2 className="text-xs font-black uppercase tracking-tight text-white truncate">
-                  {account.tradingName}
-                </h2>
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-xs font-black uppercase tracking-tight text-white truncate group-hover:text-pink-200 transition-colors">
+                    {account.tradingName}
+                  </h2>
+                  <svg className="w-3 h-3 text-gray-400 group-hover:text-pink-300 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
                 <p className="text-[11px] text-gray-400 truncate">
                   {user.name} ({user.role})
                 </p>
@@ -296,7 +322,7 @@ function TradePortalShell({ children }) {
                   : 'Prepayment / Cash'}
               </span>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Scrollable Navigation Items */}
@@ -416,19 +442,34 @@ function TradePortalShell({ children }) {
             </button>
 
             <div className="hidden sm:block">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#840038] block">
+              <Link
+                href="/trade/settings"
+                className="text-[10px] font-black uppercase tracking-widest text-[#840038] hover:text-[#6b002c] transition-colors block"
+                title="Account & Settings"
+              >
                 {account.tradingName} · Wholesale Portal
-              </span>
+              </Link>
             </div>
           </div>
 
           {/* Right Header Quick Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/trade/order-pad"
               className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold uppercase tracking-wider transition-all"
             >
               <span>+ Quick Order Pad</span>
+            </Link>
+
+            <Link
+              href="/trade/settings"
+              className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-all flex items-center justify-center"
+              title="Account & Settings"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
             </Link>
 
             {/* Wholesale Cart Pill with Live Pricing */}
