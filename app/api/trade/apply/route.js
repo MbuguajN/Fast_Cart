@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server.js';
 import {
   buildTradeAccount,
   upsertTradeAccount,
   addTradeUser,
   findTradeUserByIdentifier,
+  findMatchingTradeAccount,
   getTradeAccountById,
-} from '@/lib/trade/trade-store.js';
-import { query } from '@/lib/trade/trade-pg.js';
-import { sendTradeApplicationEmails } from '@/lib/trade/trade-email.js';
-import { cleanApplication } from '@/lib/trade/trade-application.js';
-import { rateLimitRequest } from '@/lib/rate-limit';
+} from '../../../../lib/trade/trade-store.js';
+import { sendTradeApplicationEmails } from '../../../../lib/trade/trade-email.js';
+import { cleanApplication } from '../../../../lib/trade/trade-application.js';
+import { rateLimitRequest } from '../../../../lib/rate-limit.js';
 
 export async function POST(request) {
   // Public and each hit sends emails and creates a pending account.
@@ -44,23 +44,44 @@ export async function POST(request) {
       );
     }
 
-    // Check trade_accounts table as well
-    const existingAccountCheck = await query(
-      'SELECT id, status FROM trade_accounts WHERE LOWER(email) = $1 LIMIT 1',
-      [email]
-    ).catch(() => ({ rows: [] }));
-    if (existingAccountCheck.rows.length > 0) {
-      const acc = existingAccountCheck.rows[0];
-      if (acc.status === 'active') {
-        return NextResponse.json(
-          { error: 'An account with this email address already exists. Please log in to your business account.' },
-          { status: 400 }
-        );
+    // Deduplicate commercial account: check if matching entity already exists by KRA PIN, licence, or trading name
+    const existingAccount = await findMatchingTradeAccount({
+      kraPin: data.kraPin,
+      licenceNo: data.licenceNo,
+      tradingName: data.tradingName,
+    });
+
+    if (existingAccount) {
+      const userId = `usr_${Date.now()}`;
+      await addTradeUser({
+        id: userId,
+        accountId: existingAccount.id,
+        name: data.contactName,
+        role: data.role || 'Staff Buyer',
+        seatType: 'buyer', // always buyer, never owner
+        email,
+        phone: data.phone.trim(),
+      });
+
+      // Send customer acknowledgement & admin review alerts
+      try {
+        await sendTradeApplicationEmails({
+          application: {
+            ...data,
+            id: existingAccount.id,
+            licenceDocumentUrl: data.licenceDocumentUrl,
+          },
+        });
+      } catch (emailErr) {
+        console.error('[trade-apply] Notification email error:', emailErr.message);
       }
-      return NextResponse.json(
-        { error: 'An application with this email address has already been submitted and is currently being reviewed.' },
-        { status: 400 }
-      );
+
+      return NextResponse.json({
+        success: true,
+        attachedToExisting: true,
+        message: `You have been added as a purchasing seat to ${existingAccount.tradingName}. Our compliance team will confirm your access shortly.`,
+        account: existingAccount,
+      });
     }
 
     let newAccount;
@@ -103,6 +124,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
+      attachedToExisting: false,
       message: 'Your business wholesale account application has been received and verified. Our compliance team will verify your credentials within 2 business hours.',
       account: newAccount,
     });
