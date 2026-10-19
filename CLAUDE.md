@@ -12,6 +12,8 @@ Two storefronts in one Next.js 16 app (App Router, JS not TS, Tailwind 4, `@/` a
 ## Commands
 
 - `npm run dev` / `build` / `start` / `lint`
+- `npm run migrate` (`node scripts/migrate.mjs`) — runs standalone Postgres schema migrations via `ensureTradeDb()` and closes the connection pool.
+- `./update.sh` — production update script: pulls `chrisupdates`, runs `npm install`, runs `npm run migrate`, runs `npm run build`, restarts Fastpanel systemd service, and verifies port 3061.
 - `npm test` (`node --test "tests/**/*.test.js"`) — retail and trade tests. Network-free; never point tests at the real WooCommerce store (`WOOCOMMERCE_STORE_URL` in `.env.local` is live).
 - Browser checks: Playwright/Chrome-DevTools MCP tools do not work here (no Google Chrome). Drive the local Playwright Chromium from a node script (see `check-browser.mjs`, `take-screenshot.mjs`).
 - Dev on WSL2: if the page is stuck on a spinner with an empty log, check `allowedDevOrigins` in `next.config.mjs` (Next 16 blocks cross-origin `/_next` resources).
