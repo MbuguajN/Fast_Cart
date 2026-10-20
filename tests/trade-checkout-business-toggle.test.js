@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { query, ensureTradeDb } from '../lib/trade/trade-pg.js';
-import { upsertTradeAccount, buildTradeAccount } from '../lib/trade/trade-store.js';
+import { upsertTradeAccount, buildTradeAccount, addTradeUser, findOrCreateGuestTradeAccount } from '../lib/trade/trade-store.js';
 import { POST } from '../app/api/trade/checkout/route.js';
 
 test('Individual checkout works with zero business details; business toggle associates with matching company', async () => {
@@ -88,5 +88,109 @@ test('Individual checkout works with zero business details; business toggle asso
   await query('DELETE FROM trade_orders WHERE id IN ($1, $2)', [guestData.order.id, bizData.order.id]);
   await query('DELETE FROM trade_users WHERE email IN ($1, $2)', ['david.event@example.test', 'manager@savannahbar.test']);
   await query('DELETE FROM trade_accounts WHERE id IN ($1, $2)', [guestData.account.id, existingBiz.id]);
+  await query("DELETE FROM kv_store WHERE key LIKE 'ratelimit:%'");
+});
+
+test('Repeat guest checkout backfills and persists segment individual to PostgreSQL', async () => {
+  await ensureTradeDb();
+  const email = `repeat.guest.${Date.now()}@example.test`;
+  const phone = '0711998877';
+
+  // Create an initial guest account manually with legacy segment 'horeca'
+  const initialGuest = buildTradeAccount({
+    tradingName: 'Legacy Guest',
+    contactName: 'Legacy Guest',
+    phone,
+    email,
+    segment: 'horeca',
+  }, { status: 'active' });
+  initialGuest.isGuest = true;
+  await upsertTradeAccount(initialGuest);
+
+  const initialUser = {
+    id: `usr_legacy_${Date.now()}`,
+    accountId: initialGuest.id,
+    name: 'Legacy Guest',
+    role: 'Guest Buyer',
+    seatType: 'buyer',
+    email,
+    phone,
+  };
+  await addTradeUser(initialUser);
+
+  // Repeat guest checkout
+  const { account } = await findOrCreateGuestTradeAccount({
+    name: 'Legacy Guest',
+    phone,
+    email,
+    addressLine: 'Ngong Road',
+    city: 'Nairobi',
+  });
+
+  assert.equal(account.segment, 'individual');
+
+  // Verify it was persisted to PostgreSQL
+  const { rows } = await query('SELECT segment FROM trade_accounts WHERE id = $1', [initialGuest.id]);
+  assert.equal(rows[0].segment, 'individual');
+
+  // Cleanup
+  await query('DELETE FROM trade_users WHERE id = $1', [initialUser.id]);
+  await query('DELETE FROM trade_accounts WHERE id = $1', [initialGuest.id]);
+});
+
+test('Business checkout rejects unauthenticated order using email of existing non-guest user', async () => {
+  await ensureTradeDb();
+  await query("DELETE FROM kv_store WHERE key LIKE 'ratelimit:%'");
+
+  const nonGuestEmail = `corp.owner.${Date.now()}@example.test`;
+  const nonGuestAcct = buildTradeAccount({
+    tradingName: 'Registered Corp Ltd',
+    kraPin: 'P011122233Z',
+    segment: 'corporate',
+  }, { status: 'active' });
+  nonGuestAcct.isGuest = false;
+  await upsertTradeAccount(nonGuestAcct);
+
+  const nonGuestUser = {
+    id: `usr_corp_${Date.now()}`,
+    accountId: nonGuestAcct.id,
+    name: 'Registered Owner',
+    role: 'Business Owner',
+    seatType: 'owner',
+    email: nonGuestEmail,
+    phone: '0733445566',
+  };
+  await addTradeUser(nonGuestUser);
+
+  // Try placing a business checkout using nonGuestEmail without authentication
+  const req = new Request('http://localhost:3000/api/trade/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      buyerName: 'Impostor Buyer',
+      buyerPhone: '0799887766',
+      buyerEmail: nonGuestEmail,
+      deliveryAddress: { addressLine: 'Riverside Drive', city: 'Nairobi' },
+      paymentMethod: 'paystack',
+      ageConfirmed: true,
+      submissionDurationMs: 3000,
+      businessDetails: {
+        tradingName: 'New Restaurant',
+        kraPin: 'P099988877Y',
+      },
+      items: [
+        { sku: 'JABA-JUICE-1L', quantity: 20 },
+      ],
+    }),
+  });
+
+  const res = await POST(req);
+  const data = await res.json();
+  assert.equal(res.status, 400);
+  assert.match(data.error, /already exists.*sign in/i);
+
+  // Cleanup
+  await query('DELETE FROM trade_users WHERE id = $1', [nonGuestUser.id]);
+  await query('DELETE FROM trade_accounts WHERE id = $1', [nonGuestAcct.id]);
   await query("DELETE FROM kv_store WHERE key LIKE 'ratelimit:%'");
 });

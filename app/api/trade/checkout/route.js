@@ -173,9 +173,15 @@ export async function POST(request) {
 
         const existingUser = await findTradeUserByIdentifier(buyerEmailClean);
         if (existingUser) {
+          const userAcct = await getTradeAccountById(existingUser.accountId);
+          if (userAcct && !userAcct.isGuest) {
+            return NextResponse.json(
+              { error: 'An account already exists for this email. Please sign in to place your order.' },
+              { status: 400 }
+            );
+          }
           user = existingUser;
           if (user.accountId !== account.id) {
-            const userAcct = await getTradeAccountById(user.accountId);
             if (userAcct?.isGuest) {
               await query('UPDATE trade_users SET account_id = $1 WHERE id = $2', [account.id, user.id]);
               user.accountId = account.id;
@@ -229,8 +235,8 @@ export async function POST(request) {
 
     // Paystack needs an email; check before the order exists so a missing one
     // cannot leave stock reserved.
-    const buyerEmail = auth?.user?.email || (typeof body.buyerEmail === 'string' ? body.buyerEmail.trim() : '');
-    if (effectiveMethod === 'paystack' && !buyerEmail) {
+    const buyerEmailClean = auth?.user?.email || (typeof body.buyerEmail === 'string' ? sanitizeText(body.buyerEmail, 120).toLowerCase().trim() : '');
+    if (effectiveMethod === 'paystack' && !buyerEmailClean) {
       return NextResponse.json({ error: 'Email is required for card payment' }, { status: 400 });
     }
 
@@ -270,7 +276,7 @@ export async function POST(request) {
         let paystackResult;
         try {
           paystackResult = await initializePayment({
-            email: buyerEmail,
+            email: buyerEmailClean,
             amount: order.grandTotal,
             reference,
             metadata: {
@@ -330,7 +336,7 @@ export async function POST(request) {
               ...order,
               deliveryAddress: address,
               orderedBy: user,
-              buyerEmail,
+              buyerEmail: buyerEmailClean,
             },
             reason: paystackError.message || 'Payment start failed',
           }).catch(() => {});
