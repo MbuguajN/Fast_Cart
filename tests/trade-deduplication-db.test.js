@@ -134,3 +134,73 @@ test('deduplicateTradeAccounts merges duplicate accounts and reassigns users/ord
     await query('DELETE FROM trade_accounts WHERE id IN ($1, $2)', [acct1.id, acct2.id]);
   }
 });
+
+test('findMatchingTradeAccount uses deterministic ordering prioritizing active status over earlier creation date', async () => {
+  await ensureTradeDb();
+
+  const kra = 'P055544433X';
+  const pendingOlder = buildTradeAccount({
+    id: `acc_test_ord_pend_${Date.now()}`,
+    tradingName: 'Deterministic Ordering Pending Older',
+    kraPin: kra,
+    segment: 'horeca',
+  }, { status: 'pending' });
+  pendingOlder.createdAt = new Date(Date.now() - 3600000).toISOString();
+
+  const activeNewer = buildTradeAccount({
+    id: `acc_test_ord_act_${Date.now()}`,
+    tradingName: 'Deterministic Ordering Active Newer',
+    kraPin: kra,
+    segment: 'horeca',
+  }, { status: 'active' });
+  activeNewer.createdAt = new Date(Date.now() - 1000).toISOString();
+
+  await upsertTradeAccount(pendingOlder);
+  await upsertTradeAccount(activeNewer);
+
+  try {
+    const matched = await findMatchingTradeAccount({ kraPin: kra });
+    assert.ok(matched);
+    assert.equal(matched.id, activeNewer.id, 'Active account should be selected deterministically over older pending account');
+  } finally {
+    await query('DELETE FROM trade_accounts WHERE id IN ($1, $2)', [pendingOlder.id, activeNewer.id]);
+  }
+});
+
+test('deduplicateTradeAccounts backfills missing fields from duplicate when primary has empty string', async () => {
+  await ensureTradeDb();
+
+  const sharedName = 'Empty String Coalesce Test Venue';
+  const testLicence = 'LQ-COALESCE-999';
+
+  const primAcct = buildTradeAccount({
+    id: `acc_test_coal_prim_${Date.now()}`,
+    tradingName: sharedName,
+    licenceNo: '',
+    segment: 'horeca',
+  }, { status: 'active' });
+  primAcct.createdAt = new Date(Date.now() - 60000).toISOString();
+
+  const dupAcct = buildTradeAccount({
+    id: `acc_test_coal_dup_${Date.now()}`,
+    tradingName: sharedName,
+    licenceNo: testLicence,
+    segment: 'horeca',
+  }, { status: 'pending' });
+
+  await upsertTradeAccount(primAcct);
+  await upsertTradeAccount(dupAcct);
+
+  // Force primary licence_no to empty string '' in PostgreSQL
+  await query("UPDATE trade_accounts SET licence_no = '' WHERE id = $1", [primAcct.id]);
+
+  try {
+    const result = await deduplicateTradeAccounts({ dryRun: false, logger: { log: () => {} } });
+    assert.ok(result.mergedAccountsCount >= 1);
+
+    const primRes = await query('SELECT licence_no FROM trade_accounts WHERE id = $1', [primAcct.id]);
+    assert.equal(primRes.rows[0].licence_no, testLicence, 'Empty string licence on primary should be backfilled from duplicate');
+  } finally {
+    await query('DELETE FROM trade_accounts WHERE id IN ($1, $2)', [primAcct.id, dupAcct.id]);
+  }
+});

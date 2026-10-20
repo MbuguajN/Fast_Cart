@@ -55,13 +55,13 @@ export async function deduplicateTradeAccounts({ dryRun = false, logger = consol
         const duplicate = dupRes.rows[0];
 
         // Backfill any missing fields on primary from duplicate
-        const patchPin = !primary.kra_pin && duplicate.kra_pin ? duplicate.kra_pin : null;
-        const patchLic = !primary.licence_no && duplicate.licence_no ? duplicate.licence_no : null;
+        const patchPin = (!primary.kra_pin || !primary.kra_pin.trim()) && duplicate.kra_pin ? duplicate.kra_pin : null;
+        const patchLic = (!primary.licence_no || !primary.licence_no.trim()) && duplicate.licence_no ? duplicate.licence_no : null;
         if (patchPin || patchLic) {
           await client.query(
             `UPDATE trade_accounts
-             SET kra_pin = COALESCE(kra_pin, $1),
-                 licence_no = COALESCE(licence_no, $2),
+             SET kra_pin = COALESCE(NULLIF(kra_pin, ''), $1),
+                 licence_no = COALESCE(NULLIF(licence_no, ''), $2),
                  updated_at = NOW()
              WHERE id = $3`,
             [patchPin, patchLic, primaryId]

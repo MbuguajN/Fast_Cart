@@ -1,8 +1,13 @@
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { query, ensureTradeDb } from '../lib/trade/trade-pg.js';
+import { query, ensureTradeDb, getPgPool } from '../lib/trade/trade-pg.js';
 import { upsertTradeAccount, buildTradeAccount, addTradeUser, findOrCreateGuestTradeAccount } from '../lib/trade/trade-store.js';
 import { POST } from '../app/api/trade/checkout/route.js';
+
+after(async () => {
+  const pool = getPgPool();
+  if (pool) await pool.end();
+});
 
 test('Individual checkout works with zero business details; business toggle associates with matching company', async () => {
   await ensureTradeDb();
@@ -194,6 +199,10 @@ test('Business checkout rejects unauthenticated order using email of existing no
     const data = await res.json();
     assert.equal(res.status, 400);
     assert.match(data.error, /already exists.*sign in/i);
+
+    // Verify no orphaned account was created in PostgreSQL
+    const { rows: orphanRows } = await query('SELECT * FROM trade_accounts WHERE UPPER(kra_pin) = $1', ['P099988877Y']);
+    assert.equal(orphanRows.length, 0, 'No orphaned trade account should be created on email collision');
   } finally {
     // Cleanup
     await query('DELETE FROM trade_orders WHERE account_id IN ($1, (SELECT id FROM trade_accounts WHERE UPPER(kra_pin) = $2))', [nonGuestAcct.id, 'P099988877Y']);

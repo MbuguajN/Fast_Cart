@@ -52,7 +52,7 @@ export async function POST(request) {
     });
 
     if (existingAccount) {
-      const userId = `usr_${Date.now()}`;
+      const userId = `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       await addTradeUser({
         id: userId,
         accountId: existingAccount.id,
@@ -94,7 +94,7 @@ export async function POST(request) {
       return NextResponse.json({ error: err.message }, { status: 400 });
     }
 
-    const userId = `usr_${Date.now()}`;
+    const userId = `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
     await upsertTradeAccount(newAccount);
 

@@ -673,10 +673,15 @@ export default function AdminTradePage() {
     });
   }, [accounts, accountTypeFilter, accountSearch, accountStatusFilter, accountSegmentFilter]);
 
-  const pendingAccountsCount = useMemo(
-    () => accounts.filter((a) => a.status === 'pending' && !a.isGuest && a.segment !== 'individual').length,
-    [accounts]
-  );
+  const pendingAccountsCount = useMemo(() => {
+    if (accountTypeFilter === 'commercial') {
+      return accounts.filter((a) => a.status === 'pending' && !a.isGuest && a.segment !== 'individual').length;
+    }
+    if (accountTypeFilter === 'individual') {
+      return accounts.filter((a) => a.status === 'pending' && (a.isGuest || a.segment === 'individual')).length;
+    }
+    return accounts.filter((a) => a.status === 'pending').length;
+  }, [accounts, accountTypeFilter]);
 
   // Filtered Margins
   const filteredOrders = useMemo(() => {

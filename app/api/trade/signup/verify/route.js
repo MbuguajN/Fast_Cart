@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server.js';
 import crypto from 'node:crypto';
-import { kvGet, kvDelete } from '../../../../../lib/kv-store.js';
+import { kvGet, kvSet, kvDelete, kvTimeToLive } from '../../../../../lib/kv-store.js';
 import {
   buildTradeAccount,
   upsertTradeAccount,
@@ -36,9 +36,33 @@ export async function POST(request) {
 
     const cleanEmail = email.toLowerCase().trim();
     const cleanCode = code.trim();
+    const otpKey = `trade_signup_otp:${cleanEmail}`;
 
-    const stored = await kvGet(`trade_signup_otp:${cleanEmail}`);
-    if (!stored || String(stored.code).trim() !== cleanCode) {
+    const stored = await kvGet(otpKey);
+    if (!stored) {
+      return NextResponse.json(
+        { error: 'Invalid or expired verification code. Please request a new one.' },
+        { status: 400 }
+      );
+    }
+
+    const storedCode = String(stored.code || '').trim();
+    let isMatch = false;
+    if (storedCode.length === cleanCode.length && cleanCode.length > 0) {
+      isMatch = crypto.timingSafeEqual(Buffer.from(storedCode, 'utf8'), Buffer.from(cleanCode, 'utf8'));
+    }
+
+    if (!isMatch) {
+      stored.attempts = (stored.attempts || 0) + 1;
+      if (stored.attempts >= 5) {
+        await kvDelete(otpKey);
+        return NextResponse.json(
+          { error: 'Too many invalid verification attempts. Please request a new code.' },
+          { status: 400 }
+        );
+      }
+      const remainingTtl = await kvTimeToLive(otpKey);
+      await kvSet(otpKey, stored, remainingTtl > 0 ? remainingTtl : 15 * 60 * 1000);
       return NextResponse.json(
         { error: 'Invalid or expired verification code. Please request a new one.' },
         { status: 400 }
@@ -78,7 +102,7 @@ export async function POST(request) {
     await addTradeUser(user);
 
     // 3. Clear the OTP challenge key
-    await kvDelete(`trade_signup_otp:${cleanEmail}`);
+    await kvDelete(otpKey);
 
     // 4. Issue authenticated session token
     const token = await signTradeToken({

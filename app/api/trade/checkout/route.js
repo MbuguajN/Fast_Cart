@@ -168,18 +168,25 @@ export async function POST(request) {
             { status: 'active' }
           );
           account.isGuest = false;
-          await upsertTradeAccount(account);
         }
 
         const existingUser = await findTradeUserByIdentifier(buyerEmailClean);
+        let userAcct = null;
         if (existingUser) {
-          const userAcct = await getTradeAccountById(existingUser.accountId);
-          if (userAcct && !userAcct.isGuest) {
+          userAcct = await getTradeAccountById(existingUser.accountId);
+          if (!userAcct?.isGuest && userAcct?.id !== account.id) {
             return NextResponse.json(
               { error: 'An account already exists for this email. Please sign in to place your order.' },
               { status: 400 }
             );
           }
+        }
+
+        if (!matchingAccount) {
+          await upsertTradeAccount(account);
+        }
+
+        if (existingUser) {
           user = existingUser;
           if (user.accountId !== account.id) {
             if (userAcct?.isGuest) {
@@ -189,7 +196,7 @@ export async function POST(request) {
           }
         } else {
           user = {
-            id: `usr_${Date.now()}`,
+            id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
             accountId: account.id,
             name: buyerNameClean,
             role: 'Staff Buyer',
@@ -235,8 +242,8 @@ export async function POST(request) {
 
     // Paystack needs an email; check before the order exists so a missing one
     // cannot leave stock reserved.
-    const buyerEmailClean = auth?.user?.email || (typeof body.buyerEmail === 'string' ? sanitizeText(body.buyerEmail, 120).toLowerCase().trim() : '');
-    if (effectiveMethod === 'paystack' && !buyerEmailClean) {
+    const checkoutBuyerEmail = auth?.user?.email || (typeof body.buyerEmail === 'string' ? sanitizeText(body.buyerEmail, 120).toLowerCase().trim() : '') || user?.email || '';
+    if (effectiveMethod === 'paystack' && !checkoutBuyerEmail) {
       return NextResponse.json({ error: 'Email is required for card payment' }, { status: 400 });
     }
 
@@ -276,7 +283,7 @@ export async function POST(request) {
         let paystackResult;
         try {
           paystackResult = await initializePayment({
-            email: buyerEmailClean,
+            email: checkoutBuyerEmail,
             amount: order.grandTotal,
             reference,
             metadata: {
@@ -336,7 +343,7 @@ export async function POST(request) {
               ...order,
               deliveryAddress: address,
               orderedBy: user,
-              buyerEmail: buyerEmailClean,
+              buyerEmail: checkoutBuyerEmail,
             },
             reason: paystackError.message || 'Payment start failed',
           }).catch(() => {});
