@@ -55,6 +55,7 @@ export default function AdminTradePage() {
   const [accountSearch, setAccountSearch] = useState('');
   const [accountStatusFilter, setAccountStatusFilter] = useState('all');
   const [accountSegmentFilter, setAccountSegmentFilter] = useState('all');
+  const [accountTypeFilter, setAccountTypeFilter] = useState('commercial'); // 'commercial' | 'individual' | 'all'
 
   // Margins Filters
   const [marginSearch, setMarginSearch] = useState('');
@@ -653,6 +654,10 @@ export default function AdminTradePage() {
   // Filtered Accounts
   const filteredAccounts = useMemo(() => {
     return accounts.filter((acc) => {
+      const isInd = acc.isGuest === true || acc.segment === 'individual';
+      if (accountTypeFilter === 'commercial' && isInd) return false;
+      if (accountTypeFilter === 'individual' && !isInd) return false;
+
       const q = accountSearch.trim().toLowerCase();
       const matchSearch =
         !q ||
@@ -666,10 +671,10 @@ export default function AdminTradePage() {
 
       return matchSearch && matchStatus && matchSegment;
     });
-  }, [accounts, accountSearch, accountStatusFilter, accountSegmentFilter]);
+  }, [accounts, accountTypeFilter, accountSearch, accountStatusFilter, accountSegmentFilter]);
 
   const pendingAccountsCount = useMemo(
-    () => accounts.filter((a) => a.status === 'pending').length,
+    () => accounts.filter((a) => a.status === 'pending' && !a.isGuest && a.segment !== 'individual').length,
     [accounts]
   );
 
@@ -1101,6 +1106,28 @@ export default function AdminTradePage() {
           {/* Streamlined Filter Toolbar */}
           <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-50/50">
             <div className="flex flex-1 flex-wrap items-center gap-2.5">
+              {/* Account Type Segmented Buttons */}
+              <div className="flex items-center bg-gray-200/70 p-0.5 rounded-xl text-xs">
+                {[
+                  { id: 'commercial', label: 'Commercial Businesses' },
+                  { id: 'individual', label: 'Individual Bulk Buyers' },
+                  { id: 'all', label: 'All Accounts' },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setAccountTypeFilter(t.id)}
+                    className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                      accountTypeFilter === t.id
+                        ? 'bg-white text-gray-900 shadow-2xs font-bold'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+
               {/* Search Bar */}
               <div className="relative flex-1 min-w-[220px]">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -1167,12 +1194,13 @@ export default function AdminTradePage() {
               </div>
 
               {/* Clear Filters Reset */}
-              {(accountSearch || accountStatusFilter !== 'all' || accountSegmentFilter !== 'all') && (
+              {(accountSearch || accountStatusFilter !== 'all' || accountSegmentFilter !== 'all' || accountTypeFilter !== 'commercial') && (
                 <button
                   onClick={() => {
                     setAccountSearch('');
                     setAccountStatusFilter('all');
                     setAccountSegmentFilter('all');
+                    setAccountTypeFilter('commercial');
                   }}
                   className="text-xs text-[#840038] hover:underline font-semibold px-2 py-1 flex items-center gap-1"
                 >
@@ -1210,6 +1238,7 @@ export default function AdminTradePage() {
                     setAccountSearch('');
                     setAccountStatusFilter('all');
                     setAccountSegmentFilter('all');
+                    setAccountTypeFilter('commercial');
                   }}
                   className="text-xs font-bold text-[#840038] hover:underline"
                 >
@@ -1254,6 +1283,10 @@ export default function AdminTradePage() {
                               <span className="font-mono text-gray-800 block">{acc.licenceNo}</span>
                               <span className="text-[10px] text-gray-400 font-normal">Exp: {acc.licenceExpiry || 'N/A'}</span>
                             </div>
+                          ) : acc.isGuest || acc.segment === 'individual' ? (
+                            <span className="text-[10px] text-gray-500 font-medium bg-gray-100 px-1.5 py-0.5 rounded">
+                              Individual (N/A)
+                            </span>
                           ) : (
                             <span className="text-[10px] text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded">No Licence</span>
                           )}

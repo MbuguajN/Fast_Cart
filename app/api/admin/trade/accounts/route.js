@@ -1,13 +1,23 @@
-import { NextResponse } from 'next/server';
-import { getTradeAccounts, buildTradeAccount, upsertTradeAccount, addTradeUser } from '@/lib/trade/trade-store.js';
-import { adminGuard } from '@/lib/api-guard';
+import { NextResponse } from 'next/server.js';
+import { getTradeAccounts, buildTradeAccount, upsertTradeAccount, addTradeUser } from '../../../../../lib/trade/trade-store.js';
+import { adminGuard } from '../../../../../lib/api-guard.js';
 
 export async function GET(request) {
   const denied = await adminGuard(request);
   if (denied) return denied;
 
   try {
-    const accounts = await getTradeAccounts();
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get('type');
+
+    let accounts = await getTradeAccounts();
+
+    if (type === 'commercial') {
+      accounts = accounts.filter((a) => !a.isGuest && a.segment !== 'individual');
+    } else if (type === 'individual') {
+      accounts = accounts.filter((a) => a.isGuest || a.segment === 'individual');
+    }
+
     return NextResponse.json({ success: true, accounts });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Failed to fetch trade accounts' }, { status: 500 });
