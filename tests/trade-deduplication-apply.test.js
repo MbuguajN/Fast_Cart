@@ -9,12 +9,22 @@ after(async () => {
   if (pool) await pool.end();
 });
 
+async function purgeAccountById(id) {
+  if (!id) return;
+  await query('DELETE FROM trade_orders WHERE account_id = $1', [id]);
+  await query('DELETE FROM trade_quotes WHERE account_id = $1', [id]);
+  await query('DELETE FROM trade_users WHERE account_id = $1', [id]);
+  await query('DELETE FROM trade_accounts WHERE id = $1', [id]);
+}
+
 test('POST /api/trade/apply attaches user to existing account when KRA PIN matches rather than creating duplicate', async () => {
   await ensureTradeDb();
 
-  const testKra = 'P088877766Y';
+  const testKra = 'P088877711A';
   // Clean up any stale test data first
   await query('DELETE FROM trade_users WHERE email = $1', ['brian.kip@datamuse.co.ke']);
+  await query('DELETE FROM trade_orders WHERE account_id IN (SELECT id FROM trade_accounts WHERE UPPER(kra_pin) = $1)', [testKra]);
+  await query('DELETE FROM trade_quotes WHERE account_id IN (SELECT id FROM trade_accounts WHERE UPPER(kra_pin) = $1)', [testKra]);
   await query('DELETE FROM trade_accounts WHERE UPPER(kra_pin) = $1', [testKra]);
 
   const existingAccount = buildTradeAccount({
@@ -67,8 +77,7 @@ test('POST /api/trade/apply attaches user to existing account when KRA PIN match
   assert.equal(Number(countRes.rows[0].count), 1);
 
   // Cleanup
-  await query('DELETE FROM trade_users WHERE account_id = $1', [existingAccount.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [existingAccount.id]);
+  await purgeAccountById(existingAccount.id);
 });
 
 test('POST /api/trade/apply attaches user to existing account when licence matches', async () => {
@@ -76,6 +85,8 @@ test('POST /api/trade/apply attaches user to existing account when licence match
 
   const testLicence = 'LIC-MATCH-TEST-99';
   await query('DELETE FROM trade_users WHERE email = $1', ['licence.user@testbusiness.co.ke']);
+  await query('DELETE FROM trade_orders WHERE account_id IN (SELECT id FROM trade_accounts WHERE LOWER(licence_no) = $1)', [testLicence.toLowerCase()]);
+  await query('DELETE FROM trade_quotes WHERE account_id IN (SELECT id FROM trade_accounts WHERE LOWER(licence_no) = $1)', [testLicence.toLowerCase()]);
   await query('DELETE FROM trade_accounts WHERE LOWER(licence_no) = $1', [testLicence.toLowerCase()]);
 
   const existingAccount = buildTradeAccount({
@@ -123,8 +134,7 @@ test('POST /api/trade/apply attaches user to existing account when licence match
   assert.equal(user.seatType, 'buyer');
 
   // Cleanup
-  await query('DELETE FROM trade_users WHERE account_id = $1', [existingAccount.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [existingAccount.id]);
+  await purgeAccountById(existingAccount.id);
 });
 
 test('POST /api/trade/apply attaches user when trading name matches and creates buyer seat', async () => {
@@ -132,6 +142,8 @@ test('POST /api/trade/apply attaches user when trading name matches and creates 
 
   const tradingName = 'Unique Bistro Serena Branch';
   await query('DELETE FROM trade_users WHERE email = $1', ['chef@uniquebistro.co.ke']);
+  await query('DELETE FROM trade_orders WHERE account_id IN (SELECT id FROM trade_accounts WHERE LOWER(trading_name) = $1)', [tradingName.toLowerCase()]);
+  await query('DELETE FROM trade_quotes WHERE account_id IN (SELECT id FROM trade_accounts WHERE LOWER(trading_name) = $1)', [tradingName.toLowerCase()]);
   await query('DELETE FROM trade_accounts WHERE LOWER(trading_name) = $1', [tradingName.toLowerCase()]);
 
   const existingAccount = buildTradeAccount({
@@ -179,8 +191,7 @@ test('POST /api/trade/apply attaches user when trading name matches and creates 
   assert.equal(user.seatType, 'buyer');
 
   // Cleanup
-  await query('DELETE FROM trade_users WHERE account_id = $1', [existingAccount.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [existingAccount.id]);
+  await purgeAccountById(existingAccount.id);
 });
 
 test('POST /api/trade/apply creates new commercial account when no existing match is found', async () => {
@@ -191,7 +202,11 @@ test('POST /api/trade/apply creates new commercial account when no existing matc
   const newTradingName = 'Novel Brand Tasting Room';
 
   await query('DELETE FROM trade_users WHERE email = $1', [newEmail]);
+  await query('DELETE FROM trade_orders WHERE account_id IN (SELECT id FROM trade_accounts WHERE UPPER(kra_pin) = $1)', [newKra]);
+  await query('DELETE FROM trade_quotes WHERE account_id IN (SELECT id FROM trade_accounts WHERE UPPER(kra_pin) = $1)', [newKra]);
   await query('DELETE FROM trade_accounts WHERE UPPER(kra_pin) = $1', [newKra]);
+  await query('DELETE FROM trade_orders WHERE account_id IN (SELECT id FROM trade_accounts WHERE LOWER(trading_name) = $1)', [newTradingName.toLowerCase()]);
+  await query('DELETE FROM trade_quotes WHERE account_id IN (SELECT id FROM trade_accounts WHERE LOWER(trading_name) = $1)', [newTradingName.toLowerCase()]);
   await query('DELETE FROM trade_accounts WHERE LOWER(trading_name) = $1', [newTradingName.toLowerCase()]);
 
   const applyBody = {
@@ -229,8 +244,7 @@ test('POST /api/trade/apply creates new commercial account when no existing matc
   assert.equal(user.seatType, 'owner', 'First applicant of a new business account is owner');
 
   // Cleanup
-  await query('DELETE FROM trade_users WHERE account_id = $1', [data.account.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [data.account.id]);
+  await purgeAccountById(data.account.id);
 });
 
 test('POST /api/trade/apply returns 400 when applicant email already exists', async () => {
@@ -286,6 +300,5 @@ test('POST /api/trade/apply returns 400 when applicant email already exists', as
   assert.ok(data.error.includes('already exists'));
 
   // Cleanup
-  await query('DELETE FROM trade_users WHERE account_id = $1', [existingAccount.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [existingAccount.id]);
+  await purgeAccountById(existingAccount.id);
 });

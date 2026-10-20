@@ -14,7 +14,7 @@ const orderIds = [];
 async function newPaystackOrder() {
   const index = await buildCatalogIndex();
   const p = [...new Set(index.values())].find((x) => x.stockQuantity >= 40);
-  const account = (await getTradeAccounts()).find((a) => a.status === 'active');
+  const account = (await getTradeAccounts()).find((a) => a.id === 'acc_serena_01') || (await getTradeAccounts()).find((a) => a.status === 'active' && !a.isGuest);
   const items = await resolveTradeLineItems([{ sku: p.sku, quantity: 12 }], { checkStock: true });
   const order = await createTradeOrder({
     account, user: { id: 'usr_test_sec', seatType: 'owner', name: 'TEST_sec' }, items,

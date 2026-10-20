@@ -35,6 +35,9 @@ const PRE_AUTH_PATHS = new Set([
   // present (existing accounts, credit terms) but never requires one.
   '/api/trade/catalog',
   '/api/trade/checkout',
+  // Universal customer & trade self-service signup
+  '/api/trade/signup',
+  '/api/trade/signup/verify',
   // Non-secret checkout settings (hold minutes, bank details only when enabled).
   '/api/trade/checkout-options',
   // Live promotional hero slides for the public landing page.

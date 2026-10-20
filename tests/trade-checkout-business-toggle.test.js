@@ -85,8 +85,9 @@ test('Individual checkout works with zero business details; business toggle asso
   assert.equal(bizData.order.accountId, existingBiz.id);
 
   // Cleanup
-  await query('DELETE FROM trade_orders WHERE id IN ($1, $2)', [guestData.order.id, bizData.order.id]);
-  await query('DELETE FROM trade_users WHERE email IN ($1, $2)', ['david.event@example.test', 'manager@savannahbar.test']);
+  await query('DELETE FROM trade_orders WHERE account_id IN ($1, $2)', [guestData.account.id, existingBiz.id]);
+  await query('DELETE FROM trade_quotes WHERE account_id IN ($1, $2)', [guestData.account.id, existingBiz.id]);
+  await query('DELETE FROM trade_users WHERE account_id IN ($1, $2) OR email IN ($3, $4)', [guestData.account.id, existingBiz.id, 'david.event@example.test', 'manager@savannahbar.test']);
   await query('DELETE FROM trade_accounts WHERE id IN ($1, $2)', [guestData.account.id, existingBiz.id]);
   await query("DELETE FROM kv_store WHERE key LIKE 'ratelimit:%'");
 });
@@ -118,24 +119,28 @@ test('Repeat guest checkout backfills and persists segment individual to Postgre
   };
   await addTradeUser(initialUser);
 
-  // Repeat guest checkout
-  const { account } = await findOrCreateGuestTradeAccount({
-    name: 'Legacy Guest',
-    phone,
-    email,
-    addressLine: 'Ngong Road',
-    city: 'Nairobi',
-  });
+  try {
+    // Repeat guest checkout
+    const { account } = await findOrCreateGuestTradeAccount({
+      name: 'Legacy Guest',
+      phone,
+      email,
+      addressLine: 'Ngong Road',
+      city: 'Nairobi',
+    });
 
-  assert.equal(account.segment, 'individual');
+    assert.equal(account.segment, 'individual');
 
-  // Verify it was persisted to PostgreSQL
-  const { rows } = await query('SELECT segment FROM trade_accounts WHERE id = $1', [initialGuest.id]);
-  assert.equal(rows[0].segment, 'individual');
-
-  // Cleanup
-  await query('DELETE FROM trade_users WHERE id = $1', [initialUser.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [initialGuest.id]);
+    // Verify it was persisted to PostgreSQL
+    const { rows } = await query('SELECT segment FROM trade_accounts WHERE id = $1', [initialGuest.id]);
+    assert.equal(rows[0].segment, 'individual');
+  } finally {
+    // Cleanup
+    await query('DELETE FROM trade_orders WHERE account_id = $1', [initialGuest.id]);
+    await query('DELETE FROM trade_quotes WHERE account_id = $1', [initialGuest.id]);
+    await query('DELETE FROM trade_users WHERE account_id = $1 OR id = $2', [initialGuest.id, initialUser.id]);
+    await query('DELETE FROM trade_accounts WHERE id = $1', [initialGuest.id]);
+  }
 });
 
 test('Business checkout rejects unauthenticated order using email of existing non-guest user', async () => {
@@ -184,13 +189,16 @@ test('Business checkout rejects unauthenticated order using email of existing no
     }),
   });
 
-  const res = await POST(req);
-  const data = await res.json();
-  assert.equal(res.status, 400);
-  assert.match(data.error, /already exists.*sign in/i);
-
-  // Cleanup
-  await query('DELETE FROM trade_users WHERE id = $1', [nonGuestUser.id]);
-  await query('DELETE FROM trade_accounts WHERE id = $1', [nonGuestAcct.id]);
-  await query("DELETE FROM kv_store WHERE key LIKE 'ratelimit:%'");
+  try {
+    const res = await POST(req);
+    const data = await res.json();
+    assert.equal(res.status, 400);
+    assert.match(data.error, /already exists.*sign in/i);
+  } finally {
+    // Cleanup
+    await query('DELETE FROM trade_orders WHERE account_id IN ($1, (SELECT id FROM trade_accounts WHERE UPPER(kra_pin) = $2))', [nonGuestAcct.id, 'P099988877Y']);
+    await query('DELETE FROM trade_users WHERE email = $1', [nonGuestEmail]);
+    await query('DELETE FROM trade_accounts WHERE id = $1 OR UPPER(kra_pin) = $2', [nonGuestAcct.id, 'P099988877Y']);
+    await query("DELETE FROM kv_store WHERE key LIKE 'ratelimit:%'");
+  }
 });

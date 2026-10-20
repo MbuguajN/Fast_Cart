@@ -22,7 +22,7 @@ async function stockOf(sku) {
 }
 async function place({ seatType = 'owner', account } = {}) {
   const p = await product();
-  const acct = account || (await getTradeAccounts()).find((a) => a.status === 'active');
+  const acct = account || (await getTradeAccounts()).find((a) => a.id === 'acc_serena_01') || (await getTradeAccounts()).find((a) => a.status === 'active' && !a.isGuest);
   const items = await resolveTradeLineItems([{ sku: p.sku, quantity: 12 }], { checkStock: true });
   const order = await createTradeOrder({
     account: acct, user: { id: 'usr_test_rf', seatType, name: 'TEST_rf' }, items,

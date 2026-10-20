@@ -128,6 +128,8 @@ test('deduplicateTradeAccounts merges duplicate accounts and reassigns users/ord
     const userRes = await query('SELECT account_id FROM trade_users WHERE id = $1', [testUser.id]);
     assert.equal(userRes.rows[0].account_id, acct1.id, 'User must be reassigned to primary account');
   } finally {
+    await query('DELETE FROM trade_orders WHERE account_id IN ($1, $2)', [acct1.id, acct2.id]);
+    await query('DELETE FROM trade_quotes WHERE account_id IN ($1, $2)', [acct1.id, acct2.id]);
     await query('DELETE FROM trade_users WHERE id = $1', [testUser.id]);
     await query('DELETE FROM trade_accounts WHERE id IN ($1, $2)', [acct1.id, acct2.id]);
   }
