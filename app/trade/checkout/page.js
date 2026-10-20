@@ -28,6 +28,12 @@ export default function TradeCheckoutPage() {
   const [honeypot, setHoneypot] = useState('');
   const [mountedAt] = useState(() => Date.now());
 
+  // Business purchase expansion toggle & fields
+  const [isBusiness, setIsBusiness] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [businessKraPin, setBusinessKraPin] = useState('');
+  const [licenceNo, setLicenceNo] = useState('');
+
   useEffect(() => {
     let cancelled = false;
     fetch('/api/trade/checkout-options')
@@ -93,9 +99,25 @@ export default function TradeCheckoutPage() {
       return;
     }
 
+    if (!account && isBusiness && businessKraPin.trim()) {
+      const KRA_PIN_REGEX = /^[A-Z]\d{9}[A-Z]$/i;
+      if (!KRA_PIN_REGEX.test(businessKraPin.trim())) {
+        setError('Invalid KRA PIN format. Expected format like P051123456Z');
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       setError(null);
+
+      const businessDetails = !account && isBusiness && (companyName.trim() || businessKraPin.trim() || licenceNo.trim())
+        ? {
+            tradingName: companyName.trim(),
+            kraPin: businessKraPin.trim(),
+            licenceNo: licenceNo.trim(),
+          }
+        : undefined;
 
       const res = await fetch('/api/trade/checkout', {
         method: 'POST',
@@ -113,6 +135,7 @@ export default function TradeCheckoutPage() {
           honeypot,
           submissionDurationMs: Date.now() - mountedAt,
           ...(!account ? { buyerName, buyerPhone, buyerEmail } : {}),
+          ...(businessDetails ? { businessDetails } : {}),
         }),
       });
 
@@ -219,6 +242,71 @@ export default function TradeCheckoutPage() {
                   onChange={(e) => setBuyerEmail(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
                 />
+              </div>
+
+              {/* Expandable toggle for purchasing on behalf of a registered business */}
+              <div className="pt-3 border-t border-gray-100">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isBusiness}
+                    onChange={(e) => setIsBusiness(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#840038] focus:ring-[#840038]"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-gray-900 block">
+                      Purchasing on behalf of a registered business? (Requires VAT invoice or Net 14 credit)
+                    </span>
+                    <span className="text-[11px] text-gray-500 block mt-0.5">
+                      Supply company tax details to receive an electronic VAT invoice or link this purchase to an existing corporate trade account.
+                    </span>
+                  </div>
+                </label>
+
+                {isBusiness && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                        Company Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Savannah Bar & Grill Ltd"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                          Business KRA PIN
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. P051123456Z"
+                          value={businessKraPin}
+                          onChange={(e) => setBusinessKraPin(e.target.value.toUpperCase())}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white uppercase"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                          County Liquor Licence
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. LQ-NRB-99881"
+                          value={licenceNo}
+                          onChange={(e) => setLicenceNo(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-medium bg-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
